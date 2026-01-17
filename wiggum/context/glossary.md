@@ -103,14 +103,16 @@
 | **Stock** | Whether we have a product available. Boolean in our schema. |
 | **Dashboard** | Admin area where store owner manages products and views orders. |
 
-### User Roles & Auth
+### User Roles & Auth (Magic Link / Passwordless)
 
 | Term | Definition |
 |------|------------|
-| **User** | Anyone with an account in our system. Has email, password hash, and role. |
+| **User** | Anyone with an account in our system. Has email and role. No passwords! |
+| **Magic Link** | A unique, time-limited URL sent via email that logs the user in when clicked. No password needed. |
+| **Magic Token** | The secure random token embedded in a magic link. Stored in `magic_tokens` table, expires in 15 min. |
 | **Admin** | Store owner with full access. Can manage products, orders, customers, and settings. |
 | **Customer** | A shopper who has purchased. Has access to order history and payment management. |
-| **Session** | Server-side record linking a browser cookie to a user. Manages login state. |
+| **Session** | Server-side record linking a browser cookie to a user. Created after magic link verification. |
 | **Role** | User permission level (`admin` or `customer`). Stored in database, checked on protected routes. |
 | **Auth Gate** | Middleware that checks user authentication/role before allowing route access. |
 | **Customer Portal** | `/account/*` routes where customers manage their orders and payment methods. |

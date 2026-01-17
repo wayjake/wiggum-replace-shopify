@@ -84,17 +84,22 @@ TODO:
 └── [ ] Test with Inngest dev server locally
 ```
 
-### Phase 5: User Authentication
+### Phase 5: User Authentication (Magic Link / Passwordless)
 
 ```
 TODO:
-├── [ ] Create users schema with role field
+├── [ ] Create users schema with role field (no password!)
+├── [ ] Create magic_tokens schema for magic link tokens
 ├── [ ] Create payment_methods schema
 ├── [ ] Build session management utilities
 ├── [ ] Create requireAuth middleware
 ├── [ ] Create requireAdmin middleware
-├── [ ] Build /login and /register routes
-├── [ ] Add password hashing (bcrypt or argon2)
+├── [ ] Build /login route (email input only)
+├── [ ] Build /auth/verify route (handles magic link tokens)
+├── [ ] Create sendMagicLink utility (generates token + sends via Brevo)
+├── [ ] Create verifyMagicToken utility (validates + creates session)
+├── [ ] Add MAGIC_LINK email template to Brevo
+├── [ ] Add rate limiting for magic link requests
 └── [ ] Build logout functionality
 ```
 
@@ -188,13 +193,18 @@ await migrate(db, { migrationsFolder: './migrations' });
 *How to handle user auth?*
 
 **Options considered:**
-1. **Roll our own** - Full control, more work
-2. **Auth.js (NextAuth)** - Popular but may not fit TanStack Start
-3. **Lucia** - Lightweight, framework-agnostic
-4. **Better-Auth** - Modern, works well with Drizzle
+1. **Password-based** - Traditional, but users forget passwords
+2. **OAuth only** - Good UX but requires third-party setup
+3. **Magic links** - Passwordless, email-based, simple and secure
+4. **Passkeys** - Future-proof but browser support varies
 
-**Decision:** Roll our own for simplicity. Session-based auth with cookies.
-The schema is simple enough that we don't need an auth library.
+**Decision:** Magic links (passwordless email authentication).
+- Users enter email → receive a login link → click to sign in
+- No passwords to remember, forget, or reset
+- Works perfectly with our Brevo email integration
+- Simple database schema (just users + magic_tokens tables)
+- Session-based auth with cookies after verification
+- Great UX: "Check your email for a sign-in link"
 
 ### Email Template Management
 
@@ -335,6 +345,31 @@ This lets the store owner customize emails without code changes.
    Don't rely on event order - make operations idempotent.
 ```
 
+### Magic Link Gotchas
+
+```
+⚠️ Token Expiry
+   Tokens expire in 15 minutes. Users may not check email immediately.
+   Show clear messaging about expiry and offer "resend" option.
+
+⚠️ Email Deliverability
+   Magic links depend on email arriving. If Brevo has issues,
+   users can't log in. Monitor email delivery rates.
+
+⚠️ Same Response for All Emails
+   Always show "Check your email" even if email doesn't exist.
+   This prevents email enumeration attacks.
+
+⚠️ Multiple Devices
+   Magic link creates session on whatever device clicks it.
+   User might click on phone but wanted to log in on desktop.
+   Consider showing "Sign in on this device?" confirmation.
+
+⚠️ Token Cleanup
+   Old tokens accumulate. Run periodic cleanup job to delete
+   expired/used tokens (Inngest scheduled function is perfect).
+```
+
 ---
 
 ## 🎨 Design Notes
@@ -411,7 +446,7 @@ Technical Metrics:
 - [ ] Multi-language support
 - [ ] Advanced analytics dashboard
 - [ ] Customer referral program
-- [ ] Social login (Google, Apple)
+- [ ] Social login (Google, Apple) - optional alongside magic links
 
 ### Email Enhancement Ideas
 

@@ -26,25 +26,40 @@
 
 ---
 
-## 👥 User Authentication Flow
+## 👥 User Authentication Flow (Magic Link / Passwordless)
 
 ```
     ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                        AUTHENTICATION ARCHITECTURE                           │
+    │                  MAGIC LINK AUTHENTICATION ARCHITECTURE                      │
     │                                                                              │
     │   ┌─────────────────┐                                                        │
-    │   │  /login         │──────┐                                                │
-    │   │  /register      │      │                                                │
-    │   └─────────────────┘      ▼                                                │
+    │   │  /login         │ User enters email                                     │
+    │   │  (email only)   │──────┐                                                │
+    │   └─────────────────┘      │                                                │
+    │                            ▼                                                │
     │                      ┌─────────────┐     ┌─────────────┐                    │
-    │                      │  Validate   │────▶│   Create    │                    │
-    │                      │  Credentials│     │   Session   │                    │
+    │                      │  Generate   │────▶│   Send      │                    │
+    │                      │  Token      │     │   via Brevo │                    │
     │                      └─────────────┘     └─────────────┘                    │
     │                            │                   │                            │
     │                            ▼                   ▼                            │
     │                      ┌─────────────┐     ┌─────────────┐                    │
-    │                      │   Turso     │     │   Cookie    │                    │
-    │                      │   (Users)   │     │  (Session)  │                    │
+    │                      │   Turso     │     │  📧 Email   │                    │
+    │                      │(magic_tokens)     │  with link  │                    │
+    │                      └─────────────┘     └─────────────┘                    │
+    │                                                │                            │
+    │                          User clicks link      │                            │
+    │                                                ▼                            │
+    │                      ┌─────────────┐     ┌─────────────┐                    │
+    │                      │/auth/verify │────▶│  Validate   │                    │
+    │                      │  ?token=... │     │   Token     │                    │
+    │                      └─────────────┘     └─────────────┘                    │
+    │                                                │                            │
+    │                         Valid & not expired?   │                            │
+    │                                                ▼                            │
+    │                      ┌─────────────┐     ┌─────────────┐                    │
+    │                      │  Find/Create│────▶│   Create    │                    │
+    │                      │   User      │     │   Session   │                    │
     │                      └─────────────┘     └─────────────┘                    │
     │                                                │                            │
     │                                                ▼                            │
@@ -174,7 +189,8 @@ src/
 │   ├── index.ts          # Database client initialization
 │   ├── schema/
 │   │   ├── index.ts      # Export all schemas
-│   │   ├── users.ts      # User & auth table schema
+│   │   ├── users.ts      # User table schema (no passwords!)
+│   │   ├── magic-tokens.ts  # Magic link tokens for passwordless auth
 │   │   ├── products.ts   # Product table schema
 │   │   ├── orders.ts     # Order table schema
 │   │   ├── payment-methods.ts  # Saved payment methods
@@ -182,6 +198,7 @@ src/
 │   └── migrations/       # Auto-generated migration files
 ├── lib/
 │   ├── auth.ts           # Authentication utilities
+│   ├── magic-link.ts     # Magic link generation & verification
 │   ├── brevo.ts          # Brevo email client
 │   └── inngest.ts        # Inngest event functions
 ├── drizzle.config.ts     # Drizzle Kit configuration
@@ -193,6 +210,7 @@ src/
 ```typescript
 // src/db/schema/users.ts
 // 👤 The identity layer - who's buying all this soap?
+// 🪄 Passwordless! We use magic links for auth.
 
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 import { createId } from '@paralleldrive/cuid2';
@@ -200,13 +218,24 @@ import { createId } from '@paralleldrive/cuid2';
 export const users = sqliteTable('users', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
   email: text('email').notNull().unique(),
-  passwordHash: text('password_hash'),      // null if OAuth only
   role: text('role', { enum: ['admin', 'customer'] }).default('customer'),
   stripeCustomerId: text('stripe_customer_id'),
   firstName: text('first_name'),
   lastName: text('last_name'),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+});
+
+// src/db/schema/magic-tokens.ts
+// 🪄 Tokens for passwordless magic link authentication
+
+export const magicTokens = sqliteTable('magic_tokens', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  email: text('email').notNull(),
+  token: text('token').notNull().unique(),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  usedAt: integer('used_at', { mode: 'timestamp' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
 // src/db/schema/products.ts

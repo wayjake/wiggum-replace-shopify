@@ -438,22 +438,28 @@ export async function addContactToList(
 │  TRANSACTIONAL EMAIL TEMPLATES                                │
 ├──────────────────────────────────────────────────────────────┤
 │                                                               │
-│  Template 1: WELCOME_EMAIL (ID: store in constants)          │
+│  Template 1: MAGIC_LINK (ID: store in constants)             │
+│  ─────────────────────────────────────                       │
+│  Subject: "Sign in to Karen's Beautiful Soap 🪄"             │
+│  Params: {{ params.MAGIC_LINK }}                             │
+│  Note: Link expires in 15 minutes. Include clear CTA button. │
+│                                                               │
+│  Template 2: WELCOME_EMAIL (ID: store in constants)          │
 │  ─────────────────────────────────────                       │
 │  Subject: "Welcome to Karen's Beautiful Soap! 🧼"            │
 │  Params: {{ params.FIRSTNAME }}, {{ params.STORE_URL }}      │
 │                                                               │
-│  Template 2: ORDER_CONFIRMATION (ID: store in constants)     │
+│  Template 3: ORDER_CONFIRMATION (ID: store in constants)     │
 │  ─────────────────────────────────────                       │
 │  Subject: "Order Confirmed: #{{ params.ORDER_NUMBER }}"      │
 │  Params: ORDER_NUMBER, ITEMS, TOTAL, SHIPPING_ADDRESS        │
 │                                                               │
-│  Template 3: SHIPPING_NOTIFICATION                           │
+│  Template 4: SHIPPING_NOTIFICATION                           │
 │  ─────────────────────────────────────                       │
 │  Subject: "Your soap is on its way! 📦"                      │
 │  Params: ORDER_NUMBER, TRACKING_URL, DELIVERY_ESTIMATE       │
 │                                                               │
-│  Template 4: REVIEW_REQUEST (sent 7 days after delivery)     │
+│  Template 5: REVIEW_REQUEST (sent 7 days after delivery)     │
 │  ─────────────────────────────────────                       │
 │  Subject: "How was your soap? We'd love to know!"            │
 │  Params: FIRSTNAME, PRODUCT_NAME, REVIEW_URL                 │
@@ -769,11 +775,12 @@ export const POST = serve({
 └──────────────────────────────────────────────────────────────┘
 ```
 
-### Authentication Schema
+### Authentication Schema (Magic Link / Passwordless)
 
 ```typescript
 // src/db/schema/users.ts
 // 👤 The identity layer of our soap empire
+// 🪄 We use magic links - no passwords to remember (or forget)!
 
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 import { createId } from '@paralleldrive/cuid2';
@@ -781,11 +788,22 @@ import { createId } from '@paralleldrive/cuid2';
 export const users = sqliteTable('users', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
   email: text('email').notNull().unique(),
-  passwordHash: text('password_hash'),  // null if using OAuth only
   role: text('role', { enum: ['admin', 'customer'] }).default('customer'),
   stripeCustomerId: text('stripe_customer_id'),  // For saved payment methods
+  firstName: text('first_name'),
+  lastName: text('last_name'),
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+});
+
+// 🪄 Magic link tokens for passwordless authentication
+export const magicTokens = sqliteTable('magic_tokens', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  email: text('email').notNull(),
+  token: text('token').notNull().unique(),  // Secure random token
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),  // 15 min expiry
+  usedAt: integer('used_at', { mode: 'timestamp' }),  // null until used
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
 // 💳 Saved payment methods from Stripe
@@ -879,6 +897,7 @@ export const paymentMethods = sqliteTable('payment_methods', {
 ```typescript
 // src/lib/auth.ts
 // 🛡️ The bouncer at the door of our soap club
+// 🪄 Magic link edition - no passwords, just vibes
 
 import { redirect } from '@tanstack/react-router';
 
@@ -908,6 +927,74 @@ export async function requireAdmin(context: RouterContext) {
 export async function requireCustomer(context: RouterContext) {
   const session = await requireAuth(context);
   return session;
+}
+```
+
+### Magic Link Authentication Flow
+
+```typescript
+// src/lib/magic-link.ts
+// 🪄 The spell that lets users in without remembering passwords
+
+import { randomBytes } from 'crypto';
+import { db } from '@/db';
+import { magicTokens, users } from '@/db/schema';
+import { sendTransactionalEmail } from './brevo';
+
+// Generate a magic link and send it via email
+export async function sendMagicLink(email: string) {
+  // 🎲 Generate secure random token
+  const token = randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+  // 💾 Store token in database
+  await db.insert(magicTokens).values({
+    email,
+    token,
+    expiresAt,
+  });
+
+  // 📧 Send the magic link via Brevo
+  const magicUrl = `${process.env.APP_URL}/auth/verify?token=${token}`;
+  await sendTransactionalEmail({
+    to: { email },
+    templateId: BREVO_TEMPLATES.MAGIC_LINK,
+    params: { MAGIC_LINK: magicUrl },
+  });
+}
+
+// Verify a magic link token and create session
+export async function verifyMagicToken(token: string) {
+  // 🔍 Find the token
+  const magicToken = await db.query.magicTokens.findFirst({
+    where: and(
+      eq(magicTokens.token, token),
+      isNull(magicTokens.usedAt),
+      gt(magicTokens.expiresAt, new Date()),
+    ),
+  });
+
+  if (!magicToken) {
+    return { success: false, error: 'invalid_or_expired_token' };
+  }
+
+  // ✅ Mark token as used
+  await db.update(magicTokens)
+    .set({ usedAt: new Date() })
+    .where(eq(magicTokens.id, magicToken.id));
+
+  // 👤 Find or create user
+  let user = await db.query.users.findFirst({
+    where: eq(users.email, magicToken.email),
+  });
+
+  if (!user) {
+    [user] = await db.insert(users)
+      .values({ email: magicToken.email })
+      .returning();
+  }
+
+  return { success: true, user };
 }
 ```
 
@@ -975,10 +1062,10 @@ src/routes/
 ├── checkout/
 │   └── index.tsx           # Stripe checkout
 │
-├── 🔐 AUTH ROUTES
-├── login.tsx               # Login form
-├── register.tsx            # Registration form
-├── forgot-password.tsx     # Password recovery
+├── 🔐 AUTH ROUTES (Magic Link)
+├── login.tsx               # Email input → sends magic link
+├── auth/
+│   └── verify.tsx          # Handles magic link token verification
 │
 ├── 🛒 CUSTOMER PORTAL (requires: authenticated customer)
 ├── account/

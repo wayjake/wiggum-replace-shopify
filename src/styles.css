@@ -1,15 +1,247 @@
+/* 🎨 Global Styles - The beauty routine of our soap empire
+   "Mmm, this tastes like Grandma!" - Ralph on CSS variables */
+
 @import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS - Karen's Beautiful Soap Brand
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* Primary Colors - Nature-inspired palette */
+  --soap-forest: #2D5A4A;      /* Forest green - Nature, organic, growth */
+  --soap-cream: #F5EBE0;       /* Warm cream - Softness, purity */
+  --soap-honey: #D4A574;       /* Warm honey - Handcrafted warmth */
+  --soap-charcoal: #1A1A1A;    /* Charcoal - Sophistication, text */
+  --soap-pearl: #FDFCFB;       /* Off-white - Clean, fresh backgrounds */
+
+  /* Secondary Colors */
+  --soap-forest-light: #3D7A64;
+  --soap-forest-dark: #1D3A32;
+  --soap-honey-light: #E4B584;
+  --soap-honey-dark: #B48554;
+
+  /* Typography */
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'Karla', sans-serif;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Border radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BASE STYLES
+   ═══════════════════════════════════════════════════════════ */
 
 body {
   @apply m-0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--soap-pearl);
+  color: var(--soap-charcoal);
 }
 
+/* Headings use display font */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+/* Code blocks */
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CUSTOM UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════ */
+
+/* Font families */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+/* Brand colors */
+.bg-soap-forest { background-color: var(--soap-forest); }
+.bg-soap-cream { background-color: var(--soap-cream); }
+.bg-soap-honey { background-color: var(--soap-honey); }
+.bg-soap-charcoal { background-color: var(--soap-charcoal); }
+.bg-soap-pearl { background-color: var(--soap-pearl); }
+
+.text-soap-forest { color: var(--soap-forest); }
+.text-soap-cream { color: var(--soap-cream); }
+.text-soap-honey { color: var(--soap-honey); }
+.text-soap-charcoal { color: var(--soap-charcoal); }
+.text-soap-pearl { color: var(--soap-pearl); }
+
+.border-soap-forest { border-color: var(--soap-forest); }
+.border-soap-cream { border-color: var(--soap-cream); }
+.border-soap-honey { border-color: var(--soap-honey); }
+
+/* ═══════════════════════════════════════════════════════════
+   COMPONENT STYLES
+   ═══════════════════════════════════════════════════════════ */
+
+/* Primary button - Forest green with cream text */
+.btn-primary {
+  @apply px-6 py-3 rounded-lg font-medium transition-all duration-200;
+  background-color: var(--soap-forest);
+  color: var(--soap-cream);
+}
+
+.btn-primary:hover {
+  background-color: var(--soap-forest-dark);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary button - Outlined with honey border */
+.btn-secondary {
+  @apply px-6 py-3 rounded-lg font-medium transition-all duration-200 border-2;
+  border-color: var(--soap-honey);
+  color: var(--soap-charcoal);
+  background-color: transparent;
+}
+
+.btn-secondary:hover {
+  background-color: var(--soap-honey);
+  color: white;
+}
+
+/* Ghost button - Minimal, text only */
+.btn-ghost {
+  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+  color: var(--soap-forest);
+  background-color: transparent;
+}
+
+.btn-ghost:hover {
+  background-color: var(--soap-cream);
+}
+
+/* Card component */
+.card {
+  @apply rounded-2xl overflow-hidden transition-all duration-300;
+  background-color: white;
+  border: 1px solid var(--soap-cream);
+  box-shadow: var(--shadow-sm);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* Input fields */
+.input {
+  @apply w-full px-4 py-3 rounded-lg border transition-all duration-200;
+  border-color: var(--soap-cream);
+  background-color: white;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--soap-forest);
+  box-shadow: 0 0 0 3px rgba(45, 90, 74, 0.1);
+}
+
+.input::placeholder {
+  color: #9CA3AF;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════ */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.5s ease-out forwards;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Staggered animation delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLLBAR STYLING
+   ═══════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--soap-cream);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--soap-honey);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--soap-forest);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SELECTION STYLING
+   ═══════════════════════════════════════════════════════════ */
+
+::selection {
+  background-color: var(--soap-honey);
+  color: var(--soap-charcoal);
 }

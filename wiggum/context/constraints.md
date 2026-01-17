@@ -147,6 +147,11 @@ const productSchema = z.object({
   name: z.string().min(1),
   price: z.number().positive(),
 });
+
+// ✅ DO: Validate email for magic links
+const loginSchema = z.object({
+  email: z.string().email(),
+});
 ```
 
 ---
@@ -210,6 +215,45 @@ const productSchema = z.object({
 │  ✅ Access analytics and reporting                           │
 │  ❌ Cannot delete customer accounts (soft delete only)       │
 │  ❌ Cannot modify Stripe/Brevo/Inngest keys via UI           │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🪄 Magic Link Authentication Rules
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  MAGIC LINK SECURITY RULES                                    │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│  Token Generation:                                            │
+│  ─────────────────────────────────────                       │
+│  • Use crypto.randomBytes(32) for secure tokens              │
+│  • Tokens expire after 15 minutes (configurable)             │
+│  • One token per email request (invalidate old tokens)       │
+│  • Store tokens hashed if extra paranoid (optional)          │
+│                                                               │
+│  Token Verification:                                          │
+│  ─────────────────────────────────────                       │
+│  • Check expiry BEFORE checking validity                     │
+│  • Mark token as used immediately after verification         │
+│  • Tokens are single-use (usedAt timestamp)                  │
+│  • Delete or expire old tokens periodically (cleanup job)    │
+│                                                               │
+│  Rate Limiting:                                               │
+│  ─────────────────────────────────────                       │
+│  • Max 5 magic link requests per email per hour              │
+│  • Add delay between requests to prevent timing attacks      │
+│  • Log failed verification attempts                          │
+│                                                               │
+│  UX Considerations:                                           │
+│  ─────────────────────────────────────                       │
+│  • Clear messaging: "Check your email for a sign-in link"   │
+│  • Same message whether email exists or not (security)       │
+│  • Link works on any device (creates new session)            │
+│  • Show "resend" option after 60 seconds                     │
 │                                                               │
 └──────────────────────────────────────────────────────────────┘
 ```
