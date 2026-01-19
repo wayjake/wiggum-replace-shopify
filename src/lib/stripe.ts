@@ -88,7 +88,10 @@ export type CartItem = {
 
 /**
  * Creates a Stripe Checkout Session for the given cart items.
- * Returns the session URL for redirecting the customer.
+ * Supports both hosted (redirect) and embedded checkout modes.
+ *
+ * 🎭 Embedded checkout keeps customers on your site while still
+ * using Stripe's secure, PCI-compliant checkout form. Best of both worlds!
  */
 export async function createCheckoutSession({
   items,
@@ -96,15 +99,19 @@ export async function createCheckoutSession({
   customerId,
   successUrl,
   cancelUrl,
+  returnUrl,
   metadata,
+  embedded = false,
 }: {
   items: CartItem[];
   customerEmail?: string;
   customerId?: string;
-  successUrl: string;
-  cancelUrl: string;
+  successUrl?: string;
+  cancelUrl?: string;
+  returnUrl?: string; // For embedded checkout
   metadata?: Record<string, string>;
-}): Promise<{ sessionId: string; url: string }> {
+  embedded?: boolean;
+}): Promise<{ sessionId: string; url?: string; clientSecret?: string }> {
   const stripe = getStripe();
 
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map(
@@ -124,18 +131,28 @@ export async function createCheckoutSession({
     })
   );
 
+  // 🌟 Build session params based on checkout mode
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     payment_method_types: ['card'],
     mode: 'payment',
     line_items: lineItems,
-    success_url: successUrl,
-    cancel_url: cancelUrl,
     metadata: metadata || {},
     shipping_address_collection: {
-      allowed_countries: ['US', 'CA'], // Add more as needed
+      allowed_countries: ['US', 'CA'],
     },
     billing_address_collection: 'auto',
   };
+
+  // 📍 Embedded vs Hosted checkout configuration
+  if (embedded) {
+    // Embedded checkout uses ui_mode and return_url
+    sessionParams.ui_mode = 'embedded';
+    sessionParams.return_url = returnUrl || `${process.env.APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`;
+  } else {
+    // Hosted checkout uses success_url and cancel_url
+    sessionParams.success_url = successUrl!;
+    sessionParams.cancel_url = cancelUrl!;
+  }
 
   // Add customer info if available
   if (customerId) {
@@ -145,6 +162,14 @@ export async function createCheckoutSession({
   }
 
   const session = await stripe.checkout.sessions.create(sessionParams);
+
+  // 🎁 Return different data based on checkout mode
+  if (embedded) {
+    return {
+      sessionId: session.id,
+      clientSecret: session.client_secret!,
+    };
+  }
 
   if (!session.url) {
     throw new Error('Failed to create checkout session URL');

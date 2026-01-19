@@ -1,10 +1,11 @@
 // 📋 Admin Orders - The fulfillment command center
 // "Tastes like burning!" - Ralph when orders pile up
 
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { useState } from 'react';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Package, Truck, CheckCircle, Clock, XCircle, Eye } from 'lucide-react';
 import { cn, formatPrice } from '../../../utils';
+import { requireAdmin } from '../../../lib/auth-guards';
 
 export const Route = createFileRoute('/admin/orders/')({
   head: () => ({
@@ -13,6 +14,9 @@ export const Route = createFileRoute('/admin/orders/')({
       { name: 'description', content: 'Manage customer orders and fulfillment.' },
     ],
   }),
+  loader: async () => {
+    return await requireAdmin();
+  },
   component: AdminOrders,
 });
 
@@ -73,8 +77,25 @@ const ORDERS = [
 const STATUS_OPTIONS = ['all', 'processing', 'paid', 'shipped', 'delivered', 'cancelled'];
 
 function AdminOrders() {
+  const navigate = useNavigate();
+  const authResult = Route.useLoaderData();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  // Auth guard redirect
+  useEffect(() => {
+    if (!authResult.authenticated || !authResult.isAdmin) {
+      navigate({ to: authResult.redirect || '/login' });
+    }
+  }, [authResult, navigate]);
+
+  if (!authResult.authenticated || !authResult.isAdmin) {
+    return (
+      <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#2D5A4A] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const filteredOrders = ORDERS.filter((order) => {
     const matchesSearch =

@@ -2,30 +2,66 @@
 // "I'm a brick!" - Ralph, describing soap bars probably
 
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
 import { useState } from 'react';
 import { Filter, Search, ShoppingBag, Plus, Check } from 'lucide-react';
 import { cn } from '../../utils';
+import { getDb, products, categories } from '../../db';
+import { asc } from 'drizzle-orm';
+import { ProductGridSkeleton, Skeleton } from '../../lib/skeletons';
 
-export const Route = createFileRoute('/shop/')({
-  head: () => ({
-    meta: [
-      { title: "Shop | Karen's Beautiful Soap" },
-      {
-        name: 'description',
-        content: 'Browse our collection of handcrafted artisanal soaps. Lavender, honey oat, rose petal, citrus, and more natural luxury soaps.',
-      },
-      { property: 'og:title', content: "Shop Our Soaps | Karen's Beautiful Soap" },
-      { property: 'og:description', content: 'Discover handcrafted luxury soaps made with natural ingredients' },
-    ],
-  }),
-  component: ShopPage,
+// ═══════════════════════════════════════════════════════════
+// SERVER FUNCTIONS - Fetching the soapy goodness from the DB
+// ═══════════════════════════════════════════════════════════
+
+const getProducts = createServerFn({ method: 'GET' }).handler(async () => {
+  try {
+    const db = getDb();
+
+    // Fetch all products ordered by sortOrder
+    const productList = await db
+      .select()
+      .from(products)
+      .orderBy(asc(products.sortOrder));
+
+    // Fetch all categories
+    const categoryList = await db
+      .select()
+      .from(categories)
+      .orderBy(asc(categories.sortOrder));
+
+    return {
+      products: productList.map((p) => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        price: p.price,
+        description: p.description || '',
+        shortDescription: p.shortDescription || '',
+        category: p.category || 'Uncategorized',
+        image: p.imageUrl || 'https://images.unsplash.com/photo-1600857062241-98e5dba7f214?w=400&h=400&fit=crop',
+        inStock: p.inStock ?? true,
+        featured: p.featured ?? false,
+      })),
+      categories: ['All', ...categoryList.map((c) => c.name)],
+    };
+  } catch (error) {
+    // If database isn't set up yet, return sample data
+    // 🎭 This fallback keeps the store functional during setup
+    console.warn('Database not available, using sample data:', error);
+    return {
+      products: SAMPLE_PRODUCTS,
+      categories: SAMPLE_CATEGORIES,
+    };
+  }
 });
 
 // ═══════════════════════════════════════════════════════════
-// SAMPLE PRODUCTS DATA (will be replaced with database data)
+// SAMPLE DATA - Fallback when database isn't configured
+// "I sleep in a drawer!" - Ralph, storing backup data
 // ═══════════════════════════════════════════════════════════
 
-const PRODUCTS = [
+const SAMPLE_PRODUCTS = [
   {
     id: '1',
     name: 'Lavender Dreams',
@@ -100,19 +136,43 @@ const PRODUCTS = [
   },
 ];
 
-const CATEGORIES = ['All', 'Relaxation', 'Exfoliating', 'Luxury', 'Energizing', 'Moisturizing', 'Fresh'];
+const SAMPLE_CATEGORIES = ['All', 'Relaxation', 'Exfoliating', 'Luxury', 'Energizing', 'Moisturizing', 'Fresh'];
+
+// ═══════════════════════════════════════════════════════════
+// ROUTE DEFINITION
+// ═══════════════════════════════════════════════════════════
+
+export const Route = createFileRoute('/shop/')({
+  head: () => ({
+    meta: [
+      { title: "Shop | Karen's Beautiful Soap" },
+      {
+        name: 'description',
+        content: 'Browse our collection of handcrafted artisanal soaps. Lavender, honey oat, rose petal, citrus, and more natural luxury soaps.',
+      },
+      { property: 'og:title', content: "Shop Our Soaps | Karen's Beautiful Soap" },
+      { property: 'og:description', content: 'Discover handcrafted luxury soaps made with natural ingredients' },
+    ],
+  }),
+  loader: async () => {
+    return await getProducts();
+  },
+  pendingComponent: ShopPageSkeleton,
+  component: ShopPage,
+});
 
 // ═══════════════════════════════════════════════════════════
 // COMPONENT
 // ═══════════════════════════════════════════════════════════
 
 function ShopPage() {
+  const { products: productList, categories: categoryList } = Route.useLoaderData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [cartItems, setCartItems] = useState<Set<string>>(new Set());
 
   // Filter products
-  const filteredProducts = PRODUCTS.filter((product) => {
+  const filteredProducts = productList.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
@@ -183,7 +243,7 @@ function ShopPage() {
           {/* Category Filter */}
           <div className="flex items-center gap-2 flex-wrap">
             <Filter className="w-5 h-5 text-gray-400" />
-            {CATEGORIES.map((category) => (
+            {categoryList.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
@@ -240,7 +300,7 @@ function ProductCard({
   inCart,
   onAddToCart,
 }: {
-  product: typeof PRODUCTS[number];
+  product: typeof SAMPLE_PRODUCTS[number];
   inCart: boolean;
   onAddToCart: () => void;
 }) {
@@ -311,6 +371,56 @@ function ProductCard({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// LOADING SKELETON
+// Displays while product data is being fetched
+// ═══════════════════════════════════════════════════════════
+
+function ShopPageSkeleton() {
+  return (
+    <div className="min-h-screen bg-[#FDFCFB]">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#F5EBE0]">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <nav className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-[#2D5A4A] rounded-full flex items-center justify-center">
+                <span className="text-xl">🧼</span>
+              </div>
+              <div>
+                <div className="text-lg font-bold text-[#1A1A1A] font-display">Karen's Beautiful Soap</div>
+                <div className="text-xs text-gray-500">Handcrafted with love</div>
+              </div>
+            </div>
+            <Skeleton className="h-10 w-24 rounded-lg" />
+          </nav>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-6 py-12">
+        {/* Page Header */}
+        <div className="text-center mb-12">
+          <Skeleton className="h-12 w-80 mx-auto mb-4" />
+          <Skeleton className="h-5 w-96 mx-auto" />
+        </div>
+
+        {/* Filters skeleton */}
+        <div className="flex flex-col lg:flex-row gap-6 mb-8">
+          <Skeleton className="h-12 w-full max-w-md rounded-lg" />
+          <div className="flex items-center gap-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-20 rounded-full" />
+            ))}
+          </div>
+        </div>
+
+        {/* Products Grid Skeleton */}
+        <ProductGridSkeleton count={6} />
+      </main>
     </div>
   );
 }

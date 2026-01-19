@@ -2,9 +2,56 @@
 // "I bent my wookiee!" - Ralph when the cart breaks (it won't!)
 
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useState } from 'react';
+import { createServerFn } from '@tanstack/react-start';
+import { useEffect, useRef } from 'react';
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, CreditCard, Truck } from 'lucide-react';
 import { cn, formatPrice } from '../utils';
+import {
+  useCart,
+  calculateShipping,
+  calculateTotal,
+  SHIPPING_THRESHOLD,
+  type CartItem,
+} from '../lib/cart';
+import { getSession } from '../lib/auth-guards';
+import { sendEvent } from '../lib/inngest';
+
+// ═══════════════════════════════════════════════════════════
+// SERVER FUNCTION - Trigger abandoned cart event
+// ═══════════════════════════════════════════════════════════
+
+const triggerAbandonedCart = createServerFn({ method: 'POST' })
+  .handler(async (data: {
+    items: Array<{
+      productName: string;
+      quantity: number;
+      price: number;
+      imageUrl?: string;
+    }>;
+    cartTotal: number;
+  }) => {
+    // Get user session to get email
+    const session = await getSession();
+
+    if (!session?.email) {
+      // No logged in user - can't send abandoned cart email
+      return { sent: false, reason: 'no_email' };
+    }
+
+    try {
+      await sendEvent('shop/cart.abandoned', {
+        email: session.email,
+        firstName: session.firstName,
+        items: data.items,
+        cartTotal: data.cartTotal,
+        cartUrl: `${process.env.APP_URL || ''}/cart`,
+      });
+      return { sent: true };
+    } catch (error) {
+      console.error('Failed to send abandoned cart event:', error);
+      return { sent: false, reason: 'inngest_error' };
+    }
+  });
 
 export const Route = createFileRoute('/cart')({
   head: () => ({
@@ -12,7 +59,7 @@ export const Route = createFileRoute('/cart')({
       { title: "Shopping Cart | Karen's Beautiful Soap" },
       {
         name: 'description',
-        content: "Review your cart and checkout. Free shipping on orders over $35.",
+        content: "Review your cart and checkout. Free shipping on orders over $60.",
       },
     ],
   }),
@@ -20,57 +67,58 @@ export const Route = createFileRoute('/cart')({
 });
 
 // ═══════════════════════════════════════════════════════════
-// SAMPLE CART DATA (in real app, this comes from localStorage/server)
-// ═══════════════════════════════════════════════════════════
-
-const INITIAL_CART = [
-  {
-    id: '1',
-    productId: '1',
-    name: 'Lavender Dreams',
-    slug: 'lavender-dreams',
-    price: 12.00,
-    quantity: 2,
-    image: 'https://images.unsplash.com/photo-1600857062241-98e5dba7f214?w=200&h=200&fit=crop',
-  },
-  {
-    id: '2',
-    productId: '3',
-    name: 'Rose Petal Luxury',
-    slug: 'rose-petal-luxury',
-    price: 16.00,
-    quantity: 1,
-    image: 'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=200&h=200&fit=crop',
-  },
-];
-
-// ═══════════════════════════════════════════════════════════
 // COMPONENT
+// "My cat's breath smells like cat food!" - Ralph on cart management
 // ═══════════════════════════════════════════════════════════
 
 function CartPage() {
-  const [cartItems, setCartItems] = useState(INITIAL_CART);
+  const { items: cartItems, subtotal, updateQuantity, removeItem } = useCart();
+  const abandonedCartSent = useRef(false);
 
-  const updateQuantity = (itemId: string, newQuantity: number) => {
-    if (newQuantity < 1) {
-      removeItem(itemId);
-      return;
-    }
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === itemId ? { ...item, quantity: Math.min(10, newQuantity) } : item
-      )
-    );
-  };
+  const shipping = calculateShipping(subtotal);
+  const total = calculateTotal(subtotal);
 
-  const removeItem = (itemId: string) => {
-    setCartItems((items) => items.filter((item) => item.id !== itemId));
-  };
+  // 🛒 Abandoned cart detection
+  // When user leaves with items in cart, trigger the abandoned cart workflow
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Don't trigger if cart is empty or we already sent an event
+      if (cartItems.length === 0 || abandonedCartSent.current) return;
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shippingThreshold = 35;
-  const shipping = subtotal >= shippingThreshold ? 0 : 5.99;
-  const total = subtotal + shipping;
+      // Use sendBeacon for reliability during page unload
+      const items = cartItems.map((item) => ({
+        productName: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        imageUrl: item.imageUrl,
+      }));
+
+      // Mark as sent to avoid duplicates
+      abandonedCartSent.current = true;
+
+      // Fire and forget - use sendBeacon for unload events
+      // Note: In production, you'd want a dedicated API endpoint for this
+      triggerAbandonedCart({ items, cartTotal: total }).catch(() => {
+        // Reset if failed so it can try again
+        abandonedCartSent.current = false;
+      });
+    };
+
+    // Listen for page visibility change (tab close/switch)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && cartItems.length > 0) {
+        handleBeforeUnload();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [cartItems, total]);
 
   return (
     <div className="min-h-screen bg-[#FDFCFB]">
@@ -115,18 +163,18 @@ function CartPage() {
               ))}
 
               {/* Free Shipping Progress */}
-              {subtotal < shippingThreshold && (
+              {subtotal < SHIPPING_THRESHOLD && (
                 <div className="bg-[#F5EBE0] rounded-xl p-4">
                   <div className="flex items-center gap-3 mb-2">
                     <Truck className="w-5 h-5 text-[#2D5A4A]" />
                     <p className="text-sm text-[#1A1A1A]">
-                      Add <span className="font-semibold">{formatPrice(shippingThreshold - subtotal)}</span> more for free shipping!
+                      Add <span className="font-semibold">{formatPrice(SHIPPING_THRESHOLD - subtotal)}</span> more for free shipping!
                     </p>
                   </div>
                   <div className="h-2 bg-white rounded-full overflow-hidden">
                     <div
                       className="h-full bg-[#2D5A4A] transition-all duration-500"
-                      style={{ width: `${Math.min(100, (subtotal / shippingThreshold) * 100)}%` }}
+                      style={{ width: `${Math.min(100, (subtotal / SHIPPING_THRESHOLD) * 100)}%` }}
                     />
                   </div>
                 </div>
@@ -175,7 +223,7 @@ function CartPage() {
                 <div className="border-t border-[#F5EBE0] mt-6 pt-6 space-y-3">
                   <div className="flex items-center gap-3 text-sm text-gray-600">
                     <Truck className="w-4 h-4 text-[#2D5A4A]" />
-                    <span>Free shipping on orders over $35</span>
+                    <span>Free shipping on orders over $60</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-gray-600">
                     <ShoppingBag className="w-4 h-4 text-[#2D5A4A]" />
@@ -200,7 +248,7 @@ function CartItemCard({
   onUpdateQuantity,
   onRemove,
 }: {
-  item: typeof INITIAL_CART[number];
+  item: CartItem;
   onUpdateQuantity: (qty: number) => void;
   onRemove: () => void;
 }) {

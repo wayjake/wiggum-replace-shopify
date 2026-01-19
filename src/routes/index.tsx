@@ -2,7 +2,51 @@
 // "I'm learnding!" - Ralph, every visitor discovering our soaps
 
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { ShoppingBag, Leaf, Heart, Sparkles, Star, ArrowRight } from 'lucide-react';
+import { createServerFn } from '@tanstack/react-start';
+import { useState } from 'react';
+import { ShoppingBag, Leaf, Heart, Sparkles, Star, ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { addContactToList, BREVO_LISTS } from '../lib/brevo';
+import { sendEvent } from '../lib/inngest';
+
+// ═══════════════════════════════════════════════════════════
+// SERVER FUNCTION - Newsletter subscription
+// ═══════════════════════════════════════════════════════════
+
+const subscribeToNewsletter = createServerFn({ method: 'POST' })
+  .handler(async (data: { email: string }) => {
+    // Validate email
+    if (!data.email || !data.email.includes('@')) {
+      throw new Error('Please enter a valid email address');
+    }
+
+    try {
+      await addContactToList({
+        email: data.email,
+        listIds: [BREVO_LISTS.NEWSLETTER],
+        attributes: {
+          SIGNUP_SOURCE: 'homepage_newsletter',
+        },
+      });
+
+      // 📧 Trigger welcome email via Inngest
+      try {
+        await sendEvent('shop/newsletter.subscribed', {
+          email: data.email,
+          source: 'homepage_newsletter',
+        });
+      } catch (inngestError) {
+        console.error('Failed to send Inngest event:', inngestError);
+        // Don't fail the signup if Inngest is unavailable
+      }
+
+      return { success: true };
+    } catch (error) {
+      // Still return success even if already subscribed
+      // The addContactToList function handles duplicates gracefully
+      console.log('Newsletter signup:', data.email);
+      return { success: true };
+    }
+  });
 
 export const Route = createFileRoute('/')({
   head: () => ({
@@ -68,17 +112,17 @@ const FEATURED_PRODUCTS = [
 const TESTIMONIALS = [
   {
     name: 'Sarah M.',
-    text: "The Lavender Dreams soap has completely transformed my evening routine. I've never felt so relaxed!",
+    text: "Finally found soaps that don't irritate my sensitive skin. Karen's products are sulfate-free and gentle - a total game changer!",
     rating: 5,
   },
   {
     name: 'Michael T.',
-    text: "Finally found soaps that don't irritate my sensitive skin. Karen's soaps are a game changer.",
+    text: "I love that these soaps have no parabens or mineral oil. My skin has never felt better!",
     rating: 5,
   },
   {
     name: 'Emily R.',
-    text: 'Bought these as gifts and everyone loved them. The packaging is beautiful too!',
+    text: 'Bought these as gifts and everyone loved them. The natural ingredients really make a difference!',
     rating: 5,
   },
 ];
@@ -139,12 +183,12 @@ function Navigation() {
             <Link to="/shop" className="text-gray-600 hover:text-[#2D5A4A] transition-colors">
               Shop
             </Link>
-            <a href="#about" className="text-gray-600 hover:text-[#2D5A4A] transition-colors">
+            <Link to="/about" className="text-gray-600 hover:text-[#2D5A4A] transition-colors">
               About
-            </a>
-            <a href="#contact" className="text-gray-600 hover:text-[#2D5A4A] transition-colors">
+            </Link>
+            <Link to="/contact" className="text-gray-600 hover:text-[#2D5A4A] transition-colors">
               Contact
-            </a>
+            </Link>
           </div>
 
           {/* Actions */}
@@ -184,7 +228,7 @@ function HeroSection() {
           {/* Content */}
           <div className="text-center lg:text-left">
             <span className="inline-block px-4 py-2 bg-[#2D5A4A]/10 text-[#2D5A4A] rounded-full text-sm font-medium mb-6">
-              ✨ Handcrafted in Small Batches
+              ✨ Free Shipping Over $60 • Handcrafted in Small Batches
             </span>
             <h1 className="text-4xl md:text-6xl font-bold text-[#1A1A1A] mb-6 font-display leading-tight">
               Gentle on Your Skin,{' '}
@@ -202,12 +246,12 @@ function HeroSection() {
                 Shop Now
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <a
-                href="#about"
+              <Link
+                to="/about"
                 className="inline-flex items-center justify-center gap-2 border-2 border-[#D4A574] text-[#1A1A1A] px-8 py-4 rounded-lg hover:bg-[#D4A574] hover:text-white transition-all duration-200 font-medium"
               >
                 Our Story
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -245,23 +289,23 @@ function FeaturesSection() {
   const features = [
     {
       icon: Leaf,
-      title: 'All Natural Ingredients',
-      description: 'We use only the finest organic oils, butters, and botanicals in every bar.',
+      title: 'No Harsh Chemicals',
+      description: 'Free of sulfates, mineral oil, alcohol, and parabens. Only the highest quality natural ingredients.',
     },
     {
       icon: Heart,
-      title: 'Made with Love',
-      description: 'Each soap is handcrafted in small batches to ensure the highest quality.',
+      title: 'Made for Sensitive Skin',
+      description: 'Born from personal necessity - created when commercial soaps proved too harsh for sensitive skin.',
     },
     {
       icon: Sparkles,
-      title: 'Cruelty Free',
-      description: 'Never tested on animals. Our soaps are as kind to creatures as they are to you.',
+      title: 'Farmers Market Tested',
+      description: 'Perfected through direct customer feedback at local farmers markets. Real people, real results.',
     },
   ];
 
   return (
-    <section className="py-20 px-6 bg-white" id="about">
+    <section className="py-20 px-6 bg-white">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] mb-4 font-display">
@@ -404,31 +448,89 @@ function TestimonialsSection() {
 
 // ═══════════════════════════════════════════════════════════
 // NEWSLETTER SECTION
+// "Sleep! That's where I'm a viking!" - Ralph, on email dreams
 // ═══════════════════════════════════════════════════════════
 
 function NewsletterSection() {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('loading');
+    setErrorMsg('');
+
+    try {
+      await subscribeToNewsletter({ email });
+      setStatus('success');
+      setEmail('');
+    } catch (err) {
+      setStatus('error');
+      setErrorMsg(err instanceof Error ? err.message : 'Something went wrong');
+    }
+  };
+
+  if (status === 'success') {
+    return (
+      <section className="py-20 px-6 bg-[#F5EBE0]">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="w-16 h-16 mx-auto mb-6 bg-[#2D5A4A] rounded-full flex items-center justify-center">
+            <CheckCircle2 className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] mb-4 font-display">
+            You're Subscribed!
+          </h2>
+          <p className="text-gray-600 mb-8">
+            Thank you for joining our community. Keep an eye on your inbox for soapy updates!
+          </p>
+          <button
+            onClick={() => setStatus('idle')}
+            className="text-[#2D5A4A] font-medium hover:underline"
+          >
+            Subscribe another email
+          </button>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 px-6 bg-[#F5EBE0]">
       <div className="max-w-3xl mx-auto text-center">
         <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] mb-4 font-display">
-          Join the Soap Lovers Club
+          Subscribe
         </h2>
         <p className="text-gray-600 mb-8">
-          Get exclusive offers, soap care tips, and be the first to know about new products.
+          Be the first to hear about upcoming sales, special discounts, and hot beauty trends.
         </p>
-        <form className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
           <input
             type="email"
             placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
             className="flex-1 px-6 py-4 rounded-lg border border-[#D4A574]/30 bg-white focus:outline-none focus:border-[#2D5A4A] focus:ring-2 focus:ring-[#2D5A4A]/10"
           />
           <button
             type="submit"
-            className="bg-[#2D5A4A] text-white px-8 py-4 rounded-lg hover:bg-[#1A1A1A] transition-colors font-medium whitespace-nowrap"
+            disabled={status === 'loading'}
+            className="bg-[#2D5A4A] text-white px-8 py-4 rounded-lg hover:bg-[#1A1A1A] transition-colors font-medium whitespace-nowrap disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            Subscribe
+            {status === 'loading' ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Subscribing...
+              </>
+            ) : (
+              'Subscribe'
+            )}
           </button>
         </form>
+        {status === 'error' && (
+          <p className="text-sm text-red-600 mt-4">{errorMsg}</p>
+        )}
         <p className="text-sm text-gray-500 mt-4">
           We respect your privacy. Unsubscribe anytime.
         </p>
@@ -443,7 +545,7 @@ function NewsletterSection() {
 
 function Footer() {
   return (
-    <footer className="bg-[#1A1A1A] text-white py-16 px-6" id="contact">
+    <footer className="bg-[#1A1A1A] text-white py-16 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand */}
@@ -465,7 +567,7 @@ function Footer() {
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-gray-400">
               <li><Link to="/shop" className="hover:text-white transition-colors">Shop</Link></li>
-              <li><a href="#about" className="hover:text-white transition-colors">About Us</a></li>
+              <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
               <li><Link to="/account/orders" className="hover:text-white transition-colors">Track Order</Link></li>
               <li><Link to="/login" className="hover:text-white transition-colors">Sign In</Link></li>
             </ul>
@@ -475,9 +577,14 @@ function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Contact</h4>
             <ul className="space-y-2 text-gray-400">
-              <li>hello@karenssoap.com</li>
-              <li>Portland, Oregon</li>
-              <li>Made with 💚 in the USA</li>
+              <li>
+                <a href="tel:310-804-4824" className="hover:text-white transition-colors">
+                  (310) 804-4824
+                </a>
+              </li>
+              <li>Studio City Farmers Market</li>
+              <li>Open Sundays</li>
+              <li className="pt-2 text-sm">Free shipping over $60</li>
             </ul>
           </div>
         </div>

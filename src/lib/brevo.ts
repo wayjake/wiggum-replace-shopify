@@ -19,6 +19,7 @@ export const BREVO_TEMPLATES = {
   SHIPPING_NOTIFICATION: 3, // Order shipped with tracking
   DELIVERY_FOLLOWUP: 4, // Post-delivery check-in
   REVIEW_REQUEST: 5, // Ask for a product review
+  ORDER_CANCELLED: 7, // Order cancellation notification
 
   // Educational/nurture emails
   SOAP_TIPS: 6, // Tips for using your soap

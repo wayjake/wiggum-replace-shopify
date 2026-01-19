@@ -510,4 +510,162 @@ export const getDashboardData = createServerFn({ method: 'GET' })
 
 ---
 
+## 💳 Stripe Setup Guide
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  STRIPE SETUP                                                  │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│  Step 1: Create Stripe Account                                │
+│  ───────────────────────────────────                         │
+│  1. Go to https://dashboard.stripe.com                        │
+│  2. Sign up or log in                                         │
+│  3. Complete account verification                             │
+│                                                               │
+│  Step 2: Get API Keys                                         │
+│  ───────────────────────────────────                         │
+│  1. Go to Developers → API Keys                               │
+│  2. Copy "Publishable key" → STRIPE_PUBLIC_KEY               │
+│  3. Copy "Secret key" → STRIPE_SECRET_KEY                    │
+│  Note: Use test keys (pk_test_, sk_test_) for development    │
+│                                                               │
+│  Step 3: Set Up Webhooks (Local Development)                  │
+│  ───────────────────────────────────                         │
+│  1. Install Stripe CLI: brew install stripe/stripe-cli/stripe │
+│  2. Login: stripe login                                       │
+│  3. Forward webhooks:                                         │
+│     stripe listen --forward-to localhost:3000/api/stripe/webhook
+│  4. Copy the webhook signing secret → STRIPE_WEBHOOK_SECRET  │
+│                                                               │
+│  Step 4: Set Up Webhooks (Production)                         │
+│  ───────────────────────────────────                         │
+│  1. Go to Developers → Webhooks                               │
+│  2. Add endpoint: https://yourdomain.com/api/stripe/webhook  │
+│  3. Select events: checkout.session.completed,               │
+│     payment_intent.succeeded, etc.                           │
+│  4. Copy signing secret → STRIPE_WEBHOOK_SECRET              │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📧 Brevo Setup Guide
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  BREVO EMAIL SETUP                                            │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│  Brevo (formerly Sendinblue) handles transactional emails:   │
+│  • Order confirmations                                        │
+│  • Shipping notifications                                     │
+│  • Welcome sequences                                          │
+│                                                               │
+│  Step 1: Create Brevo Account                                 │
+│  ───────────────────────────────────                         │
+│  1. Go to https://www.brevo.com                               │
+│  2. Sign up (free tier: 300 emails/day)                       │
+│  3. Verify your email address                                 │
+│                                                               │
+│  Step 2: Get API Key                                          │
+│  ───────────────────────────────────                         │
+│  1. Go to Settings → API Keys (or SMTP & API)                 │
+│  2. Click "Generate a new API key"                            │
+│  3. Name it (e.g., "Soap Store")                              │
+│  4. Copy immediately → BREVO_API_KEY                         │
+│     (Only shown once!)                                        │
+│                                                               │
+│  Step 3: Configure Sender                                     │
+│  ───────────────────────────────────                         │
+│  1. Go to Settings → Senders & IP                             │
+│  2. Add sender email (e.g., hello@karenssoap.com)            │
+│  3. Verify the domain or email address                        │
+│                                                               │
+│  Step 4: Create Email Templates                               │
+│  ───────────────────────────────────                         │
+│  Create these templates in Brevo dashboard:                   │
+│  • Template 1: Welcome Email                                  │
+│  • Template 2: Order Confirmation                             │
+│  • Template 3: Shipping Notification                          │
+│  • Template 4: Order Delivered                                │
+│  • Template 5: Order Cancelled                                │
+│  Note template IDs and update src/lib/brevo.ts               │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## ⚡ Inngest Setup Guide
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  INNGEST SETUP - Background Jobs & Events                     │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│  Inngest handles async operations:                            │
+│  • Order fulfillment workflows                                │
+│  • Email sequences with delays                                │
+│  • Webhook processing                                         │
+│                                                               │
+│  Step 1: Create Inngest Account                               │
+│  ───────────────────────────────────                         │
+│  1. Go to https://www.inngest.com                             │
+│  2. Sign up (generous free tier)                              │
+│  3. Create a new app                                          │
+│                                                               │
+│  Step 2: Get Keys                                             │
+│  ───────────────────────────────────                         │
+│  1. Go to your app's settings                                 │
+│  2. Copy Signing Key → INNGEST_SIGNING_KEY                   │
+│  3. Copy Event Key → INNGEST_EVENT_KEY                       │
+│                                                               │
+│  Step 3: Local Development                                    │
+│  ───────────────────────────────────                         │
+│  Run the Inngest dev server alongside your app:               │
+│                                                               │
+│  npx inngest-cli@latest dev                                   │
+│                                                               │
+│  This opens http://localhost:8288 for testing                 │
+│  No signing key needed for local dev!                         │
+│                                                               │
+│  Step 4: Production                                           │
+│  ───────────────────────────────────                         │
+│  1. Deploy your app with the /api/inngest endpoint            │
+│  2. In Inngest dashboard, add your production URL             │
+│  3. Inngest will discover and sync your functions             │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🔐 Session Secret
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  SESSION_SECRET                                               │
+├──────────────────────────────────────────────────────────────┤
+│                                                               │
+│  Generate a random 32+ character string:                      │
+│                                                               │
+│  Option 1: Use OpenSSL                                        │
+│  openssl rand -base64 32                                      │
+│                                                               │
+│  Option 2: Use Node.js                                        │
+│  node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+│                                                               │
+│  Option 3: Use an online generator                            │
+│  (Just make sure it's cryptographically secure!)              │
+│                                                               │
+│  Add to environment:                                          │
+│  SESSION_SECRET=your-random-string-here                       │
+│                                                               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+---
+
 *"In my database, there are no records. Only dreams... and users, and orders, and payment methods."* - Ralph, probably

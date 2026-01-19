@@ -1,10 +1,105 @@
 // 📝 Register Page - Join the soap family!
 // "My cat's breath smells like cat food." - Ralph's password hint (don't use this!)
+//
+// ╭────────────────────────────────────────────────────────────╮
+// │  🛡️ RATE LIMITED!                                          │
+// │  3 attempts per hour, 24 hour block after exceeding.       │
+// │  Prevents mass account creation by bad actors.             │
+// ╰────────────────────────────────────────────────────────────╯
 
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
 import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
 import { cn } from '../utils';
+import { createUser, createSession, createSessionCookie, getUserByEmail } from '../lib/auth';
+import { getRequest } from '@tanstack/react-start/server';
+import {
+  checkRateLimit,
+  resetRateLimit,
+  getClientIP,
+  registerRateLimit,
+} from '../lib/rate-limit';
+import { validateCsrfForRequest } from '../lib/csrf.server';
+import { useCsrf } from '../lib/csrf-react';
+
+// ═══════════════════════════════════════════════════════════
+// SERVER FUNCTIONS - Creating new soap enthusiasts
+// "I bent my wookiee!" - Ralph, creating an account
+// ═══════════════════════════════════════════════════════════
+
+const registerUser = createServerFn({ method: 'POST' })
+  .handler(async (data: {
+    firstName: string;
+    lastName?: string;
+    email: string;
+    password: string;
+    marketingConsent: boolean;
+    csrfToken?: string;
+  }) => {
+    const { firstName, lastName, email, password, csrfToken } = data;
+
+    // 🛡️ CSRF validation - protect against cross-site request forgery
+    const request = getRequest();
+    const csrfResult = validateCsrfForRequest(request, csrfToken);
+    if (!csrfResult.valid) {
+      return { success: false, error: csrfResult.error || 'Invalid security token' };
+    }
+
+    // 🛡️ Rate limiting - prevent mass account creation
+    const clientIP = request ? getClientIP(request) : 'unknown';
+    const rateLimitKey = `register:${clientIP}`;
+
+    const rateLimitResult = checkRateLimit(rateLimitKey, registerRateLimit);
+    if (!rateLimitResult.success) {
+      const hours = Math.ceil(rateLimitResult.resetIn / 3600);
+      return {
+        success: false,
+        error: rateLimitResult.blocked
+          ? `Too many registration attempts. Please try again in ${hours} hours.`
+          : `Too many attempts. Please wait before trying again.`,
+        rateLimited: true,
+        retryAfter: rateLimitResult.resetIn,
+      };
+    }
+
+    try {
+      // Check if user already exists
+      const existingUser = await getUserByEmail(email);
+      if (existingUser) {
+        return { success: false, error: 'An account with this email already exists' };
+      }
+
+      // Create the user
+      const userId = await createUser({
+        email,
+        password,
+        firstName,
+        lastName,
+        role: 'customer',
+      });
+
+      // 🎉 Success! Reset rate limit for this IP
+      resetRateLimit(rateLimitKey);
+
+      // Create session
+      const sessionId = await createSession(userId);
+      const cookie = createSessionCookie(sessionId);
+
+      return {
+        success: true,
+        userId,
+        cookie,
+      };
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { success: false, error: 'An error occurred during registration' };
+    }
+  });
+
+// ═══════════════════════════════════════════════════════════
+// ROUTE DEFINITION
+// ═══════════════════════════════════════════════════════════
 
 export const Route = createFileRoute('/register')({
   head: () => ({
@@ -21,6 +116,7 @@ export const Route = createFileRoute('/register')({
 
 function RegisterPage() {
   const navigate = useNavigate();
+  const { token: csrfToken } = useCsrf();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -66,12 +162,34 @@ function RegisterPage() {
 
     setIsLoading(true);
 
-    // In a real app, this would call your registration API
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const result = await registerUser({
+        firstName: formData.firstName,
+        lastName: formData.lastName || undefined,
+        email: formData.email,
+        password: formData.password,
+        marketingConsent: formData.marketingConsent,
+        csrfToken: csrfToken || undefined,
+      });
 
-    // Simulate successful registration
-    setIsLoading(false);
-    navigate({ to: '/login' });
+      if (!result.success) {
+        setError(result.error || 'Registration failed');
+        setIsLoading(false);
+        return;
+      }
+
+      // Set the cookie
+      if (result.cookie) {
+        document.cookie = result.cookie;
+      }
+
+      // 🎉 Welcome to the soap family! Redirect to account page
+      navigate({ to: '/account' });
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError('An unexpected error occurred');
+      setIsLoading(false);
+    }
   };
 
   return (

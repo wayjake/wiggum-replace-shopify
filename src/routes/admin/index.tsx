@@ -1,7 +1,14 @@
 // 🎛️ Admin Dashboard - Mission control for the soap empire
 // "Me fail English? That's unpossible!" - Ralph on dashboard analytics
+//
+// ╭────────────────────────────────────────────────────────────╮
+// │  🚀 Now with REAL database data!                           │
+// │  No more sample data - this dashboard tells the truth.     │
+// ╰────────────────────────────────────────────────────────────╯
 
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { useEffect } from 'react';
 import {
   Package,
   ShoppingCart,
@@ -12,6 +19,135 @@ import {
   AlertCircle,
   Clock,
 } from 'lucide-react';
+import { requireAdmin } from '../../lib/auth-guards';
+import { getDb, products, orders, users } from '../../db';
+import { eq, lt, and, gte, desc, count, sum, sql } from 'drizzle-orm';
+
+// ═══════════════════════════════════════════════════════════
+// SERVER FUNCTIONS - Real data from the database!
+// ═══════════════════════════════════════════════════════════
+
+const getDashboardStats = createServerFn({ method: 'GET' }).handler(async () => {
+  const db = getDb();
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  try {
+    // Get low stock products (stock < threshold)
+    const lowStockProducts = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        slug: products.slug,
+        stock: products.stockQuantity,
+        threshold: products.lowStockThreshold,
+      })
+      .from(products)
+      .where(
+        sql`${products.stockQuantity} < ${products.lowStockThreshold}`
+      );
+
+    // Get pending orders count
+    const pendingOrdersResult = await db
+      .select({ count: count() })
+      .from(orders)
+      .where(eq(orders.status, 'pending'));
+
+    // Get today's orders
+    const todayOrdersResult = await db
+      .select({
+        count: count(),
+        total: sum(orders.totalAmount),
+      })
+      .from(orders)
+      .where(gte(orders.createdAt, startOfToday));
+
+    // Get monthly revenue
+    const monthlyRevenueResult = await db
+      .select({ total: sum(orders.totalAmount) })
+      .from(orders)
+      .where(gte(orders.createdAt, startOfMonth));
+
+    // Get total customers
+    const totalCustomersResult = await db
+      .select({ count: count() })
+      .from(users)
+      .where(eq(users.role, 'customer'));
+
+    // Get recent orders
+    const recentOrders = await db.query.orders.findMany({
+      limit: 5,
+      orderBy: desc(orders.createdAt),
+      with: {
+        user: true,
+      },
+    });
+
+    return {
+      success: true,
+      stats: {
+        todaySales: Number(todayOrdersResult[0]?.total || 0),
+        todayOrders: Number(todayOrdersResult[0]?.count || 0),
+        pendingOrders: Number(pendingOrdersResult[0]?.count || 0),
+        lowStockItems: lowStockProducts.length,
+        totalCustomers: Number(totalCustomersResult[0]?.count || 0),
+        monthlyRevenue: Number(monthlyRevenueResult[0]?.total || 0),
+      },
+      lowStockProducts: lowStockProducts.map(p => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        stock: p.stock ?? 0,
+        threshold: p.threshold ?? 10,
+      })),
+      recentOrders: recentOrders.map(o => ({
+        id: o.orderNumber,
+        customer: o.user?.firstName
+          ? `${o.user.firstName} ${o.user.lastName?.charAt(0) || ''}.`
+          : o.email.split('@')[0],
+        total: o.totalAmount,
+        status: o.status,
+        date: formatRelativeTime(o.createdAt),
+      })),
+    };
+  } catch (error) {
+    console.error('Dashboard stats error:', error);
+    return {
+      success: false,
+      stats: {
+        todaySales: 0,
+        todayOrders: 0,
+        pendingOrders: 0,
+        lowStockItems: 0,
+        totalCustomers: 0,
+        monthlyRevenue: 0,
+      },
+      lowStockProducts: [],
+      recentOrders: [],
+    };
+  }
+});
+
+// Helper for relative time formatting
+function formatRelativeTime(date: Date | null | undefined): string {
+  if (!date) return 'Unknown';
+  const now = new Date();
+  const then = new Date(date);
+  const diffMs = now.getTime() - then.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMins < 60) return `${diffMins} min ago`;
+  if (diffHours < 24) return `${diffHours} hours ago`;
+  if (diffDays === 1) return '1 day ago';
+  return `${diffDays} days ago`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ROUTE DEFINITION
+// ═══════════════════════════════════════════════════════════
 
 export const Route = createFileRoute('/admin/')({
   head: () => ({
@@ -20,39 +156,40 @@ export const Route = createFileRoute('/admin/')({
       { name: 'description', content: 'Admin dashboard for managing your soap store.' },
     ],
   }),
+  loader: async () => {
+    const [authResult, dashboardData] = await Promise.all([
+      requireAdmin(),
+      getDashboardStats(),
+    ]);
+    return { authResult, ...dashboardData };
+  },
   component: AdminDashboard,
 });
-
-// ═══════════════════════════════════════════════════════════
-// SAMPLE DATA (will be replaced with database queries)
-// ═══════════════════════════════════════════════════════════
-
-const STATS = {
-  todaySales: 247.00,
-  todayOrders: 8,
-  pendingOrders: 3,
-  lowStockItems: 2,
-  totalCustomers: 142,
-  monthlyRevenue: 4820.00,
-};
-
-const RECENT_ORDERS = [
-  { id: 'KS-20240115-001', customer: 'Sarah M.', total: 40.00, status: 'paid', date: '2 hours ago' },
-  { id: 'KS-20240115-002', customer: 'Michael T.', total: 28.00, status: 'shipped', date: '5 hours ago' },
-  { id: 'KS-20240114-003', customer: 'Emily R.', total: 52.00, status: 'delivered', date: '1 day ago' },
-  { id: 'KS-20240114-004', customer: 'John D.', total: 16.00, status: 'processing', date: '1 day ago' },
-];
-
-const LOW_STOCK_PRODUCTS = [
-  { name: 'Lavender Dreams', stock: 5, threshold: 10 },
-  { name: 'Rose Petal Luxury', stock: 3, threshold: 10 },
-];
 
 // ═══════════════════════════════════════════════════════════
 // COMPONENT
 // ═══════════════════════════════════════════════════════════
 
 function AdminDashboard() {
+  const navigate = useNavigate();
+  const { authResult, stats, lowStockProducts, recentOrders } = Route.useLoaderData();
+
+  // Handle auth redirects
+  useEffect(() => {
+    if (!authResult.authenticated || !authResult.isAdmin) {
+      navigate({ to: authResult.redirect || '/login' });
+    }
+  }, [authResult, navigate]);
+
+  // Don't render if not authenticated/admin
+  if (!authResult.authenticated || !authResult.isAdmin) {
+    return (
+      <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#2D5A4A] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FDFCFB]">
       {/* Admin Header */}
@@ -77,6 +214,7 @@ function AdminDashboard() {
               <Link to="/admin/products" className="text-gray-600 hover:text-[#2D5A4A]">Products</Link>
               <Link to="/admin/orders" className="text-gray-600 hover:text-[#2D5A4A]">Orders</Link>
               <Link to="/admin/customers" className="text-gray-600 hover:text-[#2D5A4A]">Customers</Link>
+              <Link to="/admin/reviews" className="text-gray-600 hover:text-[#2D5A4A]">Reviews</Link>
               <Link to="/" className="text-gray-500 hover:text-[#2D5A4A] text-sm">View Store →</Link>
             </nav>
           </div>
@@ -94,29 +232,26 @@ function AdminDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             label="Today's Sales"
-            value={`$${STATS.todaySales.toFixed(2)}`}
+            value={`$${stats.todaySales.toFixed(2)}`}
             icon={DollarSign}
-            trend="+12%"
             color="green"
           />
           <StatCard
             label="Today's Orders"
-            value={STATS.todayOrders.toString()}
+            value={stats.todayOrders.toString()}
             icon={ShoppingCart}
-            trend="+3"
             color="blue"
           />
           <StatCard
             label="Pending Orders"
-            value={STATS.pendingOrders.toString()}
+            value={stats.pendingOrders.toString()}
             icon={Clock}
             color="amber"
           />
           <StatCard
             label="Total Customers"
-            value={STATS.totalCustomers.toString()}
+            value={stats.totalCustomers.toString()}
             icon={Users}
-            trend="+8 this week"
             color="purple"
           />
         </div>
@@ -134,7 +269,7 @@ function AdminDashboard() {
               </Link>
             </div>
             <div className="space-y-4">
-              {RECENT_ORDERS.map((order) => (
+              {recentOrders.length > 0 ? recentOrders.map((order) => (
                 <div
                   key={order.id}
                   className="flex items-center justify-between py-3 border-b border-[#F5EBE0] last:border-0"
@@ -148,27 +283,37 @@ function AdminDashboard() {
                     <StatusBadge status={order.status} />
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="text-center py-8 text-gray-500">
+                  <ShoppingCart className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p>No orders yet</p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Low Stock Alert */}
-            {LOW_STOCK_PRODUCTS.length > 0 && (
+            {lowStockProducts.length > 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <AlertCircle className="w-5 h-5 text-amber-600" />
                   <h3 className="font-semibold text-amber-900">Low Stock Alert</h3>
                 </div>
                 <div className="space-y-3">
-                  {LOW_STOCK_PRODUCTS.map((product) => (
-                    <div key={product.name} className="flex items-center justify-between">
+                  {lowStockProducts.map((product) => (
+                    <Link
+                      key={product.id}
+                      to="/admin/products/$productId"
+                      params={{ productId: product.id }}
+                      className="flex items-center justify-between hover:bg-amber-100/50 -mx-2 px-2 py-1 rounded transition-colors"
+                    >
                       <span className="text-sm text-amber-900">{product.name}</span>
                       <span className="text-sm font-medium text-amber-700">
                         {product.stock} left
                       </span>
-                    </div>
+                    </Link>
                   ))}
                 </div>
                 <Link
@@ -205,7 +350,7 @@ function AdminDashboard() {
                 <TrendingUp className="w-5 h-5" />
                 <span className="text-sm text-white/70">This Month</span>
               </div>
-              <p className="text-3xl font-bold">${STATS.monthlyRevenue.toLocaleString()}</p>
+              <p className="text-3xl font-bold">${stats.monthlyRevenue.toLocaleString()}</p>
               <p className="text-sm text-white/70 mt-1">Total revenue</p>
             </div>
           </div>

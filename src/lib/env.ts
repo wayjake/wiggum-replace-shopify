@@ -14,11 +14,12 @@
 
 export const ENV_CONFIG = {
   // Stripe - The payment gods
-  STRIPE_PUBLIC_KEY: {
-    key: 'STRIPE_PUBLIC_KEY',
+  // 🎭 VITE_ prefix exposes this to the client for embedded checkout!
+  VITE_STRIPE_PUBLIC_KEY: {
+    key: 'VITE_STRIPE_PUBLIC_KEY',
     required: true,
     prefix: 'pk_',
-    description: 'Stripe publishable key for client-side checkout',
+    description: 'Stripe publishable key for client-side checkout (VITE_ prefix required)',
     helpUrl: 'https://dashboard.stripe.com/apikeys',
   },
   STRIPE_SECRET_KEY: {

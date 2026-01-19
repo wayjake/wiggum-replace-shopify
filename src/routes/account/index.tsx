@@ -1,9 +1,11 @@
 // 🏠 Account Dashboard - Your soap sanctuary
 // "Sleep! That's where I'm a Viking!" - Ralph on account management
 
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { useEffect } from 'react';
 import { Package, CreditCard, MapPin, User, Heart, Bell, ChevronRight, ShoppingBag } from 'lucide-react';
 import { formatPrice } from '../../utils';
+import { requireAuth } from '../../lib/auth-guards';
 
 export const Route = createFileRoute('/account/')({
   head: () => ({
@@ -12,6 +14,9 @@ export const Route = createFileRoute('/account/')({
       { name: 'description', content: 'Manage your account, orders, and preferences.' },
     ],
   }),
+  loader: async () => {
+    return await requireAuth();
+  },
   component: AccountDashboard,
 });
 
@@ -40,6 +45,26 @@ const QUICK_LINKS = [
 ];
 
 function AccountDashboard() {
+  const navigate = useNavigate();
+  const authResult = Route.useLoaderData();
+
+  // Auth guard redirect
+  useEffect(() => {
+    if (!authResult.authenticated) {
+      navigate({ to: authResult.redirect || '/login' });
+    }
+  }, [authResult, navigate]);
+
+  if (!authResult.authenticated) {
+    return (
+      <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#2D5A4A] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  const user = authResult.user;
+
   return (
     <div className="min-h-screen bg-[#FDFCFB]">
       {/* Header */}

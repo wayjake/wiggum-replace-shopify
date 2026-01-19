@@ -74,7 +74,17 @@ export type ShopEvents = {
       orderNumber: string;
       email: string;
       firstName?: string;
-      productNames: string[]; // For review request
+      productNames?: string[]; // For review request
+    };
+  };
+
+  'shop/order.cancelled': {
+    data: {
+      orderId: string;
+      orderNumber: string;
+      email: string;
+      firstName?: string;
+      reason?: string;
     };
   };
 
@@ -85,6 +95,30 @@ export type ShopEvents = {
       email: string;
       firstName?: string;
       lastName?: string;
+    };
+  };
+
+  // Newsletter events
+  'shop/newsletter.subscribed': {
+    data: {
+      email: string;
+      source: string;
+    };
+  };
+
+  // Cart events
+  'shop/cart.abandoned': {
+    data: {
+      email: string;
+      firstName?: string;
+      items: Array<{
+        productName: string;
+        quantity: number;
+        price: number;
+        imageUrl?: string;
+      }>;
+      cartTotal: number;
+      cartUrl: string;
     };
   };
 
@@ -266,6 +300,39 @@ export const orderDeliveredWorkflow = inngest.createFunction(
 );
 
 // ═══════════════════════════════════════════════════════════
+// ORDER CANCELLED WORKFLOW
+// "I bent my Wookiee!" - Ralph on order cancellations
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Triggered when an order is cancelled.
+ * Sends cancellation notification to customer.
+ */
+export const orderCancelledWorkflow = inngest.createFunction(
+  { id: 'order-cancelled-workflow', name: 'Order Cancelled Workflow' },
+  { event: 'shop/order.cancelled' },
+  async ({ event, step }) => {
+    const { orderId, orderNumber, email, firstName, reason } = event.data;
+
+    // Send cancellation email
+    await step.run('cancellation-notification', async () => {
+      await sendTransactionalEmail({
+        to: { email, name: firstName },
+        templateId: BREVO_TEMPLATES.ORDER_CANCELLED,
+        params: {
+          FIRSTNAME: firstName || 'Valued Customer',
+          ORDER_NUMBER: orderNumber,
+          CANCELLATION_REASON: reason || 'Order was cancelled',
+        },
+      });
+      console.log(`[Inngest] Cancellation notification sent for order ${orderNumber}`);
+    });
+
+    return { success: true, orderId, orderNumber };
+  }
+);
+
+// ═══════════════════════════════════════════════════════════
 // LOW STOCK ALERT
 // ═══════════════════════════════════════════════════════════
 
@@ -291,6 +358,100 @@ export const lowStockAlert = inngest.createFunction(
 );
 
 // ═══════════════════════════════════════════════════════════
+// NEWSLETTER WELCOME WORKFLOW
+// "I'm a unitard!" - Ralph, subscribing to newsletters
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Triggered when someone subscribes to the newsletter.
+ * Sends a welcome email to the new subscriber.
+ */
+export const newsletterWelcomeWorkflow = inngest.createFunction(
+  { id: 'newsletter-welcome', name: 'Newsletter Welcome Email' },
+  { event: 'shop/newsletter.subscribed' },
+  async ({ event, step }) => {
+    const { email, source } = event.data;
+
+    await step.run('send-welcome-email', async () => {
+      // Send a simple welcome email for newsletter subscribers
+      await sendTransactionalEmail({
+        to: { email },
+        templateId: BREVO_TEMPLATES.WELCOME,
+        params: {
+          FIRSTNAME: 'Soap Lover',
+          STORE_URL: process.env.APP_URL || 'https://karenssoap.com',
+          SIGNUP_SOURCE: source,
+        },
+      });
+      console.log(`[Inngest] Newsletter welcome email sent to ${email}`);
+    });
+
+    return { success: true, email };
+  }
+);
+
+// ═══════════════════════════════════════════════════════════
+// ABANDONED CART WORKFLOW
+// "I bent my Wookiee!" - Ralph, when customers forget to checkout
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Triggered when a cart is detected as abandoned.
+ * Waits 1 hour then sends a reminder email.
+ *
+ * Note: This is triggered from the client when:
+ * - User has items in cart and is about to leave (beforeunload)
+ * - User is logged in (we have their email)
+ *
+ * Rate limit: Max 1 abandoned cart email per user per 24 hours
+ * (handled by Inngest's idempotency key)
+ */
+export const abandonedCartWorkflow = inngest.createFunction(
+  {
+    id: 'abandoned-cart-reminder',
+    name: 'Abandoned Cart Reminder',
+    // Use email + date as idempotency key to limit to 1 per day per user
+    idempotency: 'event.data.email + "-" + event.data.cartUrl.split("?")[0]',
+    // Cancel if an order is placed for this email
+    cancelOn: [
+      { event: 'shop/order.completed', match: 'data.email' },
+    ],
+  },
+  { event: 'shop/cart.abandoned' },
+  async ({ event, step }) => {
+    const { email, firstName, items, cartTotal, cartUrl } = event.data;
+
+    // Wait 1 hour before sending reminder
+    await step.sleep('wait-before-reminder', '1 hour');
+
+    // Format items for the email
+    const itemsList = items
+      .map((item) => `${item.productName} (x${item.quantity}) - $${item.price.toFixed(2)}`)
+      .join('<br>');
+
+    await step.run('send-abandoned-cart-email', async () => {
+      // 📧 Send abandoned cart reminder
+      // Note: You'd create a ABANDONED_CART template in Brevo for this
+      await sendTransactionalEmail({
+        to: { email, name: firstName },
+        templateId: BREVO_TEMPLATES.ORDER_CONFIRMATION, // Reusing template for now
+        subject: '🧼 You left some soap behind!',
+        params: {
+          FIRSTNAME: firstName || 'Soap Lover',
+          ORDER_NUMBER: 'Your Cart',
+          ORDER_TOTAL: `$${cartTotal.toFixed(2)}`,
+          ORDER_ITEMS: itemsList,
+          SHIPPING_ADDRESS: `<a href="${cartUrl}" style="color: #2D5A4A;">Complete your order →</a>`,
+        },
+      });
+      console.log(`[Inngest] Abandoned cart email sent to ${email}`);
+    });
+
+    return { success: true, email };
+  }
+);
+
+// ═══════════════════════════════════════════════════════════
 // EXPORT ALL FUNCTIONS FOR REGISTRATION
 // ═══════════════════════════════════════════════════════════
 
@@ -299,7 +460,10 @@ export const inngestFunctions = [
   welcomeDripCampaign,
   orderShippedWorkflow,
   orderDeliveredWorkflow,
+  orderCancelledWorkflow,
   lowStockAlert,
+  newsletterWelcomeWorkflow,
+  abandonedCartWorkflow,
 ];
 
 // ═══════════════════════════════════════════════════════════

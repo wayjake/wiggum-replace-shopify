@@ -1,10 +1,11 @@
 // 👥 Admin Customers - The soap enthusiast registry
 // "I'm learnding!" - Ralph on customer segmentation
 
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { useState } from 'react';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { useState, useEffect } from 'react';
 import { Search, Mail, ShoppingBag, Calendar, MoreHorizontal, Star, TrendingUp } from 'lucide-react';
 import { cn, formatPrice } from '../../../utils';
+import { requireAdmin } from '../../../lib/auth-guards';
 
 export const Route = createFileRoute('/admin/customers/')({
   head: () => ({
@@ -13,6 +14,9 @@ export const Route = createFileRoute('/admin/customers/')({
       { name: 'description', content: 'View and manage your customer base.' },
     ],
   }),
+  loader: async () => {
+    return await requireAdmin();
+  },
   component: AdminCustomers,
 });
 
@@ -86,8 +90,25 @@ const CUSTOMER_STATS = {
 };
 
 function AdminCustomers() {
+  const navigate = useNavigate();
+  const authResult = Route.useLoaderData();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'new' | 'inactive'>('all');
+
+  // Auth guard redirect
+  useEffect(() => {
+    if (!authResult.authenticated || !authResult.isAdmin) {
+      navigate({ to: authResult.redirect || '/login' });
+    }
+  }, [authResult, navigate]);
+
+  if (!authResult.authenticated || !authResult.isAdmin) {
+    return (
+      <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#2D5A4A] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const filteredCustomers = CUSTOMERS.filter((customer) => {
     const matchesSearch =

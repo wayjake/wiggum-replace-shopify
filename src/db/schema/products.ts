@@ -60,19 +60,30 @@ export const categories = sqliteTable('categories', {
  * │  PRODUCT REVIEWS TABLE                                   │
  * │  ─────────────────────────────────────────────────────── │
  * │  What customers say about their soap experience.         │
- * │  (Post-MVP feature, but schema ready!)                   │
+ * │  🎭 Reviews start as 'pending' and require admin         │
+ * │  approval before going live on the site!                 │
  * ╰─────────────────────────────────────────────────────────╯
  */
 export const productReviews = sqliteTable('product_reviews', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
   productId: text('product_id').notNull().references(() => products.id, { onDelete: 'cascade' }),
   userId: text('user_id').notNull(), // References users table
-  rating: integer('rating').notNull(), // 1-5 stars
+  rating: integer('rating').notNull(), // 1-5 stars ⭐⭐⭐⭐⭐
   title: text('title'),
   body: text('body'),
+  // 🎭 Status field for moderation workflow:
+  // - 'pending': Just submitted, awaiting Karen's approval
+  // - 'approved': Good to go, shown on the product page
+  // - 'rejected': Nope, not this one (spam, inappropriate, etc.)
+  status: text('status', { enum: ['pending', 'approved', 'rejected'] }).default('pending').notNull(),
   verified: integer('verified', { mode: 'boolean' }).default(false), // Bought the product?
   helpful: integer('helpful').default(0), // "Was this review helpful?" count
+  // 📝 Admin notes for internal tracking
+  adminNotes: text('admin_notes'), // Why rejected, etc.
+  reviewedAt: integer('reviewed_at', { mode: 'timestamp' }), // When admin reviewed
+  reviewedBy: text('reviewed_by'), // Admin user ID who reviewed
   createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
 // ═══════════════════════════════════════════════════════════
@@ -88,4 +99,6 @@ export const productReviewsRelations = relations(productReviews, ({ one }) => ({
     fields: [productReviews.productId],
     references: [products.id],
   }),
+  // 🧑 Link to the user who wrote the review
+  // Note: actual foreign key constraint is soft - user table is in users.ts
 }));

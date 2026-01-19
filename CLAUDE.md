@@ -12,14 +12,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev      # Start dev server on port 3000
 npm run build    # Production build
 npm run preview  # Preview production build
-npm run test     # Run tests (vitest)
+npm run test     # Run all tests (vitest)
+npm run test -- src/path/to/file.test.ts  # Run single test file
 
 # Database migrations (requires Drizzle ORM setup)
 npx drizzle-kit generate   # Generate migrations from schema changes
 npx drizzle-kit push       # Apply migrations to database
 
 # Local Inngest dev server (run alongside the app)
-npx inngest-cli@latest dev
+npx inngest-cli@latest dev  # Opens http://localhost:8288
 ```
 
 ## Tech Stack
@@ -62,6 +63,18 @@ export const Route = createFileRoute('/path')({
 2. **Server Functions** - `createServerFn()` for typed client-server communication
 3. **API Routes** - Pure HTTP handlers via Nitro in route files
 
+### Authentication Pattern
+
+Session-based auth with cookie parsing in server functions:
+```typescript
+import { getWebRequest } from '@tanstack/react-start/server';
+import { parseSessionCookie, validateSession } from '@/lib/auth';
+
+const session = await validateSession(
+  parseSessionCookie(getWebRequest()!.headers.get('cookie') || '')
+);
+```
+
 ### Path Alias
 
 `@/` resolves to `./src/` (e.g., `import { db } from '@/db'`)
@@ -79,10 +92,12 @@ src/
 ├── routeTree.gen.ts  # AUTO-GENERATED - do not edit
 └── styles.css        # Global styles with Tailwind import
 
-wiggum/               # Development notes, prompts, and architecture context
-├── PROMPT.md         # Main transformation protocol
-├── context/          # Architecture, constraints, glossary
-└── notes.md          # Development journal
+wiggum/               # 📖 READ THIS FOR FULL CONTEXT
+├── PROMPT.md         # Main transformation protocol - phases, brand, roadmap
+├── context/          # Architecture diagrams, constraints, glossary
+└── notes.md          # Development journal and decisions
+
+# ⚠️ Before major work, read wiggum/PROMPT.md for the full vision
 
 public/theme/zer/     # Theme assets (.css and .woff font files)
 ```
@@ -96,7 +111,10 @@ Required for full functionality:
 - `INNGEST_SIGNING_KEY`, `INNGEST_EVENT_KEY`
 - `SESSION_SECRET`
 
-For local SQLite development: `TURSO_DATABASE_URL=file:./local.db`
+For local SQLite development (no auth token needed):
+```bash
+TURSO_DATABASE_URL=file:./local.db
+```
 
 ## Coding Conventions
 
@@ -108,10 +126,13 @@ For local SQLite development: `TURSO_DATABASE_URL=file:./local.db`
 
 ### Styling
 - Tailwind first, inline styles only when obtuse
-- Use the `cn()` utility from `@/utils` for combining classes:
+- Use utilities from `@/utils`:
   ```typescript
-  import { cn } from '@/utils'
-  cn("base-class", conditional && "conditional-class")
+  import { cn, formatPrice, truncate } from '@/utils'
+
+  cn("base-class", conditional && "conditional-class")  // Merge Tailwind classes
+  formatPrice(12.99)  // → "$12.99"
+  truncate("Long text...", 50)  // Ellipsis after 50 chars
   ```
 - Create universal components for primitives (inputs, buttons) and enforce their use
 
@@ -136,12 +157,9 @@ Comments should be story-driven and creative - sprinkle in emojis, ASCII art, or
 
 ## Security Rules
 
-- NEVER hardcode API keys or commit `.env` files
-- NEVER expose secret keys to the client/browser
-- NEVER trust client-side payment amounts - calculate server-side
-- ALWAYS verify Stripe webhooks with the signing secret
-- Use server-only functions for secret access
-- Prefix client-safe vars with `VITE_` or `PUBLIC_`
+- Calculate payment amounts server-side, never trust client values
+- Verify Stripe webhooks with the signing secret
+- Keep secrets in server functions; prefix client-safe vars with `VITE_`
 
 ## User Roles
 

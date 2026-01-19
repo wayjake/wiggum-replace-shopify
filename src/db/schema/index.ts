@@ -40,3 +40,19 @@ export {
   orderItemsRelations,
   orderEventsRelations,
 } from './orders';
+
+// 🏷️ Discount-related tables
+export {
+  discountCodes,
+  discountUsages,
+  discountCodesRelations,
+  discountUsagesRelations,
+} from './discounts';
+
+// 🎁 Gift card tables
+export {
+  giftCards,
+  giftCardTransactions,
+  giftCardsRelations,
+  giftCardTransactionsRelations,
+} from './giftcards';

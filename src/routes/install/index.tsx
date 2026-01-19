@@ -25,11 +25,62 @@ import { checkAllEnvVars, ENV_CONFIG } from '../../lib/env';
 // SERVER FUNCTIONS
 // ═══════════════════════════════════════════════════════════
 
+/**
+ * 🔍 Check if the Inngest dev server is running locally
+ * When running `npx inngest-cli@latest dev`, it starts on port 8288
+ * If detected, we can skip requiring Inngest keys for local dev!
+ */
+async function checkInngestDevServer(): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1000); // 1 second timeout
+
+    const response = await fetch('http://localhost:8288/', {
+      method: 'GET',
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    // The Inngest dev server returns HTML for its dashboard
+    return response.ok;
+  } catch {
+    // Connection refused or timeout = no Inngest dev server
+    return false;
+  }
+}
+
 const getEnvStatus = createServerFn({ method: 'GET' }).handler(async () => {
   const status = checkAllEnvVars();
-  return {
-    configured: status.allPresent && status.allValid,
-    results: status.results.map((r) => ({
+  const isDev = process.env.NODE_ENV !== 'production';
+
+  // 🎯 Check if Inngest dev server is running (only in dev mode)
+  let inngestDevRunning = false;
+  if (isDev) {
+    inngestDevRunning = await checkInngestDevServer();
+  }
+
+  // Map results, marking Inngest keys as "virtual complete" if dev server is detected
+  const results = status.results.map((r) => {
+    const isInngestKey = r.key === 'INNGEST_SIGNING_KEY' || r.key === 'INNGEST_EVENT_KEY';
+
+    // If Inngest dev server is running and this is an Inngest key that's missing,
+    // mark it as present/valid (since the dev server doesn't need them)
+    if (isDev && inngestDevRunning && isInngestKey && !r.present) {
+      return {
+        key: r.key,
+        label: ENV_CONFIG[r.key].key,
+        present: true,
+        valid: true,
+        error: undefined,
+        description: ENV_CONFIG[r.key].description,
+        helpUrl: ENV_CONFIG[r.key].helpUrl,
+        required: ENV_CONFIG[r.key].required,
+        inngestDevDetected: true, // Flag to show special UI
+      };
+    }
+
+    return {
       key: r.key,
       label: ENV_CONFIG[r.key].key,
       present: r.present,
@@ -38,9 +89,88 @@ const getEnvStatus = createServerFn({ method: 'GET' }).handler(async () => {
       description: ENV_CONFIG[r.key].description,
       helpUrl: ENV_CONFIG[r.key].helpUrl,
       required: ENV_CONFIG[r.key].required,
-    })),
+      inngestDevDetected: false,
+    };
+  });
+
+  // Recalculate configured status with Inngest dev server detection
+  const allConfigured = results.every((r) => !ENV_CONFIG[r.key as keyof typeof ENV_CONFIG].required || (r.present && r.valid));
+
+  return {
+    configured: allConfigured,
+    isDev,
+    inngestDevRunning,
+    results,
   };
 });
+
+/**
+ * 🔧 Update local .env file with provided keys
+ * Only available in development mode for security!
+ * "I'm helping!" - Ralph, updating your env vars
+ */
+const updateEnvFile = createServerFn({ method: 'POST' })
+  .handler(async (data: { key: string; value: string }) => {
+    const isDev = process.env.NODE_ENV !== 'production';
+
+    if (!isDev) {
+      throw new Error('This feature is only available in development mode');
+    }
+
+    const { key, value } = data;
+
+    // Validate the key is one we know about
+    const validKeys = Object.values(ENV_CONFIG).map((c) => c.key);
+    if (!validKeys.includes(key)) {
+      throw new Error(`Unknown environment variable: ${key}`);
+    }
+
+    // Read existing .env file or create new content
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    const envPath = path.join(process.cwd(), '.env');
+
+    let envContent = '';
+    try {
+      envContent = await fs.readFile(envPath, 'utf-8');
+    } catch {
+      // File doesn't exist, we'll create it
+    }
+
+    // Parse existing env vars
+    const lines = envContent.split('\n');
+    const envVars = new Map<string, number>(); // key -> line index
+
+    lines.forEach((line, index) => {
+      const match = line.match(/^([A-Z_]+)=/);
+      if (match) {
+        envVars.set(match[1], index);
+      }
+    });
+
+    // Update or add the key
+    const newLine = `${key}=${value}`;
+    if (envVars.has(key)) {
+      lines[envVars.get(key)!] = newLine;
+    } else {
+      // Add to end (after last non-empty line)
+      const lastNonEmptyIndex = lines.findLastIndex((l) => l.trim() !== '');
+      if (lastNonEmptyIndex === -1) {
+        lines.push(newLine);
+      } else {
+        lines.splice(lastNonEmptyIndex + 1, 0, newLine);
+      }
+    }
+
+    // Write back
+    await fs.writeFile(envPath, lines.join('\n'));
+
+    // Note: The env var won't take effect until server restart
+    return {
+      success: true,
+      message: `Updated ${key}. Restart the dev server for changes to take effect.`,
+    };
+  });
 
 // ═══════════════════════════════════════════════════════════
 // ROUTE DEFINITION
@@ -281,9 +411,12 @@ python3 -c "import secrets; print(secrets.token_hex(32))"
 // ═══════════════════════════════════════════════════════════
 
 function InstallWizard() {
-  const { configured, results } = Route.useLoaderData();
+  const { configured, isDev, inngestDevRunning, results } = Route.useLoaderData();
   const [activeStep, setActiveStep] = useState(0);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [envInputs, setEnvInputs] = useState<Record<string, string>>({});
+  const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [saveMessage, setSaveMessage] = useState<{ key: string; message: string } | null>(null);
 
   // Group results by step
   const getStepStatus = (step: (typeof SETUP_STEPS)[number]) => {
@@ -302,6 +435,27 @@ function InstallWizard() {
     await navigator.clipboard.writeText(text);
     setCopiedKey(key);
     setTimeout(() => setCopiedKey(null), 2000);
+  };
+
+  const saveEnvVar = async (key: string) => {
+    const value = envInputs[key];
+    if (!value) return;
+
+    setSavingKey(key);
+    setSaveMessage(null);
+
+    try {
+      const result = await updateEnvFile({ key, value });
+      setSaveMessage({ key, message: result.message });
+      setEnvInputs((prev) => ({ ...prev, [key]: '' }));
+    } catch (error) {
+      setSaveMessage({
+        key,
+        message: error instanceof Error ? error.message : 'Failed to save',
+      });
+    } finally {
+      setSavingKey(null);
+    }
   };
 
   if (configured) {
@@ -358,6 +512,8 @@ function InstallWizard() {
                 const status = getStepStatus(step);
                 const Icon = step.icon;
                 const isActive = index === activeStep;
+                const configuredCount = status.results.filter((r) => r.present && r.valid).length;
+                const totalCount = status.results.length;
 
                 return (
                   <button
@@ -386,15 +542,34 @@ function InstallWizard() {
                         <Icon className="w-4 h-4" />
                       )}
                     </div>
-                    <div className="min-w-0">
-                      <p className="font-medium truncate">{step.title}</p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-medium truncate">{step.title}</p>
+                        {/* Status badge */}
+                        <span
+                          className={cn(
+                            'text-xs px-2 py-0.5 rounded-full flex-shrink-0',
+                            status.complete
+                              ? isActive
+                                ? 'bg-green-400/30 text-green-100'
+                                : 'bg-green-100 text-green-700'
+                              : isActive
+                                ? 'bg-white/20 text-white/80'
+                                : 'bg-red-100 text-red-700'
+                          )}
+                        >
+                          {configuredCount}/{totalCount}
+                        </span>
+                      </div>
                       <p
                         className={cn(
                           'text-xs truncate',
                           isActive ? 'text-white/70' : 'text-gray-500'
                         )}
                       >
-                        {step.description}
+                        {status.complete
+                          ? '✓ All configured'
+                          : `${totalCount - configuredCount} remaining`}
                       </p>
                     </div>
                   </button>
@@ -448,52 +623,125 @@ function InstallWizard() {
                 </div>
               </div>
 
+              {/* Inngest Dev Server Notice */}
+              {inngestDevRunning && currentStep.id === 'inngest' && (
+                <div className="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <Zap className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-purple-800">Inngest Dev Server Detected!</p>
+                      <p className="text-sm text-purple-600">
+                        Running on localhost:8288 — no API keys needed for local development.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Environment Variables Status */}
               <div className="space-y-3">
                 {stepStatus.results.map((result) => (
                   <div
                     key={result.key}
                     className={cn(
-                      'flex items-center justify-between p-3 rounded-lg border',
-                      result.present && result.valid
+                      'p-3 rounded-lg border',
+                      result.inngestDevDetected
+                        ? 'bg-purple-50 border-purple-200'
+                        : result.present && result.valid
                         ? 'bg-green-50 border-green-200'
                         : 'bg-red-50 border-red-200'
                     )}
                   >
-                    <div className="flex items-center gap-3">
-                      {result.present && result.valid ? (
-                        <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
-                      ) : (
-                        <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                      )}
-                      <div>
-                        <code className="text-sm font-mono font-medium">
-                          {result.label}
-                        </code>
-                        {!result.required && (
-                          <span className="ml-2 text-xs text-gray-500">(optional)</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {result.inngestDevDetected ? (
+                          <Zap className="w-5 h-5 text-purple-600 flex-shrink-0" />
+                        ) : result.present && result.valid ? (
+                          <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
                         )}
-                        {result.error && (
-                          <p className="text-xs text-red-600 mt-0.5">
-                            {result.error}
+                        <div>
+                          <code className="text-sm font-mono font-medium">
+                            {result.label}
+                          </code>
+                          {!result.required && (
+                            <span className="ml-2 text-xs text-gray-500">(optional)</span>
+                          )}
+                          {result.inngestDevDetected && (
+                            <span className="ml-2 text-xs text-purple-600 font-medium">
+                              (dev server detected)
+                            </span>
+                          )}
+                          {result.error && (
+                            <p className="text-xs text-red-600 mt-0.5">
+                              {result.error}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      {result.helpUrl && !result.inngestDevDetected && (
+                        <a
+                          href={result.helpUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-[#2D5A4A] hover:underline flex items-center gap-1"
+                        >
+                          Get key
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
+                    </div>
+
+                    {/* Dev mode: Show input to set this env var (skip if inngest dev detected) */}
+                    {isDev && !(result.present && result.valid) && !result.inngestDevDetected && (
+                      <div className="mt-3 pt-3 border-t border-red-200">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder={`Enter ${result.label} value...`}
+                            value={envInputs[result.label] || ''}
+                            onChange={(e) =>
+                              setEnvInputs((prev) => ({
+                                ...prev,
+                                [result.label]: e.target.value,
+                              }))
+                            }
+                            className="flex-1 px-3 py-2 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5A4A]/20 focus:border-[#2D5A4A]"
+                          />
+                          <button
+                            onClick={() => saveEnvVar(result.label)}
+                            disabled={!envInputs[result.label] || savingKey === result.label}
+                            className="px-4 py-2 bg-[#2D5A4A] text-white text-sm rounded-lg hover:bg-[#1A1A1A] disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+                          >
+                            {savingKey === result.label ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              'Save'
+                            )}
+                          </button>
+                        </div>
+                        {saveMessage?.key === result.label && (
+                          <p className="mt-2 text-xs text-[#2D5A4A]">
+                            {saveMessage.message}
                           </p>
                         )}
                       </div>
-                    </div>
-                    {result.helpUrl && (
-                      <a
-                        href={result.helpUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-[#2D5A4A] hover:underline flex items-center gap-1"
-                      >
-                        Get key
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
                     )}
                   </div>
                 ))}
               </div>
+
+              {/* Dev mode notice */}
+              {isDev && (
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <strong>Dev Mode:</strong> You can directly enter values above to save them to your <code className="bg-blue-100 px-1 rounded">.env</code> file. Restart the dev server after saving.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Instructions */}

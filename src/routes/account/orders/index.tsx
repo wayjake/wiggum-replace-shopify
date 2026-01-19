@@ -1,10 +1,41 @@
 // 📦 Order History - Your soap shopping chronicles
 // "The doctor said I wouldn't have so many nose bleeds if I kept my finger outta there." - Ralph on order tracking
+//
+// 🎭 Now fetching REAL orders from the database!
+// No more sample data - this is the real deal.
 
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { Package, Truck, CheckCircle, Clock, Search, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
-import { cn, formatPrice } from '../../../utils';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { Package, Truck, CheckCircle, Clock, Search, ChevronRight, XCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { formatPrice } from '../../../utils';
+import { requireAuth } from '../../../lib/auth-guards';
+import { getDb, orders, orderItems } from '../../../db';
+import { eq, desc } from 'drizzle-orm';
+
+// ═══════════════════════════════════════════════════════════
+// SERVER FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+
+const getUserOrders = createServerFn({ method: 'GET' })
+  .handler(async (userId: string) => {
+    const db = getDb();
+
+    // Get all orders for this user with their items
+    const userOrders = await db.query.orders.findMany({
+      where: eq(orders.userId, userId),
+      with: {
+        items: true,
+      },
+      orderBy: desc(orders.createdAt),
+    });
+
+    return userOrders;
+  });
+
+// ═══════════════════════════════════════════════════════════
+// ROUTE DEFINITION
+// ═══════════════════════════════════════════════════════════
 
 export const Route = createFileRoute('/account/orders/')({
   head: () => ({
@@ -13,71 +44,49 @@ export const Route = createFileRoute('/account/orders/')({
       { name: 'description', content: 'View and track all your orders.' },
     ],
   }),
+  loader: async () => {
+    const authResult = await requireAuth();
+    if (!authResult.authenticated || !authResult.user) {
+      return { authResult, orders: [] };
+    }
+
+    const userOrders = await getUserOrders(authResult.user.id);
+    return { authResult, orders: userOrders };
+  },
   component: AccountOrders,
 });
 
 // ═══════════════════════════════════════════════════════════
-// SAMPLE DATA
+// COMPONENT
 // ═══════════════════════════════════════════════════════════
 
-const ORDERS = [
-  {
-    id: 'KS-20240115-001',
-    date: '2024-01-15T14:30:00Z',
-    status: 'shipped',
-    total: 40.00,
-    items: [
-      { name: 'Lavender Dreams', quantity: 2, price: 12.00 },
-      { name: 'Honey Oat Comfort', quantity: 1, price: 14.00 },
-    ],
-    tracking: '1Z999AA10123456784',
-  },
-  {
-    id: 'KS-20240108-042',
-    date: '2024-01-08T10:15:00Z',
-    status: 'delivered',
-    total: 28.00,
-    items: [
-      { name: 'Rose Petal Luxury', quantity: 1, price: 16.00 },
-      { name: 'Citrus Burst', quantity: 1, price: 11.00 },
-    ],
-    deliveredDate: '2024-01-12',
-  },
-  {
-    id: 'KS-20231220-089',
-    date: '2023-12-20T16:45:00Z',
-    status: 'delivered',
-    total: 52.00,
-    items: [
-      { name: 'Lavender Dreams', quantity: 1, price: 12.00 },
-      { name: 'Coconut Milk Bliss', quantity: 2, price: 13.00 },
-      { name: 'Rose Petal Luxury', quantity: 1, price: 16.00 },
-    ],
-    deliveredDate: '2023-12-24',
-  },
-  {
-    id: 'KS-20231115-034',
-    date: '2023-11-15T09:20:00Z',
-    status: 'delivered',
-    total: 38.00,
-    items: [
-      { name: 'Honey Oat Comfort', quantity: 2, price: 14.00 },
-      { name: 'Citrus Burst', quantity: 1, price: 11.00 },
-    ],
-    deliveredDate: '2023-11-19',
-  },
-];
-
 function AccountOrders() {
+  const navigate = useNavigate();
+  const { authResult, orders: userOrders } = Route.useLoaderData();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredOrders = ORDERS.filter((order) =>
-    order.id.toLowerCase().includes(searchQuery.toLowerCase())
+  // Auth guard redirect
+  useEffect(() => {
+    if (!authResult.authenticated) {
+      navigate({ to: authResult.redirect || '/login' });
+    }
+  }, [authResult, navigate]);
+
+  if (!authResult.authenticated) {
+    return (
+      <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#2D5A4A] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  const filteredOrders = userOrders.filter((order) =>
+    order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+  const formatDate = (date: Date | null | undefined) => {
+    if (!date) return 'Unknown date';
+    return new Date(date).toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',
@@ -117,107 +126,129 @@ function AccountOrders() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-[#1A1A1A] font-display">Order History</h1>
-            <p className="text-gray-600">{ORDERS.length} orders placed</p>
+            <p className="text-gray-600">{userOrders.length} order{userOrders.length !== 1 ? 's' : ''} placed</p>
           </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search orders..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 rounded-lg border border-[#F5EBE0] focus:outline-none focus:border-[#2D5A4A] text-sm"
-            />
-          </div>
+          {userOrders.length > 0 && (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search orders..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-4 py-2 rounded-lg border border-[#F5EBE0] focus:outline-none focus:border-[#2D5A4A] text-sm"
+              />
+            </div>
+          )}
         </div>
 
         {/* Orders List */}
-        <div className="space-y-4">
-          {filteredOrders.map((order) => (
-            <div
-              key={order.id}
-              className="bg-white rounded-xl border border-[#F5EBE0] overflow-hidden"
-            >
-              {/* Order Header */}
-              <div className="flex items-center justify-between p-4 bg-[#FDFCFB] border-b border-[#F5EBE0]">
-                <div className="flex items-center gap-6">
-                  <div>
-                    <p className="text-xs text-gray-500">Order Number</p>
-                    <p className="font-medium text-[#1A1A1A]">{order.id}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Order Date</p>
-                    <p className="font-medium text-[#1A1A1A]">{formatDate(order.date)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Total</p>
-                    <p className="font-medium text-[#1A1A1A]">{formatPrice(order.total)}</p>
-                  </div>
-                </div>
-                <OrderStatusBadge status={order.status} />
-              </div>
-
-              {/* Order Items */}
-              <div className="p-4">
-                <div className="space-y-3">
-                  {order.items.map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-[#F5EBE0] rounded-lg flex items-center justify-center">
-                          <Package className="w-6 h-6 text-[#2D5A4A]" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-[#1A1A1A]">{item.name}</p>
-                          <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
-                        </div>
-                      </div>
-                      <p className="font-medium">{formatPrice(item.price * item.quantity)}</p>
+        {filteredOrders.length > 0 ? (
+          <div className="space-y-4">
+            {filteredOrders.map((order) => (
+              <div
+                key={order.id}
+                className="bg-white rounded-xl border border-[#F5EBE0] overflow-hidden"
+              >
+                {/* Order Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#FDFCFB] border-b border-[#F5EBE0] gap-4">
+                  <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+                    <div>
+                      <p className="text-xs text-gray-500">Order Number</p>
+                      <p className="font-medium text-[#1A1A1A]">{order.orderNumber}</p>
                     </div>
-                  ))}
+                    <div>
+                      <p className="text-xs text-gray-500">Order Date</p>
+                      <p className="font-medium text-[#1A1A1A]">{formatDate(order.createdAt)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Total</p>
+                      <p className="font-medium text-[#1A1A1A]">{formatPrice(order.totalAmount)}</p>
+                    </div>
+                  </div>
+                  <OrderStatusBadge status={order.status} />
                 </div>
 
-                {/* Order Actions */}
-                <div className="flex items-center justify-between mt-6 pt-4 border-t border-[#F5EBE0]">
-                  <div className="text-sm text-gray-500">
-                    {order.status === 'shipped' && order.tracking && (
-                      <span className="flex items-center gap-2">
-                        <Truck className="w-4 h-4" />
-                        Tracking: {order.tracking}
-                      </span>
-                    )}
-                    {order.status === 'delivered' && order.deliveredDate && (
-                      <span className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-green-600" />
-                        Delivered on {formatDate(order.deliveredDate)}
-                      </span>
-                    )}
+                {/* Order Items */}
+                <div className="p-4">
+                  <div className="space-y-3">
+                    {order.items.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {item.productImage ? (
+                            <img
+                              src={item.productImage}
+                              alt={item.productName}
+                              className="w-12 h-12 rounded-lg object-cover"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-[#F5EBE0] rounded-lg flex items-center justify-center">
+                              <Package className="w-6 h-6 text-[#2D5A4A]" />
+                            </div>
+                          )}
+                          <div>
+                            <Link
+                              to="/shop/$productSlug"
+                              params={{ productSlug: item.productSlug }}
+                              className="font-medium text-[#1A1A1A] hover:text-[#2D5A4A]"
+                            >
+                              {item.productName}
+                            </Link>
+                            <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                          </div>
+                        </div>
+                        <p className="font-medium">{formatPrice(item.totalPrice)}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-3">
-                    {order.status === 'shipped' && (
-                      <a
-                        href={`https://tools.usps.com/go/TrackConfirmAction?tLabels=${order.tracking}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-[#2D5A4A] hover:underline"
+
+                  {/* Order Actions */}
+                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-[#F5EBE0]">
+                    <div className="text-sm text-gray-500">
+                      {order.status === 'shipped' && order.trackingNumber && (
+                        <span className="flex items-center gap-2">
+                          <Truck className="w-4 h-4" />
+                          Tracking: {order.trackingNumber}
+                        </span>
+                      )}
+                      {order.status === 'delivered' && order.deliveredAt && (
+                        <span className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          Delivered on {formatDate(order.deliveredAt)}
+                        </span>
+                      )}
+                      {order.status === 'cancelled' && (
+                        <span className="flex items-center gap-2 text-red-600">
+                          <XCircle className="w-4 h-4" />
+                          Order cancelled
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {order.status === 'shipped' && order.trackingUrl && (
+                        <a
+                          href={order.trackingUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-[#2D5A4A] hover:underline"
+                        >
+                          Track Package
+                        </a>
+                      )}
+                      <Link
+                        to="/account/orders/$orderId"
+                        params={{ orderId: order.id }}
+                        className="text-sm bg-[#2D5A4A] text-white px-4 py-2 rounded-lg hover:bg-[#1A1A1A] transition-colors"
                       >
-                        Track Package
-                      </a>
-                    )}
-                    <Link
-                      to="/account/orders/$orderId"
-                      params={{ orderId: order.id }}
-                      className="text-sm bg-[#2D5A4A] text-white px-4 py-2 rounded-lg hover:bg-[#1A1A1A] transition-colors"
-                    >
-                      View Details
-                    </Link>
+                        View Details
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {filteredOrders.length === 0 && (
+            ))}
+          </div>
+        ) : (
           <div className="text-center py-16 bg-white rounded-xl border border-[#F5EBE0]">
             <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2 font-display">No orders found</h3>
@@ -237,11 +268,19 @@ function AccountOrders() {
   );
 }
 
+// ═══════════════════════════════════════════════════════════
+// STATUS BADGE COMPONENT
+// ═══════════════════════════════════════════════════════════
+
 function OrderStatusBadge({ status }: { status: string }) {
   const config: Record<string, { bg: string; text: string; icon: typeof Clock }> = {
+    pending: { bg: 'bg-gray-100', text: 'text-gray-700', icon: Clock },
     processing: { bg: 'bg-amber-100', text: 'text-amber-700', icon: Clock },
+    paid: { bg: 'bg-blue-100', text: 'text-blue-700', icon: CheckCircle },
     shipped: { bg: 'bg-purple-100', text: 'text-purple-700', icon: Truck },
     delivered: { bg: 'bg-green-100', text: 'text-green-700', icon: CheckCircle },
+    cancelled: { bg: 'bg-red-100', text: 'text-red-700', icon: XCircle },
+    refunded: { bg: 'bg-orange-100', text: 'text-orange-700', icon: XCircle },
   };
 
   const { bg, text, icon: Icon } = config[status] || { bg: 'bg-gray-100', text: 'text-gray-700', icon: Clock };

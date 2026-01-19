@@ -1,10 +1,80 @@
 // 📦 Admin Products - The soap inventory control room
 // "I bent my Wookiee!" - Ralph on product management
 
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { useState } from 'react';
-import { Plus, Search, Edit, Trash2, MoreHorizontal, Package, AlertTriangle } from 'lucide-react';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { useState, useEffect } from 'react';
+import { Plus, Search, Edit, Trash2, MoreHorizontal, Package, AlertTriangle, Save, X } from 'lucide-react';
 import { cn, formatPrice } from '../../../utils';
+import { requireAdmin } from '../../../lib/auth-guards';
+import { getDb, products } from '../../../db';
+import { eq, asc, desc } from 'drizzle-orm';
+
+// ═══════════════════════════════════════════════════════════
+// SERVER FUNCTIONS - Product CRUD operations
+// ═══════════════════════════════════════════════════════════
+
+const getProductsFromDb = createServerFn({ method: 'GET' }).handler(async () => {
+  try {
+    const db = getDb();
+    const productList = await db
+      .select()
+      .from(products)
+      .orderBy(desc(products.createdAt));
+
+    return {
+      success: true,
+      products: productList.map((p) => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        price: p.price,
+        category: p.category || 'Uncategorized',
+        stock: p.stockQuantity || 0,
+        image: p.imageUrl || 'https://images.unsplash.com/photo-1600857062241-98e5dba7f214?w=80&h=80&fit=crop',
+        status: (p.stockQuantity || 0) === 0 ? 'out_of_stock' : (p.stockQuantity || 0) < 10 ? 'low_stock' : 'in_stock',
+      })),
+    };
+  } catch (error) {
+    console.warn('Database not available:', error);
+    return { success: false, products: [] };
+  }
+});
+
+const deleteProduct = createServerFn({ method: 'POST' })
+  .handler(async (data: { productId: string }) => {
+    try {
+      const db = getDb();
+      await db.delete(products).where(eq(products.id, data.productId));
+      return { success: true };
+    } catch (error) {
+      console.error('Delete product error:', error);
+      return { success: false, error: 'Failed to delete product' };
+    }
+  });
+
+const updateProductStock = createServerFn({ method: 'POST' })
+  .handler(async (data: { productId: string; stockQuantity: number }) => {
+    try {
+      const db = getDb();
+      await db
+        .update(products)
+        .set({
+          stockQuantity: data.stockQuantity,
+          inStock: data.stockQuantity > 0,
+          updatedAt: new Date(),
+        })
+        .where(eq(products.id, data.productId));
+      return { success: true };
+    } catch (error) {
+      console.error('Update stock error:', error);
+      return { success: false, error: 'Failed to update stock' };
+    }
+  });
+
+// ═══════════════════════════════════════════════════════════
+// ROUTE DEFINITION
+// ═══════════════════════════════════════════════════════════
 
 export const Route = createFileRoute('/admin/products/')({
   head: () => ({
@@ -13,6 +83,13 @@ export const Route = createFileRoute('/admin/products/')({
       { name: 'description', content: 'Manage your product catalog.' },
     ],
   }),
+  loader: async () => {
+    const [authResult, productsResult] = await Promise.all([
+      requireAdmin(),
+      getProductsFromDb(),
+    ]);
+    return { authResult, productsResult };
+  },
   component: AdminProducts,
 });
 
@@ -74,12 +151,54 @@ const PRODUCTS = [
 ];
 
 function AdminProducts() {
+  const navigate = useNavigate();
+  const { authResult, productsResult } = Route.useLoaderData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  const filteredProducts = PRODUCTS.filter((product) =>
+  // Auth guard redirect
+  useEffect(() => {
+    if (!authResult.authenticated || !authResult.isAdmin) {
+      navigate({ to: authResult.redirect || '/login' });
+    }
+  }, [authResult, navigate]);
+
+  if (!authResult.authenticated || !authResult.isAdmin) {
+    return (
+      <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#2D5A4A] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Use database products if available, otherwise fallback to sample data
+  const productData = productsResult.success && productsResult.products.length > 0
+    ? productsResult.products
+    : PRODUCTS;
+
+  const filteredProducts = productData.filter((product) =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+
+    setIsDeleting(productId);
+    try {
+      const result = await deleteProduct({ productId });
+      if (result.success) {
+        // Reload the page to refresh the data
+        window.location.reload();
+      } else {
+        alert('Failed to delete product');
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Failed to delete product');
+    }
+    setIsDeleting(null);
+  };
 
   const toggleProduct = (id: string) => {
     setSelectedProducts((prev) => {

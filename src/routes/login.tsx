@@ -1,10 +1,131 @@
 // 🔐 Login Page - The door to your soap kingdom
 // "I'm Idaho!" - Ralph, logging in successfully
+//
+// ╭────────────────────────────────────────────────────────────╮
+// │  🛡️ RATE LIMITED!                                          │
+// │  5 attempts per 15 minutes, 1 hour block after exceeding.  │
+// │  Protects against brute force attacks on accounts.         │
+// ╰────────────────────────────────────────────────────────────╯
 
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
 import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
 import { cn } from '../utils';
+import {
+  authenticateUser,
+  createSession,
+  createSessionCookie,
+  validateSession,
+  parseSessionCookie,
+} from '../lib/auth';
+import { getRequest } from '@tanstack/react-start/server';
+import {
+  checkRateLimit,
+  resetRateLimit,
+  getClientIP,
+  loginRateLimit,
+} from '../lib/rate-limit';
+import { validateCsrfForRequest } from '../lib/csrf.server';
+import { useCsrf } from '../lib/csrf-react';
+
+// ═══════════════════════════════════════════════════════════
+// SERVER FUNCTIONS - The authentication gatekeepers
+// "I'm Idaho!" - Ralph, successfully authenticated
+// ═══════════════════════════════════════════════════════════
+
+const loginUser = createServerFn({ method: 'POST' })
+  .handler(async (data: { email: string; password: string; csrfToken?: string }) => {
+    const { email, password, csrfToken } = data;
+
+    // 🛡️ CSRF validation - protect against cross-site request forgery
+    const request = getRequest();
+    const csrfResult = validateCsrfForRequest(request, csrfToken);
+    if (!csrfResult.valid) {
+      return { success: false, error: csrfResult.error || 'Invalid security token' };
+    }
+
+    // 🛡️ Rate limiting - protect against brute force attacks
+    const clientIP = request ? getClientIP(request) : 'unknown';
+    const rateLimitKey = `login:${clientIP}`;
+
+    const rateLimitResult = checkRateLimit(rateLimitKey, loginRateLimit);
+    if (!rateLimitResult.success) {
+      const minutes = Math.ceil(rateLimitResult.resetIn / 60);
+      return {
+        success: false,
+        error: rateLimitResult.blocked
+          ? `Too many failed attempts. Please try again in ${minutes} minutes.`
+          : `Too many attempts. Please wait ${minutes} minutes before trying again.`,
+        rateLimited: true,
+        retryAfter: rateLimitResult.resetIn,
+      };
+    }
+
+    try {
+      const user = await authenticateUser(email, password);
+
+      if (!user) {
+        // Don't reset rate limit on failure - that's the point!
+        return {
+          success: false,
+          error: 'Invalid email or password',
+          remaining: rateLimitResult.remaining,
+        };
+      }
+
+      // 🎉 Success! Reset rate limit for this IP
+      resetRateLimit(rateLimitKey);
+
+      // Create session
+      const sessionId = await createSession(user.id);
+      const cookie = createSessionCookie(sessionId);
+
+      return {
+        success: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          firstName: user.firstName,
+        },
+        cookie,
+      };
+    } catch (error) {
+      console.error('Login error:', error);
+      return { success: false, error: 'An error occurred during login' };
+    }
+  });
+
+const checkSession = createServerFn({ method: 'GET' }).handler(async () => {
+  try {
+    const request = getRequest();
+    const cookieHeader = request?.headers.get('cookie') || '';
+    const sessionId = parseSessionCookie(cookieHeader);
+
+    if (!sessionId) {
+      return { authenticated: false };
+    }
+
+    const session = await validateSession(sessionId);
+
+    if (!session) {
+      return { authenticated: false };
+    }
+
+    return {
+      authenticated: true,
+      user: session.user,
+    };
+  } catch (error) {
+    console.error('Session check error:', error);
+    return { authenticated: false };
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// ROUTE DEFINITION
+// ═══════════════════════════════════════════════════════════
 
 export const Route = createFileRoute('/login')({
   head: () => ({
@@ -16,16 +137,33 @@ export const Route = createFileRoute('/login')({
       },
     ],
   }),
+  loader: async () => {
+    // Check if user is already logged in
+    const sessionStatus = await checkSession();
+    return { isAuthenticated: sessionStatus.authenticated, user: sessionStatus.authenticated ? sessionStatus.user : null };
+  },
   component: LoginPage,
 });
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = Route.useLoaderData();
+  const { token: csrfToken } = useCsrf();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // If already logged in, redirect based on role
+  // 🎭 Admins go to the control room, customers to their portal
+  if (isAuthenticated && user) {
+    if (user.role === 'admin') {
+      navigate({ to: '/admin' });
+    } else {
+      navigate({ to: '/account' });
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,14 +176,32 @@ function LoginPage() {
 
     setIsLoading(true);
 
-    // In a real app, this would call your auth API
-    // For demo, we'll simulate a login
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const result = await loginUser({ email, password, csrfToken: csrfToken || undefined });
 
-    // Simulate successful login
-    // In production: redirect based on user role (admin → /admin, customer → /account)
-    setIsLoading(false);
-    navigate({ to: '/' });
+      if (!result.success) {
+        setError(result.error || 'Login failed');
+        setIsLoading(false);
+        return;
+      }
+
+      // Set the cookie via the response
+      if (result.cookie) {
+        document.cookie = result.cookie;
+      }
+
+      // Redirect based on user role
+      // 🎪 The admin show vs the customer experience
+      if (result.user?.role === 'admin') {
+        navigate({ to: '/admin' });
+      } else {
+        navigate({ to: '/account' });
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('An unexpected error occurred');
+      setIsLoading(false);
+    }
   };
 
   return (
