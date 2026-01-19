@@ -65,6 +65,27 @@ export const paymentMethods = sqliteTable('payment_methods', {
 
 /**
  * ╭─────────────────────────────────────────────────────────╮
+ * │  OAUTH ACCOUNTS TABLE                                    │
+ * │  ─────────────────────────────────────────────────────── │
+ * │  Links to external OAuth providers (Google, etc).        │
+ * │  Users can have multiple OAuth connections.              │
+ * ╰─────────────────────────────────────────────────────────╯
+ */
+export const oauthAccounts = sqliteTable('oauth_accounts', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  provider: text('provider').notNull(), // 'google', 'github', etc.
+  providerAccountId: text('provider_account_id').notNull(), // The user's ID from the provider
+  email: text('email'), // Email from the provider (for reference)
+  accessToken: text('access_token'),
+  refreshToken: text('refresh_token'),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+});
+
+/**
+ * ╭─────────────────────────────────────────────────────────╮
  * │  ADDRESSES TABLE                                         │
  * │  ─────────────────────────────────────────────────────── │
  * │  Where the soap gets shipped! Multiple per user.         │
@@ -93,6 +114,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   paymentMethods: many(paymentMethods),
   addresses: many(addresses),
+  oauthAccounts: many(oauthAccounts),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -112,6 +134,13 @@ export const paymentMethodsRelations = relations(paymentMethods, ({ one }) => ({
 export const addressesRelations = relations(addresses, ({ one }) => ({
   user: one(users, {
     fields: [addresses.userId],
+    references: [users.id],
+  }),
+}));
+
+export const oauthAccountsRelations = relations(oauthAccounts, ({ one }) => ({
+  user: one(users, {
+    fields: [oauthAccounts.userId],
     references: [users.id],
   }),
 }));

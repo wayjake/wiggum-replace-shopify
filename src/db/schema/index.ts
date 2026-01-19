@@ -16,10 +16,12 @@ export {
   sessions,
   paymentMethods,
   addresses,
+  oauthAccounts,
   usersRelations,
   sessionsRelations,
   paymentMethodsRelations,
   addressesRelations,
+  oauthAccountsRelations,
 } from './users';
 
 // 🧼 Product-related tables

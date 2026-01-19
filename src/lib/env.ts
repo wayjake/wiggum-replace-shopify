@@ -91,6 +91,23 @@ export const ENV_CONFIG = {
     description: 'Secret for session cookie encryption (32+ characters)',
     sensitive: true,
   },
+
+  // Google OAuth - Sign in with Google (optional)
+  GOOGLE_CLIENT_ID: {
+    key: 'GOOGLE_CLIENT_ID',
+    required: false,
+    suffix: '.apps.googleusercontent.com',
+    description: 'Google OAuth client ID for "Sign in with Google"',
+    helpUrl: 'https://console.cloud.google.com/apis/credentials',
+  },
+  GOOGLE_CLIENT_SECRET: {
+    key: 'GOOGLE_CLIENT_SECRET',
+    required: false,
+    prefix: 'GOCSPX-',
+    description: 'Google OAuth client secret',
+    helpUrl: 'https://console.cloud.google.com/apis/credentials',
+    sensitive: true,
+  },
 } as const;
 
 export type EnvKey = keyof typeof ENV_CONFIG;

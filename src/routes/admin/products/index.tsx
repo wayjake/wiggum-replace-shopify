@@ -252,7 +252,7 @@ function AdminProducts() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-bold text-[#1A1A1A] font-display">Products</h2>
-            <p className="text-gray-600">{PRODUCTS.length} products in your catalog</p>
+            <p className="text-gray-600">{productData.length} products in your catalog</p>
           </div>
           <Link
             to="/admin/products/new"

@@ -13,7 +13,17 @@
 
 
 ## Status
+
+### Next
+
+
+### Future Ideas
+
 ### Completed
+- [x] Google OAuth integration with GCP (setup instructions in install wizard, optional env vars)
+- [x] Database seeding with products, categories, and test users (npx tsx src/db/seed.ts)
+- [x] Database initialization step in install wizard (run migrations + seed with one click)
+- [x] Product management in admin dashboard (create, edit, delete, image gallery, stock management)
 - [x] Database schema & migrations
 - [x] Product catalog with loaders
 - [x] Stripe checkout integration (Embedded Checkout - customers stay on site!)
@@ -46,11 +56,8 @@
 - [x] Rate limiting on auth routes (sliding window, IP-based, configurable blocks)
 - [x] CSRF protection (double-submit cookie, React hooks, form integration)
 - [x] Production Stripe webhooks (order creation, Inngest events, stock updates)
-
-### Next
 - [x] Inngest dev server detection (auto-complete installation step when localhost:8288 is running)
 
-### Future Ideas
 
 ---
 

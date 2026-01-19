@@ -17,6 +17,7 @@ import {
   Copy,
   Check,
   Loader2,
+  Chrome,
 } from 'lucide-react';
 import { cn } from '../../utils';
 import { checkAllEnvVars, ENV_CONFIG } from '../../lib/env';
@@ -172,6 +173,82 @@ const updateEnvFile = createServerFn({ method: 'POST' })
     };
   });
 
+/**
+ * 🔍 Check if the database has been seeded
+ * Looks for products in the database to determine if seed has run
+ */
+const checkDatabaseStatus = createServerFn({ method: 'GET' }).handler(async () => {
+  try {
+    const { getDb, products, categories, users } = await import('../../db');
+    const { count } = await import('drizzle-orm');
+    const db = getDb();
+
+    // Count records in key tables
+    const [productCount] = await db.select({ count: count() }).from(products);
+    const [categoryCount] = await db.select({ count: count() }).from(categories);
+    const [userCount] = await db.select({ count: count() }).from(users);
+
+    return {
+      success: true,
+      hasData: (productCount?.count ?? 0) > 0,
+      counts: {
+        products: productCount?.count ?? 0,
+        categories: categoryCount?.count ?? 0,
+        users: userCount?.count ?? 0,
+      },
+    };
+  } catch (error) {
+    // Database might not exist yet - that's ok!
+    return {
+      success: false,
+      hasData: false,
+      error: error instanceof Error ? error.message : 'Database check failed',
+      counts: { products: 0, categories: 0, users: 0 },
+    };
+  }
+});
+
+/**
+ * 🌱 Run database migrations and seed
+ * Creates tables and populates with initial data
+ */
+const runDatabaseSetup = createServerFn({ method: 'POST' }).handler(async () => {
+  const isDev = process.env.NODE_ENV !== 'production';
+
+  if (!isDev) {
+    throw new Error('Database setup is only available in development mode');
+  }
+
+  try {
+    // Run drizzle-kit push to apply migrations
+    const { execSync } = await import('child_process');
+
+    console.log('📦 Running database migrations...');
+    execSync('npx drizzle-kit push', {
+      stdio: 'pipe',
+      cwd: process.cwd(),
+    });
+
+    // Run the seed script
+    console.log('🌱 Running database seed...');
+    execSync('npx tsx src/db/seed.ts', {
+      stdio: 'pipe',
+      cwd: process.cwd(),
+    });
+
+    return {
+      success: true,
+      message: 'Database initialized with migrations and seed data!',
+    };
+  } catch (error) {
+    console.error('Database setup error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Database setup failed',
+    };
+  }
+});
+
 // ═══════════════════════════════════════════════════════════
 // ROUTE DEFINITION
 // ═══════════════════════════════════════════════════════════
@@ -189,7 +266,11 @@ export const Route = createFileRoute('/install/')({
     ],
   }),
   loader: async () => {
-    return await getEnvStatus();
+    const [envStatus, dbStatus] = await Promise.all([
+      getEnvStatus(),
+      checkDatabaseStatus(),
+    ]);
+    return { ...envStatus, dbStatus };
   },
   component: InstallWizard,
 });
@@ -250,6 +331,49 @@ For offline development, use a local file:
 TURSO_DATABASE_URL=file:./local.db
 \`\`\`
 No auth token needed for local files!
+`,
+  },
+  {
+    id: 'database-init',
+    title: 'Initialize Database',
+    icon: Database,
+    description: 'Create tables and seed sample data',
+    envKeys: [], // No env keys - this is a special step
+    isDbInit: true, // Special flag for database initialization
+    instructions: `
+## Database Initialization
+
+After connecting to Turso (or local SQLite), you need to create the tables and add sample data.
+
+### What This Does
+
+1. **Creates Tables** - Runs Drizzle migrations to create all database tables
+2. **Seeds Products** - Adds 8 handcrafted soap products
+3. **Creates Categories** - Sets up 6 product categories
+4. **Creates Test Users** - Adds admin and customer accounts for testing
+
+### Manual Setup (Alternative)
+
+If you prefer to run commands manually:
+
+\`\`\`bash
+# Apply database migrations
+npx drizzle-kit push
+
+# Seed with sample data
+npx tsx src/db/seed.ts
+\`\`\`
+
+### Test Credentials
+
+After seeding, you can log in with:
+
+- **Admin**: admin@karenssoap.com / admin123
+- **Customer**: customer@example.com / customer123
+
+### Note
+
+This step is only available in development mode. For production, run the migrations manually or via CI/CD.
 `,
   },
   {
@@ -404,6 +528,72 @@ python3 -c "import secrets; print(secrets.token_hex(32))"
 - If you suspect the secret has been compromised, **rotate it immediately**
 `,
   },
+  {
+    id: 'google',
+    title: 'Google Sign-In (Optional)',
+    icon: Chrome,
+    description: 'Let customers sign in with their Google account',
+    envKeys: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
+    instructions: `
+## Google OAuth Setup
+
+Enable "Sign in with Google" to make registration and login easier for your customers.
+
+### Step 1: Go to Google Cloud Console
+
+Visit [Google Cloud Console](https://console.cloud.google.com/) and sign in.
+
+### Step 2: Create or Select a Project
+
+1. Click the project dropdown in the top bar
+2. Click "New Project" or select an existing one
+3. Give it a name like "Karen's Soap Store"
+
+### Step 3: Enable the Google+ API
+
+1. Go to "APIs & Services" → "Library"
+2. Search for "Google+ API" and enable it
+3. Also enable "Google People API" if prompted
+
+### Step 4: Configure OAuth Consent Screen
+
+1. Go to "APIs & Services" → "OAuth consent screen"
+2. Choose "External" (for any Google user)
+3. Fill in required fields:
+   - App name: "Karen's Beautiful Soap"
+   - User support email: your email
+   - Developer contact: your email
+4. Add scopes: \`email\`, \`profile\`, \`openid\`
+5. Save and continue
+
+### Step 5: Create OAuth Credentials
+
+1. Go to "APIs & Services" → "Credentials"
+2. Click "Create Credentials" → "OAuth client ID"
+3. Application type: "Web application"
+4. Name: "Soap Store Web Client"
+5. Authorized JavaScript origins:
+   - \`http://localhost:3000\` (development)
+   - \`https://yourdomain.com\` (production)
+6. Authorized redirect URIs:
+   - \`http://localhost:3000/api/auth/google/callback\` (development)
+   - \`https://yourdomain.com/api/auth/google/callback\` (production)
+7. Click "Create"
+
+### Step 6: Copy Your Credentials
+
+After creation, you'll see:
+- **Client ID** (ends with \`.apps.googleusercontent.com\`)
+- **Client Secret** (starts with \`GOCSPX-\`)
+
+Add these to your environment variables.
+
+### Note
+
+Google OAuth is completely optional. Customers can always register with email/password.
+The "Sign in with Google" button only appears if these credentials are configured.
+`,
+  },
 ];
 
 // ═══════════════════════════════════════════════════════════
@@ -411,15 +601,26 @@ python3 -c "import secrets; print(secrets.token_hex(32))"
 // ═══════════════════════════════════════════════════════════
 
 function InstallWizard() {
-  const { configured, isDev, inngestDevRunning, results } = Route.useLoaderData();
+  const { configured, isDev, inngestDevRunning, results, dbStatus } = Route.useLoaderData();
   const [activeStep, setActiveStep] = useState(0);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [envInputs, setEnvInputs] = useState<Record<string, string>>({});
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<{ key: string; message: string } | null>(null);
+  const [isRunningDbSetup, setIsRunningDbSetup] = useState(false);
+  const [dbSetupMessage, setDbSetupMessage] = useState<{ success: boolean; message: string } | null>(null);
 
   // Group results by step
   const getStepStatus = (step: (typeof SETUP_STEPS)[number]) => {
+    // Special handling for database-init step
+    if (step.id === 'database-init') {
+      return {
+        complete: dbStatus.hasData,
+        results: [],
+        isDbInit: true,
+      };
+    }
+
     const relevantResults = results.filter((r) =>
       step.envKeys.includes(r.label)
     );
@@ -429,6 +630,33 @@ function InstallWizard() {
       complete: allPresent && allValid,
       results: relevantResults,
     };
+  };
+
+  // Handle database setup
+  const handleDbSetup = async () => {
+    setIsRunningDbSetup(true);
+    setDbSetupMessage(null);
+
+    try {
+      const result = await runDatabaseSetup();
+      setDbSetupMessage({
+        success: result.success,
+        message: result.success
+          ? result.message
+          : result.error || 'Database setup failed',
+      });
+      // Refresh page after successful setup
+      if (result.success) {
+        setTimeout(() => window.location.reload(), 1500);
+      }
+    } catch (error) {
+      setDbSetupMessage({
+        success: false,
+        message: error instanceof Error ? error.message : 'Database setup failed',
+      });
+    } finally {
+      setIsRunningDbSetup(false);
+    }
   };
 
   const copyToClipboard = async (text: string, key: string) => {
@@ -546,20 +774,37 @@ function InstallWizard() {
                       <div className="flex items-center justify-between gap-2">
                         <p className="font-medium truncate">{step.title}</p>
                         {/* Status badge */}
-                        <span
-                          className={cn(
-                            'text-xs px-2 py-0.5 rounded-full flex-shrink-0',
-                            status.complete
-                              ? isActive
-                                ? 'bg-green-400/30 text-green-100'
-                                : 'bg-green-100 text-green-700'
-                              : isActive
-                                ? 'bg-white/20 text-white/80'
-                                : 'bg-red-100 text-red-700'
-                          )}
-                        >
-                          {configuredCount}/{totalCount}
-                        </span>
+                        {step.id === 'database-init' ? (
+                          <span
+                            className={cn(
+                              'text-xs px-2 py-0.5 rounded-full flex-shrink-0',
+                              status.complete
+                                ? isActive
+                                  ? 'bg-green-400/30 text-green-100'
+                                  : 'bg-green-100 text-green-700'
+                                : isActive
+                                  ? 'bg-white/20 text-white/80'
+                                  : 'bg-amber-100 text-amber-700'
+                            )}
+                          >
+                            {status.complete ? 'Seeded' : 'Action'}
+                          </span>
+                        ) : (
+                          <span
+                            className={cn(
+                              'text-xs px-2 py-0.5 rounded-full flex-shrink-0',
+                              status.complete
+                                ? isActive
+                                  ? 'bg-green-400/30 text-green-100'
+                                  : 'bg-green-100 text-green-700'
+                                : isActive
+                                  ? 'bg-white/20 text-white/80'
+                                  : 'bg-red-100 text-red-700'
+                            )}
+                          >
+                            {configuredCount}/{totalCount}
+                          </span>
+                        )}
                       </div>
                       <p
                         className={cn(
@@ -567,9 +812,13 @@ function InstallWizard() {
                           isActive ? 'text-white/70' : 'text-gray-500'
                         )}
                       >
-                        {status.complete
-                          ? '✓ All configured'
-                          : `${totalCount - configuredCount} remaining`}
+                        {step.id === 'database-init'
+                          ? status.complete
+                            ? '✓ Database seeded'
+                            : 'Run setup'
+                          : status.complete
+                            ? '✓ All configured'
+                            : `${totalCount - configuredCount} remaining`}
                       </p>
                     </div>
                   </button>
@@ -734,8 +983,99 @@ function InstallWizard() {
                 ))}
               </div>
 
+              {/* Database Init Step - Special UI */}
+              {currentStep.id === 'database-init' && (
+                <div className="mt-4 space-y-4">
+                  {/* Database Status */}
+                  <div
+                    className={cn(
+                      'p-4 rounded-lg border',
+                      dbStatus.hasData
+                        ? 'bg-green-50 border-green-200'
+                        : 'bg-amber-50 border-amber-200'
+                    )}
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      {dbStatus.hasData ? (
+                        <CheckCircle2 className="w-6 h-6 text-green-600" />
+                      ) : (
+                        <Database className="w-6 h-6 text-amber-600" />
+                      )}
+                      <div>
+                        <p className="font-medium text-[#1A1A1A]">
+                          {dbStatus.hasData
+                            ? 'Database is seeded and ready!'
+                            : 'Database needs initialization'}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {dbStatus.hasData
+                            ? `${dbStatus.counts.products} products, ${dbStatus.counts.categories} categories, ${dbStatus.counts.users} users`
+                            : 'Run setup to create tables and add sample data'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Run Setup Button */}
+                    {isDev && !dbStatus.hasData && (
+                      <div className="mt-4 pt-4 border-t border-amber-200">
+                        <button
+                          onClick={handleDbSetup}
+                          disabled={isRunningDbSetup}
+                          className={cn(
+                            'w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors',
+                            isRunningDbSetup
+                              ? 'bg-gray-200 text-gray-500 cursor-wait'
+                              : 'bg-[#2D5A4A] text-white hover:bg-[#1A1A1A]'
+                          )}
+                        >
+                          {isRunningDbSetup ? (
+                            <>
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                              Running migrations & seed...
+                            </>
+                          ) : (
+                            <>
+                              <Database className="w-5 h-5" />
+                              Initialize Database
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Setup Message */}
+                    {dbSetupMessage && (
+                      <div
+                        className={cn(
+                          'mt-4 p-3 rounded-lg text-sm',
+                          dbSetupMessage.success
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        )}
+                      >
+                        {dbSetupMessage.message}
+                        {dbSetupMessage.success && (
+                          <span className="block text-xs mt-1 opacity-70">
+                            Refreshing page...
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Already seeded notice */}
+                  {dbStatus.hasData && (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-800">
+                        <strong>Already initialized!</strong> Your database has sample data. To reset, delete your database file and run setup again.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Dev mode notice */}
-              {isDev && (
+              {isDev && currentStep.id !== 'database-init' && (
                 <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <p className="text-sm text-blue-800">
                     <strong>Dev Mode:</strong> You can directly enter values above to save them to your <code className="bg-blue-100 px-1 rounded">.env</code> file. Restart the dev server after saving.
