@@ -1,4 +1,4 @@
-// 📬 Contact Page - Get in touch with Enrollsy
+// 🌿 Contact Page - Get in touch with EnrollSage
 // Contact form sends to jake@dubsado.com + newsletter signup with double opt-in
 
 import { createFileRoute, Link } from '@tanstack/react-router';
@@ -18,22 +18,24 @@ import { cn } from '../utils';
  * Sends email to jake@dubsado.com with the inquiry details
  */
 const submitContactForm = createServerFn({ method: 'POST' })
-  .handler(async (data: {
+  .handler(async (input: { data: {
     name: string;
     email: string;
     schoolName: string;
     studentCount: string;
     message: string;
     subscribeNewsletter: boolean;
-  }) => {
+  } }) => {
+    const { name, email, schoolName, studentCount, message, subscribeNewsletter } = input.data;
+
     // Validate inputs
-    if (!data.name || data.name.trim().length < 2) {
+    if (!name || name.trim().length < 2) {
       throw new Error('Please enter your name');
     }
-    if (!data.email || !data.email.includes('@')) {
+    if (!email || !email.includes('@')) {
       throw new Error('Please enter a valid email address');
     }
-    if (!data.message || data.message.trim().length < 10) {
+    if (!message || message.trim().length < 10) {
       throw new Error('Please enter a message (at least 10 characters)');
     }
 
@@ -41,41 +43,41 @@ const submitContactForm = createServerFn({ method: 'POST' })
       // 📧 Send contact form email to jake@dubsado.com
       await sendSimpleEmail({
         to: { email: 'jake@dubsado.com', name: 'Jake' },
-        subject: `[Enrollsy] New inquiry from ${data.name} at ${data.schoolName || 'Unknown School'}`,
+        subject: `[EnrollSage] New inquiry from ${name} at ${schoolName || 'Unknown School'}`,
         htmlContent: `
           <h2>New Contact Form Submission</h2>
-          <p><strong>Name:</strong> ${data.name}</p>
-          <p><strong>Email:</strong> ${data.email}</p>
-          <p><strong>School:</strong> ${data.schoolName || 'Not provided'}</p>
-          <p><strong>Student Count:</strong> ${data.studentCount || 'Not provided'}</p>
-          <p><strong>Newsletter Signup:</strong> ${data.subscribeNewsletter ? 'Yes' : 'No'}</p>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>School:</strong> ${schoolName || 'Not provided'}</p>
+          <p><strong>Student Count:</strong> ${studentCount || 'Not provided'}</p>
+          <p><strong>Newsletter Signup:</strong> ${subscribeNewsletter ? 'Yes' : 'No'}</p>
           <hr />
           <p><strong>Message:</strong></p>
-          <p>${data.message.replace(/\n/g, '<br>')}</p>
+          <p>${message.replace(/\n/g, '<br>')}</p>
         `,
         textContent: `
 New Contact Form Submission
 
-Name: ${data.name}
-Email: ${data.email}
-School: ${data.schoolName || 'Not provided'}
-Student Count: ${data.studentCount || 'Not provided'}
-Newsletter Signup: ${data.subscribeNewsletter ? 'Yes' : 'No'}
+Name: ${name}
+Email: ${email}
+School: ${schoolName || 'Not provided'}
+Student Count: ${studentCount || 'Not provided'}
+Newsletter Signup: ${subscribeNewsletter ? 'Yes' : 'No'}
 
 Message:
-${data.message}
+${message}
         `,
       });
 
       // 📋 If they opted in to newsletter, add to pending list with double opt-in
-      if (data.subscribeNewsletter) {
+      if (subscribeNewsletter) {
         await addContactToList({
-          email: data.email,
+          email: email,
           listIds: [BREVO_LISTS.NEWSLETTER],
           attributes: {
-            FIRSTNAME: data.name.split(' ')[0],
+            FIRSTNAME: name.split(' ')[0],
             SIGNUP_SOURCE: 'contact_form',
-            SCHOOL_NAME: data.schoolName || '',
+            SCHOOL_NAME: schoolName || '',
             CONFIRMED: 'false',
           },
         });
@@ -83,9 +85,9 @@ ${data.message}
         // Trigger double opt-in email via Inngest
         try {
           await sendEvent('school/newsletter.signup', {
-            email: data.email,
+            email: email,
             source: 'contact_form',
-            name: data.name,
+            name: name,
           });
         } catch (inngestError) {
           console.error('Failed to send newsletter confirmation:', inngestError);
@@ -93,9 +95,9 @@ ${data.message}
       }
 
       console.log('Contact form submitted:', {
-        name: data.name,
-        email: data.email,
-        schoolName: data.schoolName,
+        name: name,
+        email: email,
+        schoolName: schoolName,
         timestamp: new Date().toISOString(),
       });
 
@@ -109,12 +111,12 @@ ${data.message}
 export const Route = createFileRoute('/contact')({
   head: () => ({
     meta: [
-      { title: 'Contact Us | Enrollsy' },
+      { title: 'Contact Us | EnrollSage' },
       {
         name: 'description',
-        content: 'Get in touch with Enrollsy. Schedule a demo, ask questions, or learn how we can help modernize your school enrollment process.',
+        content: 'Get in touch with EnrollSage. Schedule a demo, ask questions, or learn how we can bring wise guidance to your school enrollment process.',
       },
-      { property: 'og:title', content: 'Contact Us | Enrollsy' },
+      { property: 'og:title', content: 'Contact Us | EnrollSage' },
       { property: 'og:description', content: 'Schedule a demo or get answers to your questions.' },
     ],
   }),
@@ -123,7 +125,7 @@ export const Route = createFileRoute('/contact')({
 
 function ContactPage() {
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       <Navigation />
       <HeroSection />
       <ContactSection />
@@ -144,24 +146,24 @@ function Navigation() {
       <div className="max-w-6xl mx-auto px-6 py-4">
         <nav className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#1F2A44] rounded flex items-center justify-center">
-              <span className="text-white font-display font-bold text-sm">E</span>
+            <div className="w-8 h-8 bg-[#5B7F6D] rounded flex items-center justify-center">
+              <span className="text-white text-lg">🌿</span>
             </div>
-            <span className="text-xl font-display text-[#1F2A44]">Enrollsy</span>
+            <span className="text-xl font-display text-[#2D4F3E]">EnrollSage</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
-            <Link to="/about" className="text-[#5F6368] hover:text-[#1F2A44] transition-colors">About</Link>
-            <Link to="/contact" className="text-[#1F2A44] font-medium">Contact</Link>
+            <Link to="/about" className="text-[#5F6368] hover:text-[#2D4F3E] transition-colors">About</Link>
+            <Link to="/contact" className="text-[#2D4F3E] font-medium">Contact</Link>
           </div>
 
           <div className="hidden md:flex items-center gap-4">
-            <Link to="/login" className="text-[#5F6368] hover:text-[#1F2A44] transition-colors">
+            <Link to="/login" className="text-[#5F6368] hover:text-[#2D4F3E] transition-colors">
               Sign In
             </Link>
             <Link
               to="/contact"
-              className="bg-[#2F5D50] text-white px-5 py-2 rounded-md hover:bg-[#234840] transition-colors font-medium"
+              className="bg-[#5B7F6D] text-white px-5 py-2 rounded-md hover:bg-[#4A6B5B] transition-colors font-medium"
             >
               Request Demo
             </Link>
@@ -176,7 +178,7 @@ function Navigation() {
           <div className="md:hidden pt-4 pb-2 border-t border-gray-100 mt-4">
             <div className="flex flex-col gap-4">
               <Link to="/about" className="text-[#5F6368]">About</Link>
-              <Link to="/contact" className="text-[#1F2A44] font-medium">Contact</Link>
+              <Link to="/contact" className="text-[#2D4F3E] font-medium">Contact</Link>
               <Link to="/login" className="text-[#5F6368]">Sign In</Link>
             </div>
           </div>
@@ -194,12 +196,12 @@ function HeroSection() {
   return (
     <section className="py-16 px-6 bg-white">
       <div className="max-w-3xl mx-auto text-center">
-        <h1 className="text-4xl md:text-5xl font-display text-[#1F2A44] mb-6">
+        <h1 className="text-4xl md:text-5xl font-display text-[#2D4F3E] mb-6">
           Let's talk about your school
         </h1>
         <p className="text-lg text-[#5F6368]">
           Whether you're ready for a demo or just have questions, we're here to help.
-          No pressure, no sales pitch—just a conversation about what you need.
+          No pressure, no sales pitch—just a wise conversation about what you need.
         </p>
       </div>
     </section>
@@ -212,13 +214,13 @@ function HeroSection() {
 
 function ContactSection() {
   return (
-    <section className="py-16 px-6 bg-[#F7F5F2]">
+    <section className="py-16 px-6 bg-[#F8F9F6]">
       <div className="max-w-5xl mx-auto">
         <div className="grid md:grid-cols-5 gap-12">
           {/* Form - takes 3 columns */}
           <div className="md:col-span-3">
             <div className="bg-white p-8 rounded-lg border border-gray-200">
-              <h2 className="text-2xl font-display text-[#1F2A44] mb-6">
+              <h2 className="text-2xl font-display text-[#2D4F3E] mb-6">
                 Send us a message
               </h2>
               <ContactForm />
@@ -229,25 +231,25 @@ function ContactSection() {
           <div className="md:col-span-2 space-y-8">
             {/* What to expect */}
             <div className="bg-white p-6 rounded-lg border border-gray-200">
-              <h3 className="font-display text-lg text-[#1F2A44] mb-4">What happens next?</h3>
+              <h3 className="font-display text-lg text-[#2D4F3E] mb-4">What happens next?</h3>
               <ul className="space-y-3 text-[#5F6368] text-sm">
                 <li className="flex gap-3">
-                  <span className="text-[#2F5D50] font-bold">1.</span>
+                  <span className="text-[#5B7F6D] font-bold">1.</span>
                   We'll respond within 24 hours (usually faster)
                 </li>
                 <li className="flex gap-3">
-                  <span className="text-[#2F5D50] font-bold">2.</span>
+                  <span className="text-[#5B7F6D] font-bold">2.</span>
                   Schedule a 30-minute discovery call
                 </li>
                 <li className="flex gap-3">
-                  <span className="text-[#2F5D50] font-bold">3.</span>
-                  See Enrollsy in action with a personalized demo
+                  <span className="text-[#5B7F6D] font-bold">3.</span>
+                  See EnrollSage in action with a personalized demo
                 </li>
               </ul>
             </div>
 
             {/* Direct contact */}
-            <div className="bg-[#1F2A44] p-6 rounded-lg text-white">
+            <div className="bg-[#2D4F3E] p-6 rounded-lg text-white">
               <h3 className="font-display text-lg mb-4">Prefer email?</h3>
               <p className="text-white/70 text-sm mb-4">
                 Reach out directly and we'll get back to you.
@@ -263,7 +265,7 @@ function ContactSection() {
 
             {/* FAQ teaser */}
             <div className="bg-white p-6 rounded-lg border border-gray-200">
-              <h3 className="font-display text-lg text-[#1F2A44] mb-4">Common questions</h3>
+              <h3 className="font-display text-lg text-[#2D4F3E] mb-4">Common questions</h3>
               <ul className="space-y-3 text-[#5F6368] text-sm">
                 <li>
                   <strong className="text-[#1E1E1E]">How long does setup take?</strong>
@@ -291,33 +293,33 @@ function ContactSection() {
 // ═══════════════════════════════════════════════════════════
 
 function ContactForm() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    schoolName: '',
-    studentCount: '',
-    message: '',
-    subscribeNewsletter: false,
-  });
+  // 🌿 Using refs + FormData to capture browser autofill values
+  // (onChange doesn't fire for autofilled inputs, so we read directly on submit)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [subscribedToNewsletter, setSubscribedToNewsletter] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus('loading');
     setErrorMessage('');
 
+    // Read values directly from form to capture autofill
+    const form = e.currentTarget;
+    const formData = {
+      name: (form.elements.namedItem('name') as HTMLInputElement).value,
+      email: (form.elements.namedItem('email') as HTMLInputElement).value,
+      schoolName: (form.elements.namedItem('schoolName') as HTMLInputElement).value,
+      studentCount: (form.elements.namedItem('studentCount') as HTMLSelectElement).value,
+      message: (form.elements.namedItem('message') as HTMLTextAreaElement).value,
+      subscribeNewsletter: (form.elements.namedItem('subscribeNewsletter') as HTMLInputElement).checked,
+    };
+
     try {
-      await submitContactForm(formData);
+      await submitContactForm({ data: formData });
+      setSubscribedToNewsletter(formData.subscribeNewsletter);
       setStatus('success');
-      setFormData({
-        name: '',
-        email: '',
-        schoolName: '',
-        studentCount: '',
-        message: '',
-        subscribeNewsletter: false,
-      });
+      form.reset();
     } catch (err) {
       setStatus('error');
       setErrorMessage(err instanceof Error ? err.message : 'Something went wrong');
@@ -327,21 +329,21 @@ function ContactForm() {
   if (status === 'success') {
     return (
       <div className="text-center py-8">
-        <div className="w-16 h-16 bg-[#3A7F6B]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle2 className="w-8 h-8 text-[#3A7F6B]" />
+        <div className="w-16 h-16 bg-[#5B7F6D]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <CheckCircle2 className="w-8 h-8 text-[#5B7F6D]" />
         </div>
-        <h3 className="text-xl font-display text-[#1F2A44] mb-2">Message sent!</h3>
+        <h3 className="text-xl font-display text-[#2D4F3E] mb-2">Message sent!</h3>
         <p className="text-[#5F6368] mb-6">
           Thanks for reaching out. We'll get back to you within 24 hours.
         </p>
-        {formData.subscribeNewsletter && (
+        {subscribedToNewsletter && (
           <p className="text-sm text-[#5F6368] mb-6">
             Check your inbox to confirm your newsletter subscription.
           </p>
         )}
         <button
           onClick={() => setStatus('idle')}
-          className="text-[#2F5D50] font-medium hover:underline"
+          className="text-[#5B7F6D] font-medium hover:underline"
         >
           Send another message
         </button>
@@ -352,7 +354,7 @@ function ContactForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {status === 'error' && (
-        <div className="flex items-center gap-3 p-4 bg-red-50 border border-[#9C2F2F]/20 rounded-md text-[#9C2F2F]">
+        <div className="flex items-center gap-3 p-4 bg-red-50 border border-[#8B4444]/20 rounded-md text-[#8B4444]">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           <p>{errorMessage}</p>
         </div>
@@ -366,10 +368,10 @@ function ContactForm() {
           <input
             type="text"
             id="name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+            name="name"
+            className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
             placeholder="Jane Smith"
+            autoComplete="name"
             required
           />
         </div>
@@ -381,10 +383,10 @@ function ContactForm() {
           <input
             type="email"
             id="email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+            name="email"
+            className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
             placeholder="jane@yourschool.edu"
+            autoComplete="email"
             required
           />
         </div>
@@ -398,10 +400,10 @@ function ContactForm() {
           <input
             type="text"
             id="schoolName"
-            value={formData.schoolName}
-            onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })}
-            className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+            name="schoolName"
+            className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
             placeholder="Westlake Academy"
+            autoComplete="organization"
           />
         </div>
 
@@ -411,9 +413,9 @@ function ContactForm() {
           </label>
           <select
             id="studentCount"
-            value={formData.studentCount}
-            onChange={(e) => setFormData({ ...formData, studentCount: e.target.value })}
-            className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10 bg-white"
+            name="studentCount"
+            defaultValue=""
+            className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10 bg-white"
           >
             <option value="">Select...</option>
             <option value="under-200">Under 200</option>
@@ -431,10 +433,9 @@ function ContactForm() {
         </label>
         <textarea
           id="message"
-          value={formData.message}
-          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+          name="message"
           rows={5}
-          className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10 resize-none"
+          className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10 resize-none"
           placeholder="Tell us about your school and what you're looking for..."
           required
         />
@@ -445,9 +446,8 @@ function ContactForm() {
         <input
           type="checkbox"
           id="subscribeNewsletter"
-          checked={formData.subscribeNewsletter}
-          onChange={(e) => setFormData({ ...formData, subscribeNewsletter: e.target.checked })}
-          className="mt-1 w-4 h-4 text-[#2F5D50] border-gray-300 rounded focus:ring-[#2F5D50]"
+          name="subscribeNewsletter"
+          className="mt-1 w-4 h-4 text-[#5B7F6D] border-gray-300 rounded focus:ring-[#5B7F6D]"
         />
         <label htmlFor="subscribeNewsletter" className="text-sm text-[#5F6368]">
           Subscribe to our newsletter for practical insights on school enrollment and EdTech.
@@ -462,7 +462,7 @@ function ContactForm() {
           'w-full flex items-center justify-center gap-2 px-6 py-4 rounded-md font-medium transition-colors',
           status === 'loading'
             ? 'bg-gray-400 cursor-not-allowed'
-            : 'bg-[#2F5D50] text-white hover:bg-[#234840]'
+            : 'bg-[#5B7F6D] text-white hover:bg-[#4A6B5B]'
         )}
       >
         {status === 'loading' ? (
@@ -489,18 +489,18 @@ function ContactForm() {
 
 function Footer() {
   return (
-    <footer className="bg-[#1F2A44] text-white py-12 px-6">
+    <footer className="bg-[#2D4F3E] text-white py-12 px-6">
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
-                <span className="text-[#1F2A44] font-display font-bold text-sm">E</span>
+                <span className="text-lg">🌿</span>
               </div>
-              <span className="text-lg font-display">Enrollsy</span>
+              <span className="text-lg font-display">EnrollSage</span>
             </div>
             <p className="text-white/60 text-sm">
-              The modern front door for private schools.
+              Wise guidance for enrollment journeys.
             </p>
           </div>
 
@@ -532,10 +532,10 @@ function Footer() {
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-white/40 text-sm">
-            &copy; {new Date().getFullYear()} Enrollsy. All rights reserved.
+            &copy; {new Date().getFullYear()} EnrollSage. All rights reserved.
           </p>
           <p className="text-white/40 text-sm">
-            Made with care for schools that care.
+            Made with wisdom for schools that care.
           </p>
         </div>
       </div>

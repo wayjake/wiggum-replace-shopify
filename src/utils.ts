@@ -1,4 +1,4 @@
-// 🧰 Utility functions - the Swiss Army knife of Enrollsy
+// 🧰 Utility functions - the Swiss Army knife of EnrollSage
 // Common helpers used throughout the application
 
 import { type ClassValue, clsx } from "clsx";

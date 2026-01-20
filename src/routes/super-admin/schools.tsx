@@ -3,7 +3,7 @@
 //
 // ╭────────────────────────────────────────────────────────────╮
 // │  SCHOOL DIRECTORY                                          │
-// │  View and manage all schools on the Enrollsy platform.    │
+// │  View and manage all schools on the EnrollSage platform.    │
 // │  Create new schools, configure settings, monitor usage.    │
 // ╰────────────────────────────────────────────────────────────╯
 
@@ -118,8 +118,8 @@ const logoutUser = createServerFn({ method: 'POST' }).handler(async () => {
 export const Route = createFileRoute('/super-admin/schools')({
   head: () => ({
     meta: [
-      { title: 'Schools | Enrollsy Super Admin' },
-      { name: 'description', content: 'View and manage all schools on the Enrollsy platform.' },
+      { title: 'Schools | EnrollSage Super Admin' },
+      { name: 'description', content: 'View and manage all schools on the EnrollSage platform.' },
     ],
   }),
   loader: async () => {
@@ -165,17 +165,17 @@ function SchoolsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Top Navigation */}
-      <nav className="bg-[#1F2A44] text-white">
+      <nav className="bg-[#2D4F3E] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <Link to="/" className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-[#2F5D50] rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
                   <span className="text-lg">🎓</span>
                 </div>
-                <span className="font-bold text-lg font-display">Enrollsy</span>
+                <span className="font-bold text-lg font-display">EnrollSage</span>
               </Link>
               <span className="text-xs bg-white/10 px-2 py-1 rounded">Super Admin</span>
             </div>
@@ -196,15 +196,15 @@ function SchoolsPage() {
         {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-[#1F2A44] font-display flex items-center gap-3">
-              <Building2 className="w-8 h-8 text-[#2F5D50]" />
+            <h1 className="text-3xl font-bold text-[#2D4F3E] font-display flex items-center gap-3">
+              <Building2 className="w-8 h-8 text-[#5B7F6D]" />
               Schools
             </h1>
             <p className="text-gray-600">{schoolList.length} schools on the platform</p>
           </div>
           <Link
             to="/super-admin/schools/new"
-            className="flex items-center gap-2 bg-[#2F5D50] text-white px-4 py-2 rounded-lg hover:bg-[#1F2A44] transition-colors"
+            className="flex items-center gap-2 bg-[#5B7F6D] text-white px-4 py-2 rounded-lg hover:bg-[#2D4F3E] transition-colors"
           >
             <Plus className="w-4 h-4" />
             Create School
@@ -220,13 +220,13 @@ function SchoolsPage() {
               placeholder="Search schools..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50]"
+            className="px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D]"
           >
             <option value="all">All Statuses</option>
             <option value="active">Active</option>
@@ -248,13 +248,13 @@ function SchoolsPage() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-[#2F5D50] rounded-xl flex items-center justify-center text-white">
+                      <div className="w-14 h-14 bg-[#5B7F6D] rounded-xl flex items-center justify-center text-white">
                         <Building2 className="w-7 h-7" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-lg text-[#1F2A44]">{school.name}</h3>
+                        <h3 className="font-semibold text-lg text-[#2D4F3E]">{school.name}</h3>
                         <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
-                          <span className="text-[#2F5D50] font-mono text-xs">/{school.slug}</span>
+                          <span className="text-[#5B7F6D] font-mono text-xs">/{school.slug}</span>
                           {school.city && school.state && (
                             <span className="flex items-center gap-1">
                               <MapPin className="w-3 h-3" /> {school.city}, {school.state}
@@ -310,7 +310,7 @@ function SchoolsPage() {
               {!searchQuery && statusFilter === 'all' && (
                 <Link
                   to="/super-admin/schools/new"
-                  className="inline-flex items-center gap-2 bg-[#2F5D50] text-white px-4 py-2 rounded-lg hover:bg-[#1F2A44]"
+                  className="inline-flex items-center gap-2 bg-[#5B7F6D] text-white px-4 py-2 rounded-lg hover:bg-[#2D4F3E]"
                 >
                   <Plus className="w-4 h-4" />
                   Create School

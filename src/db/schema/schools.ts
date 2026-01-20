@@ -1,4 +1,4 @@
-// 🏫 Schools Schema - The multi-tenant foundation of Enrollsy
+// 🏫 Schools Schema - The multi-tenant foundation of EnrollSage
 // "Each school is its own world, but they all live in our universe"
 
 import { sqliteTable, text, integer, unique } from 'drizzle-orm/sqlite-core';
@@ -18,7 +18,7 @@ export const schools = sqliteTable('schools', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),           // URL-friendly: 'westlake-academy'
-  subdomain: text('subdomain').unique(),           // Optional: 'westlake' for westlake.enrollsy.com
+  subdomain: text('subdomain').unique(),           // Optional: 'westlake' for westlake.enrollsage.com
 
   // School settings
   timezone: text('timezone').default('America/New_York'),
@@ -33,8 +33,8 @@ export const schools = sqliteTable('schools', {
 
   // Branding
   logoUrl: text('logo_url'),
-  primaryColor: text('primary_color').default('#2F5D50'),
-  accentColor: text('accent_color').default('#1F2A44'),
+  primaryColor: text('primary_color').default('#5B7F6D'),
+  accentColor: text('accent_color').default('#2D4F3E'),
 
   // Google OAuth for this school (optional)
   googleClientId: text('google_client_id'),

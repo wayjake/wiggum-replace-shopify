@@ -1,4 +1,4 @@
-// 📬 Brevo Email Integration - Communication backbone for Enrollsy
+// 📬 Brevo Email Integration - Communication backbone for EnrollSage
 // Handles transactional emails, newsletter signups, and contact management
 
 import * as Brevo from '@getbrevo/brevo';
@@ -34,7 +34,7 @@ export const BREVO_TEMPLATES = {
  * Update this with your verified sender in Brevo.
  */
 export const DEFAULT_SENDER = {
-  name: 'Enrollsy',
+  name: 'EnrollSage',
   email: 'jake@dubsado.com', // Must be verified in Brevo!
 };
 
@@ -165,7 +165,7 @@ export async function sendSimpleEmail({
 export const BREVO_LISTS = {
   ALL_FAMILIES: 1, // All registered families
   NEWSLETTER: 2, // Newsletter subscribers
-  SCHOOL_LEADS: 3, // Schools interested in Enrollsy
+  SCHOOL_LEADS: 3, // Schools interested in EnrollSage
 } as const;
 
 /**
@@ -278,7 +278,7 @@ export async function sendWelcomeEmail({
     templateId: BREVO_TEMPLATES.WELCOME,
     params: {
       FIRSTNAME: firstName || 'there',
-      STORE_URL: process.env.APP_URL || 'https://enrollsy.com',
+      STORE_URL: process.env.APP_URL || 'https://enrollsage.com',
     },
   });
 
@@ -428,14 +428,14 @@ export async function sendStaffInvitationEmail({
     console.log('[Brevo] Template failed, sending simple email instead');
     await sendSimpleEmail({
       to: { email: to },
-      subject: `You've been invited to join ${schoolName} on Enrollsy`,
+      subject: `You've been invited to join ${schoolName} on EnrollSage`,
       htmlContent: `
         <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #1F2A44;">You're Invited! 🎉</h1>
-          <p>${inviterName} has invited you to join <strong>${schoolName}</strong> on Enrollsy as a <strong>${roleLabels[role] || role}</strong>.</p>
-          <p>Enrollsy is the all-in-one enrollment management platform that makes school admissions simple.</p>
+          <p>${inviterName} has invited you to join <strong>${schoolName}</strong> on EnrollSage as a <strong>${roleLabels[role] || role}</strong>.</p>
+          <p>EnrollSage is the all-in-one enrollment management platform that makes school admissions simple.</p>
           <div style="margin: 30px 0;">
-            <a href="${inviteUrl}" style="display: inline-block; background-color: #2F5D50; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600;">
+            <a href="${inviteUrl}" style="display: inline-block; background-color: #5B7F6D; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600;">
               Accept Invitation
             </a>
           </div>
@@ -456,7 +456,7 @@ export async function sendStaffInvitationEmail({
       textContent: `
 You're Invited!
 
-${inviterName} has invited you to join ${schoolName} on Enrollsy as a ${roleLabels[role] || role}.
+${inviterName} has invited you to join ${schoolName} on EnrollSage as a ${roleLabels[role] || role}.
 
 Accept your invitation: ${inviteUrl}
 

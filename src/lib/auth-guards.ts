@@ -1,4 +1,4 @@
-// 🛡️ Authentication Guards - Protecting the Enrollsy kingdom
+// 🛡️ Authentication Guards - Protecting the EnrollSage kingdom
 // "Hi, Super Nintendo Chalmers!" - Ralph, greeting authorized users
 //
 // These server functions provide authentication and authorization checks

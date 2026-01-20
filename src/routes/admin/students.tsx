@@ -107,7 +107,7 @@ const logoutUser = createServerFn({ method: 'POST' }).handler(async () => {
 export const Route = createFileRoute('/admin/students')({
   head: () => ({
     meta: [
-      { title: 'Students | School Dashboard | Enrollsy' },
+      { title: 'Students | School Dashboard | EnrollSage' },
       { name: 'description', content: 'View and manage all students in your school.' },
     ],
   }),
@@ -140,8 +140,8 @@ function StudentsPage() {
 
   if (!authResult.authenticated || !authResult.isAdmin) {
     return (
-      <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#2F5D50] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#5B7F6D] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -166,29 +166,29 @@ function StudentsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Admin Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <Link to="/" className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#2F5D50] rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
                   <span className="text-xl">🎓</span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-[#1F2A44] font-display">School Dashboard</h1>
+                  <h1 className="text-lg font-bold text-[#2D4F3E] font-display">School Dashboard</h1>
                   <p className="text-xs text-gray-500">Westlake Academy</p>
                 </div>
               </Link>
             </div>
             <nav className="flex items-center gap-6">
-              <Link to="/admin" className="text-gray-600 hover:text-[#2F5D50]">Dashboard</Link>
-              <a href="/admin/applications" className="text-gray-600 hover:text-[#2F5D50]">Applications</a>
-              <a href="/admin/leads" className="text-gray-600 hover:text-[#2F5D50]">Leads</a>
-              <Link to="/admin/families" className="text-gray-600 hover:text-[#2F5D50]">Families</Link>
-              <Link to="/admin/students" className="text-[#2F5D50] font-medium">Students</Link>
-              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#2F5D50] text-sm">
+              <Link to="/admin" className="text-gray-600 hover:text-[#5B7F6D]">Dashboard</Link>
+              <a href="/admin/applications" className="text-gray-600 hover:text-[#5B7F6D]">Applications</a>
+              <a href="/admin/leads" className="text-gray-600 hover:text-[#5B7F6D]">Leads</a>
+              <Link to="/admin/families" className="text-gray-600 hover:text-[#5B7F6D]">Families</Link>
+              <Link to="/admin/students" className="text-[#5B7F6D] font-medium">Students</Link>
+              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#5B7F6D] text-sm">
                 <LogOut className="w-4 h-4" /> Sign Out
               </button>
             </nav>
@@ -200,8 +200,8 @@ function StudentsPage() {
         {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-[#1F2A44] font-display flex items-center gap-3">
-              <GraduationCap className="w-7 h-7 text-[#2F5D50]" />
+            <h2 className="text-2xl font-bold text-[#2D4F3E] font-display flex items-center gap-3">
+              <GraduationCap className="w-7 h-7 text-[#5B7F6D]" />
               Students
             </h2>
             <p className="text-gray-600">
@@ -220,7 +220,7 @@ function StudentsPage() {
               placeholder="Search students or families..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
             />
           </div>
 
@@ -228,7 +228,7 @@ function StudentsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+            className="px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
           >
             <option value="all">All Statuses</option>
             <option value="enrolled">Enrolled</option>
@@ -242,7 +242,7 @@ function StudentsPage() {
           <select
             value={gradeFilter}
             onChange={(e) => setGradeFilter(e.target.value)}
-            className="px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+            className="px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
           >
             <option value="all">All Grades</option>
             {grades.map((grade) => (
@@ -275,7 +275,7 @@ function StudentsPage() {
                         )} />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-[#1F2A44]">
+                        <h3 className="font-semibold text-[#2D4F3E]">
                           {student.firstName} {student.lastName}
                           {student.preferredName && student.preferredName !== student.firstName && (
                             <span className="text-gray-500 font-normal"> ({student.preferredName})</span>
@@ -296,7 +296,7 @@ function StudentsPage() {
                     <div className="flex items-center gap-6">
                       {student.gradeLevel && (
                         <div className="text-right">
-                          <span className="text-sm font-medium text-[#1F2A44]">
+                          <span className="text-sm font-medium text-[#2D4F3E]">
                             {student.gradeLevel === 'PK' ? 'Pre-K' : student.gradeLevel === 'K' ? 'Kindergarten' : `Grade ${student.gradeLevel}`}
                           </span>
                         </div>
@@ -335,7 +335,7 @@ function StatusBadge({ status }: { status: string }) {
     applicant: 'bg-blue-100 text-blue-700',
     accepted: 'bg-purple-100 text-purple-700',
     withdrawn: 'bg-gray-100 text-gray-600',
-    graduated: 'bg-[#2F5D50]/20 text-[#2F5D50]',
+    graduated: 'bg-[#5B7F6D]/20 text-[#5B7F6D]',
     unknown: 'bg-gray-100 text-gray-600',
   };
 

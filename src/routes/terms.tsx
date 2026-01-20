@@ -8,12 +8,12 @@ import { useState } from 'react';
 export const Route = createFileRoute('/terms')({
   head: () => ({
     meta: [
-      { title: 'Terms of Service | Enrollsy' },
+      { title: 'Terms of Service | EnrollSage' },
       {
         name: 'description',
-        content: 'Read the Terms of Service for Enrollsy, the modern enrollment platform for private schools.',
+        content: 'Read the Terms of Service for EnrollSage, the modern enrollment platform for private schools.',
       },
-      { property: 'og:title', content: 'Terms of Service | Enrollsy' },
+      { property: 'og:title', content: 'Terms of Service | EnrollSage' },
     ],
   }),
   component: TermsPage,
@@ -21,19 +21,19 @@ export const Route = createFileRoute('/terms')({
 
 function TermsPage() {
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       <Navigation />
       <main className="py-16 px-6">
         <article className="max-w-3xl mx-auto">
           <header className="mb-12">
-            <h1 className="text-4xl font-display text-[#1F2A44] mb-4">Terms of Service</h1>
+            <h1 className="text-4xl font-display text-[#2D4F3E] mb-4">Terms of Service</h1>
             <p className="text-[#5F6368]">Last updated: January 2026</p>
           </header>
 
           <div className="prose prose-lg max-w-none">
             <Section title="1. Agreement to Terms">
               <p>
-                By accessing or using Enrollsy ("Service"), you agree to be bound by these
+                By accessing or using EnrollSage ("Service"), you agree to be bound by these
                 Terms of Service ("Terms"). If you disagree with any part of these terms,
                 you may not access the Service.
               </p>
@@ -45,7 +45,7 @@ function TermsPage() {
 
             <Section title="2. Description of Service">
               <p>
-                Enrollsy provides a cloud-based platform for private schools to manage admissions,
+                EnrollSage provides a cloud-based platform for private schools to manage admissions,
                 enrollment, and tuition payments. Our Service includes:
               </p>
               <ul>
@@ -98,7 +98,7 @@ function TermsPage() {
               </p>
               <p>
                 <strong>Data Protection:</strong> We take data protection seriously. Please review
-                our <Link to="/privacy" className="text-[#2F5D50] hover:underline">Privacy Policy</Link> for
+                our <Link to="/privacy" className="text-[#5B7F6D] hover:underline">Privacy Policy</Link> for
                 details on how we collect, use, and protect your information.
               </p>
             </Section>
@@ -127,7 +127,7 @@ function TermsPage() {
             <Section title="7. Intellectual Property">
               <p>
                 The Service and its original content (excluding Your Data), features, and
-                functionality are owned by Enrollsy and are protected by copyright, trademark,
+                functionality are owned by EnrollSage and are protected by copyright, trademark,
                 and other intellectual property laws.
               </p>
               <p>
@@ -169,7 +169,7 @@ function TermsPage() {
 
             <Section title="11. Limitation of Liability">
               <p>
-                TO THE MAXIMUM EXTENT PERMITTED BY LAW, ENROLLSY SHALL NOT BE LIABLE FOR ANY
+                TO THE MAXIMUM EXTENT PERMITTED BY LAW, ENROLLSAGE SHALL NOT BE LIABLE FOR ANY
                 INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING
                 BUT NOT LIMITED TO LOSS OF PROFITS, DATA, OR GOODWILL.
               </p>
@@ -182,7 +182,7 @@ function TermsPage() {
 
             <Section title="12. Indemnification">
               <p>
-                You agree to indemnify and hold harmless Enrollsy and its officers, directors,
+                You agree to indemnify and hold harmless EnrollSage and its officers, directors,
                 employees, and agents from any claims, damages, losses, or expenses arising
                 from your use of the Service or violation of these Terms.
               </p>
@@ -234,8 +234,8 @@ function TermsPage() {
                 If you have any questions about these Terms, please contact us at:
               </p>
               <ul>
-                <li>Email: <a href="mailto:jake@dubsado.com" className="text-[#2F5D50] hover:underline">jake@dubsado.com</a></li>
-                <li>Contact form: <Link to="/contact" className="text-[#2F5D50] hover:underline">enrollsy.com/contact</Link></li>
+                <li>Email: <a href="mailto:jake@dubsado.com" className="text-[#5B7F6D] hover:underline">jake@dubsado.com</a></li>
+                <li>Contact form: <Link to="/contact" className="text-[#5B7F6D] hover:underline">enrollsage.com/contact</Link></li>
               </ul>
             </Section>
           </div>
@@ -253,7 +253,7 @@ function TermsPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-10">
-      <h2 className="text-xl font-display text-[#1F2A44] mb-4">{title}</h2>
+      <h2 className="text-xl font-display text-[#2D4F3E] mb-4">{title}</h2>
       <div className="text-[#5F6368] space-y-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2 [&_li]:text-[#5F6368]">
         {children}
       </div>
@@ -273,24 +273,24 @@ function Navigation() {
       <div className="max-w-6xl mx-auto px-6 py-4">
         <nav className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#1F2A44] rounded flex items-center justify-center">
-              <span className="text-white font-display font-bold text-sm">E</span>
+            <div className="w-8 h-8 bg-[#2D4F3E] rounded flex items-center justify-center">
+              <span className="text-white font-display font-bold text-sm">🌿</span>
             </div>
-            <span className="text-xl font-display text-[#1F2A44]">Enrollsy</span>
+            <span className="text-xl font-display text-[#2D4F3E]">EnrollSage</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
-            <Link to="/about" className="text-[#5F6368] hover:text-[#1F2A44] transition-colors">About</Link>
-            <Link to="/contact" className="text-[#5F6368] hover:text-[#1F2A44] transition-colors">Contact</Link>
+            <Link to="/about" className="text-[#5F6368] hover:text-[#2D4F3E] transition-colors">About</Link>
+            <Link to="/contact" className="text-[#5F6368] hover:text-[#2D4F3E] transition-colors">Contact</Link>
           </div>
 
           <div className="hidden md:flex items-center gap-4">
-            <Link to="/login" className="text-[#5F6368] hover:text-[#1F2A44] transition-colors">
+            <Link to="/login" className="text-[#5F6368] hover:text-[#2D4F3E] transition-colors">
               Sign In
             </Link>
             <Link
               to="/contact"
-              className="bg-[#2F5D50] text-white px-5 py-2 rounded-md hover:bg-[#234840] transition-colors font-medium"
+              className="bg-[#5B7F6D] text-white px-5 py-2 rounded-md hover:bg-[#4a6a5a] transition-colors font-medium"
             >
               Request Demo
             </Link>
@@ -321,15 +321,15 @@ function Navigation() {
 
 function Footer() {
   return (
-    <footer className="bg-[#1F2A44] text-white py-12 px-6">
+    <footer className="bg-[#2D4F3E] text-white py-12 px-6">
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
-                <span className="text-[#1F2A44] font-display font-bold text-sm">E</span>
+                <span className="text-[#2D4F3E] font-display font-bold text-sm">🌿</span>
               </div>
-              <span className="text-lg font-display">Enrollsy</span>
+              <span className="text-lg font-display">EnrollSage</span>
             </div>
             <p className="text-white/60 text-sm">
               The modern front door for private schools.
@@ -364,7 +364,7 @@ function Footer() {
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-white/40 text-sm">
-            &copy; {new Date().getFullYear()} Enrollsy. All rights reserved.
+            &copy; {new Date().getFullYear()} EnrollSage. All rights reserved.
           </p>
           <p className="text-white/40 text-sm">
             Made with care for schools that care.

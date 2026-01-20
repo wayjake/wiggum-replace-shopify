@@ -15,7 +15,7 @@ import { test as base, expect, Page } from '@playwright/test';
 
 export const TEST_USERS = {
   superadmin: {
-    email: 'superadmin@enrollsy.com',
+    email: 'superadmin@enrollsage.com',
     password: 'superadmin123',
     role: 'superadmin',
     redirectUrl: '/super-admin',
@@ -137,7 +137,7 @@ export async function assertNavigationExists(page: Page): Promise<void> {
  * Assert that branding is visible
  */
 export async function assertBrandingVisible(page: Page): Promise<void> {
-  await expect(page.locator('text=Enrollsy').first()).toBeVisible();
+  await expect(page.locator('text=EnrollSage').first()).toBeVisible();
 }
 
 // ═══════════════════════════════════════════════════════════

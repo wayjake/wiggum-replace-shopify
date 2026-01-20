@@ -95,7 +95,7 @@ const logoutUser = createServerFn({ method: 'POST' }).handler(async () => {
 export const Route = createFileRoute('/admin/families')({
   head: () => ({
     meta: [
-      { title: 'Families | School Dashboard | Enrollsy' },
+      { title: 'Families | School Dashboard | EnrollSage' },
       { name: 'description', content: 'Manage family households and their enrolled students.' },
     ],
   }),
@@ -126,8 +126,8 @@ function FamiliesPage() {
 
   if (!authResult.authenticated || !authResult.isAdmin) {
     return (
-      <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#2F5D50] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#5B7F6D] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -145,29 +145,29 @@ function FamiliesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Admin Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <Link to="/" className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#2F5D50] rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
                   <span className="text-xl">🎓</span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-[#1F2A44] font-display">School Dashboard</h1>
+                  <h1 className="text-lg font-bold text-[#2D4F3E] font-display">School Dashboard</h1>
                   <p className="text-xs text-gray-500">Westlake Academy</p>
                 </div>
               </Link>
             </div>
             <nav className="flex items-center gap-6">
-              <Link to="/admin" className="text-gray-600 hover:text-[#2F5D50]">Dashboard</Link>
-              <a href="/admin/applications" className="text-gray-600 hover:text-[#2F5D50]">Applications</a>
-              <a href="/admin/leads" className="text-gray-600 hover:text-[#2F5D50]">Leads</a>
-              <Link to="/admin/families" className="text-[#2F5D50] font-medium">Families</Link>
-              <a href="/admin/students" className="text-gray-600 hover:text-[#2F5D50]">Students</a>
-              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#2F5D50] text-sm">
+              <Link to="/admin" className="text-gray-600 hover:text-[#5B7F6D]">Dashboard</Link>
+              <a href="/admin/applications" className="text-gray-600 hover:text-[#5B7F6D]">Applications</a>
+              <a href="/admin/leads" className="text-gray-600 hover:text-[#5B7F6D]">Leads</a>
+              <Link to="/admin/families" className="text-[#5B7F6D] font-medium">Families</Link>
+              <a href="/admin/students" className="text-gray-600 hover:text-[#5B7F6D]">Students</a>
+              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#5B7F6D] text-sm">
                 <LogOut className="w-4 h-4" /> Sign Out
               </button>
             </nav>
@@ -179,15 +179,15 @@ function FamiliesPage() {
         {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-[#1F2A44] font-display flex items-center gap-3">
-              <Home className="w-7 h-7 text-[#2F5D50]" />
+            <h2 className="text-2xl font-bold text-[#2D4F3E] font-display flex items-center gap-3">
+              <Home className="w-7 h-7 text-[#5B7F6D]" />
               Families
             </h2>
             <p className="text-gray-600">{families.length} households registered</p>
           </div>
           <a
             href="/admin/families/new"
-            className="flex items-center gap-2 bg-[#2F5D50] text-white px-4 py-2 rounded-lg hover:bg-[#1F2A44] transition-colors"
+            className="flex items-center gap-2 bg-[#5B7F6D] text-white px-4 py-2 rounded-lg hover:bg-[#2D4F3E] transition-colors"
           >
             <Plus className="w-4 h-4" />
             Add Family
@@ -203,7 +203,7 @@ function FamiliesPage() {
               placeholder="Search families by name or email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
             />
           </div>
         </div>
@@ -220,11 +220,11 @@ function FamiliesPage() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-[#2F5D50]/10 rounded-full flex items-center justify-center">
-                        <Home className="w-6 h-6 text-[#2F5D50]" />
+                      <div className="w-12 h-12 bg-[#5B7F6D]/10 rounded-full flex items-center justify-center">
+                        <Home className="w-6 h-6 text-[#5B7F6D]" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-[#1F2A44]">{family.name}</h3>
+                        <h3 className="font-semibold text-[#2D4F3E]">{family.name}</h3>
                         <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
                           {family.primaryEmail && (
                             <span className="flex items-center gap-1">
@@ -276,7 +276,7 @@ function FamiliesPage() {
               {!searchQuery && (
                 <a
                   href="/admin/families/new"
-                  className="inline-flex items-center gap-2 bg-[#2F5D50] text-white px-4 py-2 rounded-lg hover:bg-[#1F2A44]"
+                  className="inline-flex items-center gap-2 bg-[#5B7F6D] text-white px-4 py-2 rounded-lg hover:bg-[#2D4F3E]"
                 >
                   <Plus className="w-4 h-4" />
                   Add Family

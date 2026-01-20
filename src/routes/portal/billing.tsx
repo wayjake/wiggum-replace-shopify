@@ -182,7 +182,7 @@ const logoutUser = createServerFn({ method: 'POST' }).handler(async () => {
 export const Route = createFileRoute('/portal/billing')({
   head: () => ({
     meta: [
-      { title: 'Billing | Family Portal | Enrollsy' },
+      { title: 'Billing | Family Portal | EnrollSage' },
       { name: 'description', content: 'View invoices, make payments, and manage payment methods.' },
     ],
   }),
@@ -238,24 +238,24 @@ function BillingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-6">
               <Link to="/portal" className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-[#2F5D50] rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
                   <span className="text-lg">🎓</span>
                 </div>
-                <span className="font-bold text-lg text-[#1F2A44] font-display">Family Portal</span>
+                <span className="font-bold text-lg text-[#2D4F3E] font-display">Family Portal</span>
               </Link>
             </div>
             <nav className="flex items-center gap-6">
-              <Link to="/portal" className="text-gray-600 hover:text-[#2F5D50] text-sm">Dashboard</Link>
-              <a href="/portal/applications" className="text-gray-600 hover:text-[#2F5D50] text-sm">Applications</a>
-              <Link to="/portal/billing" className="text-[#2F5D50] font-medium text-sm">Billing</Link>
-              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#2F5D50] text-sm">
+              <Link to="/portal" className="text-gray-600 hover:text-[#5B7F6D] text-sm">Dashboard</Link>
+              <a href="/portal/applications" className="text-gray-600 hover:text-[#5B7F6D] text-sm">Applications</a>
+              <Link to="/portal/billing" className="text-[#5B7F6D] font-medium text-sm">Billing</Link>
+              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#5B7F6D] text-sm">
                 <LogOut className="w-4 h-4" /> Sign Out
               </button>
             </nav>
@@ -265,8 +265,8 @@ function BillingPage() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-[#1F2A44] font-display flex items-center gap-3">
-            <DollarSign className="w-7 h-7 text-[#2F5D50]" />
+          <h1 className="text-2xl font-bold text-[#2D4F3E] font-display flex items-center gap-3">
+            <DollarSign className="w-7 h-7 text-[#5B7F6D]" />
             Billing
           </h1>
           <p className="text-gray-600">Manage your tuition payments and view invoices</p>
@@ -289,7 +289,7 @@ function BillingPage() {
                   </div>
                   <span className="text-sm text-gray-500">Amount Due</span>
                 </div>
-                <p className="text-3xl font-bold text-[#1F2A44]">
+                <p className="text-3xl font-bold text-[#2D4F3E]">
                   {formatCurrency(summary?.totalDue || 0)}
                 </p>
               </div>
@@ -301,14 +301,14 @@ function BillingPage() {
                   </div>
                   <span className="text-sm text-gray-500">Total Paid</span>
                 </div>
-                <p className="text-3xl font-bold text-[#1F2A44]">
+                <p className="text-3xl font-bold text-[#2D4F3E]">
                   {formatCurrency(summary?.totalPaid || 0)}
                 </p>
               </div>
 
-              <div className="bg-[#2F5D50] rounded-xl p-6 text-white">
+              <div className="bg-[#5B7F6D] rounded-xl p-6 text-white">
                 <p className="text-sm text-white/70 mb-2">Make a Payment</p>
-                <button className="w-full py-3 px-4 bg-white text-[#2F5D50] rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2">
+                <button className="w-full py-3 px-4 bg-white text-[#5B7F6D] rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2">
                   <CreditCard className="w-4 h-4" />
                   Pay Now
                 </button>
@@ -317,8 +317,8 @@ function BillingPage() {
 
             {/* Invoices */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-[#1F2A44] mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#2F5D50]" />
+              <h2 className="text-lg font-semibold text-[#2D4F3E] mb-4 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-[#5B7F6D]" />
                 Invoices
               </h2>
 
@@ -327,7 +327,7 @@ function BillingPage() {
                   {householdInvoices.map((invoice: any) => (
                     <div key={invoice.id} className="py-4 flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-[#1F2A44]">
+                        <p className="font-medium text-[#2D4F3E]">
                           {invoice.invoiceNumber || 'Invoice'}
                         </p>
                         <p className="text-sm text-gray-500">
@@ -336,7 +336,7 @@ function BillingPage() {
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">
-                          <p className="font-semibold text-[#1F2A44]">
+                          <p className="font-semibold text-[#2D4F3E]">
                             {formatCurrency(invoice.amountDue || 0)}
                           </p>
                           <p className="text-xs text-gray-500">
@@ -360,11 +360,11 @@ function BillingPage() {
             {/* Payment Methods */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-[#1F2A44] flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-[#2F5D50]" />
+                <h2 className="text-lg font-semibold text-[#2D4F3E] flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-[#5B7F6D]" />
                   Payment Methods
                 </h2>
-                <button className="text-sm text-[#2F5D50] hover:underline flex items-center gap-1">
+                <button className="text-sm text-[#5B7F6D] hover:underline flex items-center gap-1">
                   <Plus className="w-4 h-4" /> Add Card
                 </button>
               </div>
@@ -381,7 +381,7 @@ function BillingPage() {
                           <CreditCard className="w-5 h-5 text-gray-600" />
                         </div>
                         <div>
-                          <p className="font-medium text-[#1F2A44]">
+                          <p className="font-medium text-[#2D4F3E]">
                             {pm.type === 'card' ? 'Card' : pm.type} •••• {pm.last4}
                           </p>
                           <p className="text-sm text-gray-500">
@@ -390,7 +390,7 @@ function BillingPage() {
                         </div>
                       </div>
                       {pm.isDefault && (
-                        <span className="text-xs bg-[#2F5D50]/10 text-[#2F5D50] px-2 py-1 rounded">
+                        <span className="text-xs bg-[#5B7F6D]/10 text-[#5B7F6D] px-2 py-1 rounded">
                           Default
                         </span>
                       )}
@@ -401,7 +401,7 @@ function BillingPage() {
                 <div className="text-center py-8 text-gray-500">
                   <CreditCard className="w-8 h-8 mx-auto mb-2 opacity-50" />
                   <p>No payment methods saved</p>
-                  <button className="text-[#2F5D50] hover:underline text-sm mt-2">
+                  <button className="text-[#5B7F6D] hover:underline text-sm mt-2">
                     Add a payment method
                   </button>
                 </div>
@@ -410,8 +410,8 @@ function BillingPage() {
 
             {/* Payment History */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-[#1F2A44] mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-[#2F5D50]" />
+              <h2 className="text-lg font-semibold text-[#2D4F3E] mb-4 flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-[#5B7F6D]" />
                 Payment History
               </h2>
 
@@ -420,7 +420,7 @@ function BillingPage() {
                   {paymentHistory.map((payment: any) => (
                     <div key={payment.id} className="py-4 flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-[#1F2A44]">
+                        <p className="font-medium text-[#2D4F3E]">
                           {formatCurrency(payment.amount || 0)}
                         </p>
                         <p className="text-sm text-gray-500">

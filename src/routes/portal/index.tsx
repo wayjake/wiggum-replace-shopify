@@ -181,7 +181,7 @@ const logoutUser = createServerFn({ method: 'POST' }).handler(async () => {
 export const Route = createFileRoute('/portal/')({
   head: () => ({
     meta: [
-      { title: 'Family Portal | Enrollsy' },
+      { title: 'Family Portal | EnrollSage' },
       {
         name: 'description',
         content: 'View your children\'s enrollment status, applications, and billing information.',
@@ -239,16 +239,16 @@ function FamilyPortal() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#2F5D50] rounded-lg flex items-center justify-center">
-                <span className="text-lg">🎓</span>
+              <div className="w-8 h-8 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
+                <span className="text-lg">🌿</span>
               </div>
-              <span className="font-bold text-lg text-[#1F2A44] font-display">Family Portal</span>
+              <span className="font-bold text-lg text-[#2D4F3E] font-display">Family Portal</span>
             </div>
 
             <div className="flex items-center gap-4">
@@ -257,7 +257,7 @@ function FamilyPortal() {
               </span>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#2F5D50] transition-colors"
+                className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#5B7F6D] transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 Sign Out
@@ -270,7 +270,7 @@ function FamilyPortal() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-[#1F2A44] font-display">
+          <h1 className="text-2xl font-bold text-[#2D4F3E] font-display">
             Welcome, {user.firstName}!
           </h1>
           <p className="text-gray-600 mt-1">
@@ -283,10 +283,10 @@ function FamilyPortal() {
         {!hasHousehold ? (
           // No household - prompt to complete registration
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-            <div className="w-16 h-16 bg-[#2F5D50]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Home className="w-8 h-8 text-[#2F5D50]" />
+            <div className="w-16 h-16 bg-[#5B7F6D]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Home className="w-8 h-8 text-[#5B7F6D]" />
             </div>
-            <h2 className="text-xl font-semibold text-[#1F2A44] mb-2">
+            <h2 className="text-xl font-semibold text-[#2D4F3E] mb-2">
               Complete Your Family Registration
             </h2>
             <p className="text-gray-600 mb-6 max-w-md mx-auto">
@@ -295,7 +295,7 @@ function FamilyPortal() {
             </p>
             <Link
               to="/contact"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#2F5D50] text-white rounded-lg hover:bg-[#1F2A44] transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#5B7F6D] text-white rounded-lg hover:bg-[#2D4F3E] transition-colors"
             >
               Contact the School
               <ChevronRight className="w-4 h-4" />
@@ -308,8 +308,8 @@ function FamilyPortal() {
               {/* Students Section */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-[#1F2A44] flex items-center gap-2">
-                    <GraduationCap className="w-5 h-5 text-[#2F5D50]" />
+                  <h2 className="text-lg font-semibold text-[#2D4F3E] flex items-center gap-2">
+                    <GraduationCap className="w-5 h-5 text-[#5B7F6D]" />
                     Your Children
                   </h2>
                 </div>
@@ -322,13 +322,13 @@ function FamilyPortal() {
                         className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-[#2F5D50]/10 rounded-full flex items-center justify-center">
+                          <div className="w-12 h-12 bg-[#5B7F6D]/10 rounded-full flex items-center justify-center">
                             <span className="text-xl">
                               {student.firstName.charAt(0)}
                             </span>
                           </div>
                           <div>
-                            <p className="font-medium text-[#1F2A44]">
+                            <p className="font-medium text-[#2D4F3E]">
                               {student.preferredName || student.firstName} {student.lastName}
                             </p>
                             <p className="text-sm text-gray-500">
@@ -351,13 +351,13 @@ function FamilyPortal() {
               {/* Applications Section */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-[#1F2A44] flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-[#2F5D50]" />
+                  <h2 className="text-lg font-semibold text-[#2D4F3E] flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-[#5B7F6D]" />
                     Applications
                   </h2>
                   <a
                     href="/portal/applications"
-                    className="text-sm text-[#2F5D50] hover:underline"
+                    className="text-sm text-[#5B7F6D] hover:underline"
                   >
                     View all
                   </a>
@@ -371,7 +371,7 @@ function FamilyPortal() {
                         className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors"
                       >
                         <div>
-                          <p className="font-medium text-[#1F2A44]">
+                          <p className="font-medium text-[#2D4F3E]">
                             {app.studentName}
                           </p>
                           <p className="text-sm text-gray-500">
@@ -388,7 +388,7 @@ function FamilyPortal() {
                     <p>No applications yet</p>
                     <a
                       href="/portal/apply"
-                      className="text-[#2F5D50] hover:underline text-sm"
+                      className="text-[#5B7F6D] hover:underline text-sm"
                     >
                       Start an application
                     </a>
@@ -401,7 +401,7 @@ function FamilyPortal() {
             <div className="space-y-6">
               {/* Quick Actions */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="font-semibold text-[#1F2A44] mb-4">Quick Actions</h3>
+                <h3 className="font-semibold text-[#2D4F3E] mb-4">Quick Actions</h3>
                 <div className="space-y-2">
                   <QuickAction
                     icon={FileText}
@@ -429,13 +429,13 @@ function FamilyPortal() {
               {/* Billing Summary */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-[#1F2A44] flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-[#2F5D50]" />
+                  <h3 className="font-semibold text-[#2D4F3E] flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-[#5B7F6D]" />
                     Billing
                   </h3>
                   <a
                     href="/portal/billing"
-                    className="text-xs text-[#2F5D50] hover:underline"
+                    className="text-xs text-[#5B7F6D] hover:underline"
                   >
                     View all
                   </a>
@@ -449,7 +449,7 @@ function FamilyPortal() {
                         className="p-3 bg-gray-50 rounded-lg"
                       >
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-[#1F2A44]">
+                          <p className="text-sm font-medium text-[#2D4F3E]">
                             {invoice.invoiceNumber || 'Invoice'}
                           </p>
                           <InvoiceStatusBadge status={invoice.status} />
@@ -457,7 +457,7 @@ function FamilyPortal() {
                         <p className="text-xs text-gray-500 mt-1">
                           Due: {invoice.dueDate || 'N/A'}
                         </p>
-                        <p className="text-sm font-medium text-[#1F2A44] mt-1">
+                        <p className="text-sm font-medium text-[#2D4F3E] mt-1">
                           ${((invoice.amountDue || 0) / 100).toFixed(2)} due
                         </p>
                       </div>
@@ -471,7 +471,7 @@ function FamilyPortal() {
               </div>
 
               {/* School Info */}
-              <div className="bg-[#2F5D50] rounded-xl p-6 text-white">
+              <div className="bg-[#5B7F6D] rounded-xl p-6 text-white">
                 <h3 className="font-semibold mb-2">Westlake Academy</h3>
                 <p className="text-sm text-white/70 mb-4">
                   1234 Education Lane<br />
@@ -512,7 +512,7 @@ function QuickAction({
       href={href}
       className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
     >
-      <div className="w-8 h-8 bg-[#2F5D50]/10 rounded-lg flex items-center justify-center text-[#2F5D50] group-hover:bg-[#2F5D50] group-hover:text-white transition-colors">
+      <div className="w-8 h-8 bg-[#5B7F6D]/10 rounded-lg flex items-center justify-center text-[#5B7F6D] group-hover:bg-[#5B7F6D] group-hover:text-white transition-colors">
         <Icon className="w-4 h-4" />
       </div>
       <span className="text-sm font-medium text-gray-700">{label}</span>
@@ -525,7 +525,7 @@ function EnrollmentStatusBadge({ status }: { status: string }) {
   const styles: Record<string, { bg: string; text: string; icon: React.ComponentType<{ className?: string }> }> = {
     enrolled: { bg: 'bg-green-100', text: 'text-green-700', icon: CheckCircle },
     applicant: { bg: 'bg-blue-100', text: 'text-blue-700', icon: Clock },
-    accepted: { bg: 'bg-[#2F5D50]/20', text: 'text-[#2F5D50]', icon: CheckCircle },
+    accepted: { bg: 'bg-[#5B7F6D]/20', text: 'text-[#5B7F6D]', icon: CheckCircle },
     waitlisted: { bg: 'bg-amber-100', text: 'text-amber-700', icon: Clock },
     prospective: { bg: 'bg-gray-100', text: 'text-gray-700', icon: Clock },
     withdrawn: { bg: 'bg-red-100', text: 'text-red-700', icon: AlertCircle },
@@ -562,7 +562,7 @@ function ApplicationStatusBadge({ status }: { status: string }) {
     accepted: 'bg-green-100 text-green-700',
     waitlisted: 'bg-orange-100 text-orange-700',
     denied: 'bg-red-100 text-red-700',
-    enrolled: 'bg-[#2F5D50]/20 text-[#2F5D50]',
+    enrolled: 'bg-[#5B7F6D]/20 text-[#5B7F6D]',
   };
 
   const labels: Record<string, string> = {

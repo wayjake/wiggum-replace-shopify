@@ -281,7 +281,7 @@ const logoutUser = createServerFn({ method: 'POST' }).handler(async () => {
 export const Route = createFileRoute('/admin/team')({
   head: () => ({
     meta: [
-      { title: 'Team | School Dashboard | Enrollsy' },
+      { title: 'Team | School Dashboard | EnrollSage' },
       { name: 'description', content: 'Manage your school staff and send invitations.' },
     ],
   }),
@@ -317,8 +317,8 @@ function TeamPage() {
 
   if (!authResult.authenticated || !authResult.isAdmin) {
     return (
-      <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#2F5D50] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#5B7F6D] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -383,29 +383,29 @@ function TeamPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Admin Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <Link to="/" className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#2F5D50] rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
                   <span className="text-xl">🎓</span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-[#1F2A44] font-display">School Dashboard</h1>
+                  <h1 className="text-lg font-bold text-[#2D4F3E] font-display">School Dashboard</h1>
                   <p className="text-xs text-gray-500">{school?.name || 'Loading...'}</p>
                 </div>
               </Link>
             </div>
             <nav className="flex items-center gap-6">
-              <Link to="/admin" className="text-gray-600 hover:text-[#2F5D50]">Dashboard</Link>
-              <Link to="/admin/applications" className="text-gray-600 hover:text-[#2F5D50]">Applications</Link>
-              <Link to="/admin/families" className="text-gray-600 hover:text-[#2F5D50]">Families</Link>
-              <Link to="/admin/team" className="text-[#2F5D50] font-medium">Team</Link>
-              <Link to="/admin/settings" className="text-gray-600 hover:text-[#2F5D50]">Settings</Link>
-              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#2F5D50] text-sm">
+              <Link to="/admin" className="text-gray-600 hover:text-[#5B7F6D]">Dashboard</Link>
+              <Link to="/admin/applications" className="text-gray-600 hover:text-[#5B7F6D]">Applications</Link>
+              <Link to="/admin/families" className="text-gray-600 hover:text-[#5B7F6D]">Families</Link>
+              <Link to="/admin/team" className="text-[#5B7F6D] font-medium">Team</Link>
+              <Link to="/admin/settings" className="text-gray-600 hover:text-[#5B7F6D]">Settings</Link>
+              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#5B7F6D] text-sm">
                 <LogOut className="w-4 h-4" /> Sign Out
               </button>
             </nav>
@@ -417,8 +417,8 @@ function TeamPage() {
         {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-[#1F2A44] font-display flex items-center gap-3">
-              <Users className="w-7 h-7 text-[#2F5D50]" />
+            <h2 className="text-2xl font-bold text-[#2D4F3E] font-display flex items-center gap-3">
+              <Users className="w-7 h-7 text-[#5B7F6D]" />
               Team
             </h2>
             <p className="text-gray-600">
@@ -428,7 +428,7 @@ function TeamPage() {
           {canManageTeam && (
             <button
               onClick={() => setShowInviteModal(true)}
-              className="flex items-center gap-2 bg-[#2F5D50] text-white px-4 py-2 rounded-lg hover:bg-[#1F2A44] transition-colors"
+              className="flex items-center gap-2 bg-[#5B7F6D] text-white px-4 py-2 rounded-lg hover:bg-[#2D4F3E] transition-colors"
             >
               <UserPlus className="w-4 h-4" />
               Invite Staff
@@ -445,7 +445,7 @@ function TeamPage() {
             {/* Team Members */}
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <div className="p-6 border-b border-gray-100">
-                <h3 className="font-semibold text-[#1F2A44] font-display">
+                <h3 className="font-semibold text-[#2D4F3E] font-display">
                   Staff Members ({members?.length || 0})
                 </h3>
               </div>
@@ -468,7 +468,7 @@ function TeamPage() {
                             )} />
                           </div>
                           <div>
-                            <p className="font-medium text-[#1F2A44]">
+                            <p className="font-medium text-[#2D4F3E]">
                               {member.userFirstName} {member.userLastName}
                               {member.userId === currentUserId && (
                                 <span className="text-xs text-gray-500 font-normal ml-2">(you)</span>
@@ -507,7 +507,7 @@ function TeamPage() {
             {invitations && invitations.length > 0 && (
               <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <div className="p-6 border-b border-gray-100">
-                  <h3 className="font-semibold text-[#1F2A44] font-display flex items-center gap-2">
+                  <h3 className="font-semibold text-[#2D4F3E] font-display flex items-center gap-2">
                     <Clock className="w-4 h-4 text-amber-500" />
                     Pending Invitations ({invitations.length})
                   </h3>
@@ -520,7 +520,7 @@ function TeamPage() {
                           <Mail className="w-5 h-5 text-amber-600" />
                         </div>
                         <div>
-                          <p className="font-medium text-[#1F2A44]">{invite.email}</p>
+                          <p className="font-medium text-[#2D4F3E]">{invite.email}</p>
                           <p className="text-xs text-gray-500">
                             Invited by {invite.invitedByFirstName} {invite.invitedByLastName} •
                             Expires {new Date(invite.expiresAt!).toLocaleDateString()}
@@ -554,8 +554,8 @@ function TeamPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl w-full max-w-md mx-4 overflow-hidden">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="font-semibold text-[#1F2A44] font-display flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-[#2F5D50]" />
+              <h3 className="font-semibold text-[#2D4F3E] font-display flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-[#5B7F6D]" />
                 Invite Staff Member
               </h3>
               <button
@@ -575,7 +575,7 @@ function TeamPage() {
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="colleague@school.edu"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
                 />
               </div>
 
@@ -586,7 +586,7 @@ function TeamPage() {
                 <select
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50]"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D]"
                 >
                   <option value="admin">Administrator (full access)</option>
                   <option value="admissions">Admissions (leads & applications)</option>
@@ -631,7 +631,7 @@ function TeamPage() {
                   'flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors',
                   inviteSending || !inviteEmail
                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-[#2F5D50] text-white hover:bg-[#1F2A44]'
+                    : 'bg-[#5B7F6D] text-white hover:bg-[#2D4F3E]'
                 )}
               >
                 {inviteSending ? (

@@ -1,11 +1,11 @@
 # User Journey Maps
 
-> Understanding how each user type interacts with Enrollsy
+> Understanding how each user type interacts with EnrollSage
 
 ## Overview
 
-Enrollsy serves three distinct user types with different needs and journeys:
-1. **Platform Admins** (Enrollsy staff) - Super-admin level access
+EnrollSage serves three distinct user types with different needs and journeys:
+1. **Platform Admins** (EnrollSage staff) - Super-admin level access
 2. **School Staff** (Admissions, Business Office) - School-level administration
 3. **Families** (Parents/Guardians, Students) - Application and portal access
 
@@ -13,7 +13,7 @@ Enrollsy serves three distinct user types with different needs and journeys:
 
 ## 1. Platform Admin Journey
 
-Platform admins are Enrollsy employees who manage the multi-tenant SaaS platform.
+Platform admins are EnrollSage employees who manage the multi-tenant SaaS platform.
 
 ### Entry Points
 - `/super-admin` - Platform administration dashboard

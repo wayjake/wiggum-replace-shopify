@@ -1,4 +1,4 @@
-// 📝 Register Page - Join the Enrollsy family portal
+// 📝 Register Page - Join the EnrollSage family portal
 // For parents who want to track their family's enrollment status
 //
 // ╭────────────────────────────────────────────────────────────╮
@@ -110,7 +110,7 @@ const registerUser = createServerFn({ method: 'POST' })
 export const Route = createFileRoute('/register')({
   head: () => ({
     meta: [
-      { title: 'Create Account | Enrollsy' },
+      { title: 'Create Account | EnrollSage' },
       {
         name: 'description',
         content: 'Create a family account to manage your children\'s school applications and enrollment.',
@@ -123,45 +123,47 @@ export const Route = createFileRoute('/register')({
 function RegisterPage() {
   const navigate = useNavigate();
   const { token: csrfToken } = useCsrf();
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    marketingConsent: false,
-  });
+  // 🌿 Keep password state only for real-time validation UI
+  const [passwordValue, setPasswordValue] = useState('');
+  const [confirmPasswordValue, setConfirmPasswordValue] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const updateField = (field: keyof typeof formData, value: string | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
   const passwordRequirements = [
-    { label: 'At least 8 characters', met: formData.password.length >= 8 },
-    { label: 'Contains a number', met: /\d/.test(formData.password) },
-    { label: 'Contains uppercase letter', met: /[A-Z]/.test(formData.password) },
+    { label: 'At least 8 characters', met: passwordValue.length >= 8 },
+    { label: 'Contains a number', met: /\d/.test(passwordValue) },
+    { label: 'Contains uppercase letter', met: /[A-Z]/.test(passwordValue) },
   ];
 
   const isPasswordValid = passwordRequirements.every((req) => req.met);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
-    if (!formData.firstName || !formData.email || !formData.password) {
+    // Read values directly from form to capture browser autofill
+    const form = e.currentTarget;
+    const firstName = (form.elements.namedItem('firstName') as HTMLInputElement).value;
+    const lastName = (form.elements.namedItem('lastName') as HTMLInputElement).value;
+    const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+    const password = (form.elements.namedItem('password') as HTMLInputElement).value;
+    const confirmPassword = (form.elements.namedItem('confirmPassword') as HTMLInputElement).value;
+    const marketingConsent = (form.elements.namedItem('marketingConsent') as HTMLInputElement).checked;
+
+    if (!firstName || !email || !password) {
       setError('Please fill in all required fields');
       return;
     }
 
-    if (!isPasswordValid) {
+    // Re-validate password from form value in case autofill bypassed state
+    const passValid = password.length >= 8 && /\d/.test(password) && /[A-Z]/.test(password);
+    if (!passValid) {
       setError('Password does not meet requirements');
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
@@ -180,11 +182,11 @@ function RegisterPage() {
 
     try {
       const result = await registerUser({ data: {
-        firstName: formData.firstName,
-        lastName: formData.lastName || undefined,
-        email: formData.email,
-        password: formData.password,
-        marketingConsent: formData.marketingConsent,
+        firstName,
+        lastName: lastName || undefined,
+        email,
+        password,
+        marketingConsent,
         csrfToken: tokenToUse || undefined,
       } });
 
@@ -209,15 +211,15 @@ function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2] flex">
+    <div className="min-h-screen bg-[#F8F9F6] flex">
       {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#2F5D50] text-white p-12 flex-col justify-between">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#5B7F6D] text-white p-12 flex-col justify-between">
         <div>
           <Link to="/" className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-              <span className="text-2xl">🎓</span>
+              <span className="text-2xl">🌿</span>
             </div>
-            <span className="text-2xl font-bold font-display">Enrollsy</span>
+            <span className="text-2xl font-bold font-display">EnrollSage</span>
           </Link>
         </div>
 
@@ -246,7 +248,7 @@ function RegisterPage() {
         </div>
 
         <div className="text-white/60 text-sm">
-          &copy; {new Date().getFullYear()} Enrollsy. School enrollment made simple.
+          &copy; {new Date().getFullYear()} EnrollSage. School enrollment made simple.
         </div>
       </div>
 
@@ -256,14 +258,14 @@ function RegisterPage() {
           {/* Mobile Logo */}
           <div className="lg:hidden mb-8 text-center">
             <Link to="/" className="inline-flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#2F5D50] rounded-full flex items-center justify-center">
-                <span className="text-xl">🎓</span>
+              <div className="w-10 h-10 bg-[#5B7F6D] rounded-full flex items-center justify-center">
+                <span className="text-xl">🌿</span>
               </div>
-              <span className="text-xl font-bold text-[#1F2A44] font-display">Enrollsy</span>
+              <span className="text-xl font-bold text-[#2D4F3E] font-display">EnrollSage</span>
             </Link>
           </div>
 
-          <h1 className="text-3xl font-bold text-[#1F2A44] mb-2 font-display">
+          <h1 className="text-3xl font-bold text-[#2D4F3E] mb-2 font-display">
             Create Account
           </h1>
           <p className="text-gray-600 mb-8">
@@ -289,10 +291,10 @@ function RegisterPage() {
                   <input
                     type="text"
                     id="firstName"
-                    value={formData.firstName}
-                    onChange={(e) => updateField('firstName', e.target.value)}
+                    name="firstName"
                     placeholder="Jane"
-                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+                    autoComplete="given-name"
+                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
                   />
                 </div>
               </div>
@@ -303,10 +305,10 @@ function RegisterPage() {
                 <input
                   type="text"
                   id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) => updateField('lastName', e.target.value)}
+                  name="lastName"
                   placeholder="Smith"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+                  autoComplete="family-name"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
                 />
               </div>
             </div>
@@ -321,10 +323,10 @@ function RegisterPage() {
                 <input
                   type="email"
                   id="email"
-                  value={formData.email}
-                  onChange={(e) => updateField('email', e.target.value)}
+                  name="email"
                   placeholder="you@example.com"
-                  className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+                  autoComplete="email"
+                  className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
                 />
               </div>
             </div>
@@ -339,10 +341,12 @@ function RegisterPage() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="password"
-                  value={formData.password}
-                  onChange={(e) => updateField('password', e.target.value)}
+                  name="password"
+                  value={passwordValue}
+                  onChange={(e) => setPasswordValue(e.target.value)}
                   placeholder="Create a strong password"
-                  className="w-full pl-12 pr-12 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+                  autoComplete="new-password"
+                  className="w-full pl-12 pr-12 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
                 />
                 <button
                   type="button"
@@ -353,7 +357,7 @@ function RegisterPage() {
                 </button>
               </div>
               {/* Password Requirements */}
-              {formData.password && (
+              {passwordValue && (
                 <div className="mt-2 space-y-1">
                   {passwordRequirements.map((req, index) => (
                     <div
@@ -381,14 +385,16 @@ function RegisterPage() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={(e) => updateField('confirmPassword', e.target.value)}
+                  name="confirmPassword"
+                  value={confirmPasswordValue}
+                  onChange={(e) => setConfirmPasswordValue(e.target.value)}
                   placeholder="Confirm your password"
+                  autoComplete="new-password"
                   className={cn(
                     'w-full pl-12 pr-4 py-3 rounded-lg border focus:outline-none focus:ring-2',
-                    formData.confirmPassword && formData.password !== formData.confirmPassword
+                    confirmPasswordValue && passwordValue !== confirmPasswordValue
                       ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                      : 'border-gray-200 focus:border-[#2F5D50] focus:ring-[#2F5D50]/10'
+                      : 'border-gray-200 focus:border-[#5B7F6D] focus:ring-[#5B7F6D]/10'
                   )}
                 />
               </div>
@@ -399,9 +405,8 @@ function RegisterPage() {
               <input
                 type="checkbox"
                 id="marketingConsent"
-                checked={formData.marketingConsent}
-                onChange={(e) => updateField('marketingConsent', e.target.checked)}
-                className="mt-1 w-4 h-4 rounded border-gray-300 text-[#2F5D50] focus:ring-[#2F5D50]"
+                name="marketingConsent"
+                className="mt-1 w-4 h-4 rounded border-gray-300 text-[#5B7F6D] focus:ring-[#5B7F6D]"
               />
               <label htmlFor="marketingConsent" className="text-sm text-gray-600">
                 I'd like to receive enrollment tips and school updates via email. You can unsubscribe anytime.
@@ -416,7 +421,7 @@ function RegisterPage() {
                 'w-full flex items-center justify-center gap-2 py-4 rounded-lg font-medium transition-all',
                 isLoading
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-[#2F5D50] text-white hover:bg-[#1F2A44]'
+                  : 'bg-[#5B7F6D] text-white hover:bg-[#2D4F3E]'
               )}
             >
               {isLoading ? (
@@ -435,16 +440,16 @@ function RegisterPage() {
             {/* Terms */}
             <p className="text-xs text-gray-500 text-center">
               By creating an account, you agree to our{' '}
-              <Link to="/terms" className="text-[#2F5D50] hover:underline">Terms of Service</Link>
+              <Link to="/terms" className="text-[#5B7F6D] hover:underline">Terms of Service</Link>
               {' '}and{' '}
-              <Link to="/privacy" className="text-[#2F5D50] hover:underline">Privacy Policy</Link>.
+              <Link to="/privacy" className="text-[#5B7F6D] hover:underline">Privacy Policy</Link>.
             </p>
           </form>
 
           {/* Login Link */}
           <p className="mt-8 text-center text-gray-600">
             Already have an account?{' '}
-            <Link to="/login" className="text-[#2F5D50] font-medium hover:underline">
+            <Link to="/login" className="text-[#5B7F6D] font-medium hover:underline">
               Sign in
             </Link>
           </p>
@@ -453,7 +458,7 @@ function RegisterPage() {
           <div className="mt-8 pt-8 border-t border-gray-200 text-center">
             <Link
               to="/"
-              className="text-gray-500 hover:text-[#2F5D50] transition-colors"
+              className="text-gray-500 hover:text-[#5B7F6D] transition-colors"
             >
               Back to homepage
             </Link>

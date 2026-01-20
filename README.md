@@ -1,4 +1,4 @@
-# Enrollsy: School Enrollment Made Simple
+# EnrollSage: School Enrollment Made Simple
 
 ```
     ╭─────────────────────────────────────────────────────────╮
@@ -11,9 +11,9 @@
     ╰─────────────────────────────────────────────────────────╯
 ```
 
-## What is Enrollsy?
+## What is EnrollSage?
 
-Enrollsy is a **modern school enrollment management platform** built as an educational project. Schools subscribe to manage their admissions pipeline, student enrollment, and tuition billing, while families use a self-service portal to apply and manage their children's enrollment.
+EnrollSage is a **modern school enrollment management platform** built as an educational project. Schools subscribe to manage their admissions pipeline, student enrollment, and tuition billing, while families use a self-service portal to apply and manage their children's enrollment.
 
 ## The Stack
 
@@ -73,7 +73,7 @@ After seeding the database (`npx tsx src/db/seed.ts`):
 
 | Role | Email | Password |
 |------|-------|----------|
-| Superadmin | superadmin@enrollsy.com | superadmin123 |
+| Superadmin | superadmin@enrollsage.com | superadmin123 |
 | School Staff | admissions@example.com | admissions123 |
 | Parent | student@example.com | student123 |
 

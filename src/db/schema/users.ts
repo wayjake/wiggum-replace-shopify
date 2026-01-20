@@ -1,4 +1,4 @@
-// 👤 The identity layer of Enrollsy
+// 👤 The identity layer of EnrollSage
 // Global user accounts that can span multiple schools
 // "One login to rule them all, one login to find them,
 //  One login to bring them all, and in the dashboard bind them."
@@ -11,7 +11,7 @@ import { relations } from 'drizzle-orm';
  * ╭─────────────────────────────────────────────────────────╮
  * │  USERS TABLE                                             │
  * │  ─────────────────────────────────────────────────────── │
- * │  Everyone who enters Enrollsy gets a record.             │
+ * │  Everyone who enters EnrollSage gets a record.           │
  * │  superadmin = platform, admin = school staff, customer = parent │
  * ╰─────────────────────────────────────────────────────────╯
  */

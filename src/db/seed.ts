@@ -29,7 +29,7 @@ async function seed() {
   // 🏫 ENROLLSY SCHOOL DATA
   // ═══════════════════════════════════════════════════════════
 
-  console.log('🏫 Setting up Enrollsy school enrollment data...\n');
+  console.log('🏫 Setting up EnrollSage school enrollment data...\n');
 
   // --- Create Super Admin (Platform Level) ---
   console.log('👑 Creating super admin...');
@@ -61,8 +61,8 @@ async function seed() {
       timezone: 'America/Chicago',
       currentSchoolYear: '2025-2026',
       gradesOffered: JSON.stringify(['PK', 'K', '1', '2', '3', '4', '5', '6', '7', '8']),
-      primaryColor: '#2F5D50',
-      accentColor: '#1F2A44',
+      primaryColor: '#5B7F6D',
+      accentColor: '#2D4F3E',
       email: 'info@westlakeacademy.edu',
       phone: '(512) 555-0100',
       addressLine1: '1234 Education Lane',
@@ -332,7 +332,7 @@ async function seed() {
   console.log('📋 SUMMARY');
   console.log('═'.repeat(50));
 
-  console.log('\n🏫 Enrollsy School Data:');
+  console.log('\n🏫 EnrollSage School Data:');
   console.log('   - 1 school (Westlake Academy)');
   console.log('   - 1 school year (2025-2026)');
   console.log('   - 1 household (Johnson Family)');

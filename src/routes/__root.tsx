@@ -97,17 +97,17 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'Enrollsy | Modern School Enrollment & Payments' },
+      { title: 'EnrollSage | Modern School Enrollment & Payments' },
       {
         name: 'description',
         content: 'The modern front door for private schools. From first inquiry to tuition paid—admissions, enrollment, and billing in one clean system.',
       },
       // Open Graph
       { property: 'og:type', content: 'website' },
-      { property: 'og:title', content: 'Enrollsy | Modern School Enrollment' },
+      { property: 'og:title', content: 'EnrollSage | Modern School Enrollment' },
       { property: 'og:description', content: 'From first inquiry to tuition paid—without spreadsheets, PDFs, or duct tape.' },
       // Theme color for browsers - Academic Navy
-      { name: 'theme-color', content: '#1F2A44' },
+      { name: 'theme-color', content: '#2D4F3E' },
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
@@ -132,7 +132,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-[#F7F5F2] text-[#1E1E1E] font-sans antialiased">
+      <body className="bg-[#F8F9F6] text-[#1E1E1E] font-sans antialiased">
         {children}
         <TanStackDevtools
           config={{ position: 'bottom-right' }}
@@ -173,18 +173,18 @@ function RootLayout() {
 
 function NotFoundPage() {
   return (
-    <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center px-6">
+    <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center px-6">
       <div className="max-w-md text-center">
         {/* Simple, professional illustration */}
         <div className="mb-8">
           <div className="w-24 h-24 mx-auto bg-white rounded-lg shadow-sm border border-gray-200 flex items-center justify-center">
-            <span className="text-4xl">🎓</span>
+            <span className="text-4xl">🌿</span>
           </div>
         </div>
 
         {/* Error number with style */}
         <div className="mb-4">
-          <span className="text-7xl font-bold text-[#1F2A44]/10 font-display">
+          <span className="text-7xl font-bold text-[#2D4F3E]/10 font-display">
             404
           </span>
         </div>
@@ -202,14 +202,14 @@ function NotFoundPage() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             to="/"
-            className="inline-flex items-center justify-center gap-2 bg-[#2F5D50] text-white px-6 py-3 rounded-md hover:bg-[#234840] transition-colors font-medium"
+            className="inline-flex items-center justify-center gap-2 bg-[#5B7F6D] text-white px-6 py-3 rounded-md hover:bg-[#234840] transition-colors font-medium"
           >
             <Home className="w-4 h-4" />
             Go Home
           </Link>
           <Link
             to="/contact"
-            className="inline-flex items-center justify-center gap-2 border border-[#1F2A44] text-[#1F2A44] px-6 py-3 rounded-md hover:bg-[#1F2A44] hover:text-white transition-colors font-medium"
+            className="inline-flex items-center justify-center gap-2 border border-[#2D4F3E] text-[#2D4F3E] px-6 py-3 rounded-md hover:bg-[#2D4F3E] hover:text-white transition-colors font-medium"
           >
             Contact Support
           </Link>
@@ -219,15 +219,15 @@ function NotFoundPage() {
         <div className="mt-12 pt-8 border-t border-gray-200">
           <p className="text-sm text-[#5F6368] mb-4">Looking for something specific?</p>
           <div className="flex flex-wrap justify-center gap-4 text-sm">
-            <Link to="/about" className="text-[#2F5D50] hover:underline">
+            <Link to="/about" className="text-[#5B7F6D] hover:underline">
               About Us
             </Link>
             <span className="text-gray-300">•</span>
-            <Link to="/contact" className="text-[#2F5D50] hover:underline">
+            <Link to="/contact" className="text-[#5B7F6D] hover:underline">
               Contact
             </Link>
             <span className="text-gray-300">•</span>
-            <Link to="/login" className="text-[#2F5D50] hover:underline">
+            <Link to="/login" className="text-[#5B7F6D] hover:underline">
               Sign In
             </Link>
           </div>
@@ -246,7 +246,7 @@ function ErrorPage({ error, reset }: { error: Error; reset?: () => void }) {
   const isDev = import.meta.env.DEV;
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center px-6">
+    <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center px-6">
       <div className="max-w-md text-center">
         {/* Error illustration - muted, not alarming */}
         <div className="mb-8">
@@ -283,7 +283,7 @@ function ErrorPage({ error, reset }: { error: Error; reset?: () => void }) {
           {reset && (
             <button
               onClick={reset}
-              className="inline-flex items-center justify-center gap-2 bg-[#2F5D50] text-white px-6 py-3 rounded-md hover:bg-[#234840] transition-colors font-medium"
+              className="inline-flex items-center justify-center gap-2 bg-[#5B7F6D] text-white px-6 py-3 rounded-md hover:bg-[#234840] transition-colors font-medium"
             >
               <RefreshCw className="w-4 h-4" />
               Try Again
@@ -291,7 +291,7 @@ function ErrorPage({ error, reset }: { error: Error; reset?: () => void }) {
           )}
           <Link
             to="/"
-            className="inline-flex items-center justify-center gap-2 border border-[#1F2A44] text-[#1F2A44] px-6 py-3 rounded-md hover:bg-[#1F2A44] hover:text-white transition-colors font-medium"
+            className="inline-flex items-center justify-center gap-2 border border-[#2D4F3E] text-[#2D4F3E] px-6 py-3 rounded-md hover:bg-[#2D4F3E] hover:text-white transition-colors font-medium"
           >
             <Home className="w-4 h-4" />
             Go Home
@@ -301,7 +301,7 @@ function ErrorPage({ error, reset }: { error: Error; reset?: () => void }) {
         {/* Contact support */}
         <div className="mt-12 pt-8 border-t border-gray-200">
           <p className="text-sm text-[#5F6368] mb-2">Need assistance?</p>
-          <Link to="/contact" className="text-[#2F5D50] hover:underline text-sm">
+          <Link to="/contact" className="text-[#5B7F6D] hover:underline text-sm">
             Contact Support
           </Link>
         </div>

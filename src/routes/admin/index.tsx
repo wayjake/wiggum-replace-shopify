@@ -180,7 +180,7 @@ function formatRelativeTime(date: Date | null | undefined): string {
 export const Route = createFileRoute('/admin/')({
   head: () => ({
     meta: [
-      { title: 'School Dashboard | Enrollsy' },
+      { title: 'School Dashboard | EnrollSage' },
       { name: 'description', content: 'Manage your school enrollments, applications, and families.' },
     ],
   }),
@@ -212,8 +212,8 @@ function AdminDashboard() {
   // Don't render if not authenticated/admin
   if (!authResult.authenticated || !authResult.isAdmin) {
     return (
-      <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#2F5D50] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#5B7F6D] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -227,18 +227,18 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Admin Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <Link to="/" className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#2F5D50] rounded-lg flex items-center justify-center">
-                  <span className="text-xl">🎓</span>
+                <div className="w-10 h-10 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
+                  <span className="text-xl">🌿</span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-[#1F2A44] font-display">School Dashboard</h1>
+                  <h1 className="text-lg font-bold text-[#2D4F3E] font-display">School Dashboard</h1>
                   <p className="text-xs text-gray-500">Westlake Academy</p>
                 </div>
               </Link>
@@ -246,15 +246,15 @@ function AdminDashboard() {
 
             {/* Admin Nav */}
             <nav className="flex items-center gap-6">
-              <Link to="/admin" className="text-[#2F5D50] font-medium">Dashboard</Link>
-              <Link to="/admin/applications" className="text-gray-600 hover:text-[#2F5D50]">Applications</Link>
-              <Link to="/admin/leads" className="text-gray-600 hover:text-[#2F5D50]">Leads</Link>
-              <Link to="/admin/families" className="text-gray-600 hover:text-[#2F5D50]">Families</Link>
-              <Link to="/admin/students" className="text-gray-600 hover:text-[#2F5D50]">Students</Link>
-              <Link to="/admin/settings" className="text-gray-600 hover:text-[#2F5D50]">Settings</Link>
+              <Link to="/admin" className="text-[#5B7F6D] font-medium">Dashboard</Link>
+              <Link to="/admin/applications" className="text-gray-600 hover:text-[#5B7F6D]">Applications</Link>
+              <Link to="/admin/leads" className="text-gray-600 hover:text-[#5B7F6D]">Leads</Link>
+              <Link to="/admin/families" className="text-gray-600 hover:text-[#5B7F6D]">Families</Link>
+              <Link to="/admin/students" className="text-gray-600 hover:text-[#5B7F6D]">Students</Link>
+              <Link to="/admin/settings" className="text-gray-600 hover:text-[#5B7F6D]">Settings</Link>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-1 text-gray-500 hover:text-[#2F5D50] text-sm"
+                className="flex items-center gap-1 text-gray-500 hover:text-[#5B7F6D] text-sm"
               >
                 <LogOut className="w-4 h-4" />
                 Sign Out
@@ -267,7 +267,7 @@ function AdminDashboard() {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Welcome Header */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-[#1F2A44] font-display">
+          <h2 className="text-2xl font-bold text-[#2D4F3E] font-display">
             Welcome back, {authResult.user?.firstName || 'Admin'}!
           </h2>
           <p className="text-gray-600">Here's what's happening with your school today.</p>
@@ -312,13 +312,13 @@ function AdminDashboard() {
           {/* Recent Applications */}
           <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-[#1F2A44] font-display flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#2F5D50]" />
+              <h3 className="text-lg font-semibold text-[#2D4F3E] font-display flex items-center gap-2">
+                <FileText className="w-5 h-5 text-[#5B7F6D]" />
                 Recent Applications
               </h3>
               <a
                 href="/admin/applications"
-                className="text-sm text-[#2F5D50] hover:underline flex items-center gap-1"
+                className="text-sm text-[#5B7F6D] hover:underline flex items-center gap-1"
               >
                 View all <ArrowRight className="w-4 h-4" />
               </a>
@@ -330,7 +330,7 @@ function AdminDashboard() {
                   className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0"
                 >
                   <div>
-                    <p className="font-medium text-[#1F2A44]">{app.studentName}</p>
+                    <p className="font-medium text-[#2D4F3E]">{app.studentName}</p>
                     <p className="text-sm text-gray-500">
                       Grade {app.grade} • {app.schoolYear} • {app.date}
                     </p>
@@ -352,23 +352,23 @@ function AdminDashboard() {
           <div className="space-y-6">
             {/* Quick Actions */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="font-semibold text-[#1F2A44] mb-4 font-display">Quick Actions</h3>
+              <h3 className="font-semibold text-[#2D4F3E] mb-4 font-display">Quick Actions</h3>
               <div className="space-y-2">
                 <a
                   href="/admin/leads/new"
-                  className="block w-full py-2 px-4 bg-[#2F5D50] text-white rounded-lg text-center hover:bg-[#1F2A44] transition-colors"
+                  className="block w-full py-2 px-4 bg-[#5B7F6D] text-white rounded-lg text-center hover:bg-[#2D4F3E] transition-colors"
                 >
                   + Add New Lead
                 </a>
                 <a
                   href="/admin/families/new"
-                  className="block w-full py-2 px-4 bg-gray-100 text-[#1F2A44] rounded-lg text-center hover:bg-gray-200 transition-colors"
+                  className="block w-full py-2 px-4 bg-gray-100 text-[#2D4F3E] rounded-lg text-center hover:bg-gray-200 transition-colors"
                 >
                   + Register Family
                 </a>
                 <a
                   href="/admin/applications"
-                  className="block w-full py-2 px-4 bg-gray-100 text-[#1F2A44] rounded-lg text-center hover:bg-gray-200 transition-colors"
+                  className="block w-full py-2 px-4 bg-gray-100 text-[#2D4F3E] rounded-lg text-center hover:bg-gray-200 transition-colors"
                 >
                   Review Applications
                 </a>
@@ -378,13 +378,13 @@ function AdminDashboard() {
             {/* Recent Leads */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-[#1F2A44] font-display flex items-center gap-2">
-                  <UserPlus className="w-4 h-4 text-[#2F5D50]" />
+                <h3 className="font-semibold text-[#2D4F3E] font-display flex items-center gap-2">
+                  <UserPlus className="w-4 h-4 text-[#5B7F6D]" />
                   Recent Leads
                 </h3>
                 <a
                   href="/admin/leads"
-                  className="text-xs text-[#2F5D50] hover:underline"
+                  className="text-xs text-[#5B7F6D] hover:underline"
                 >
                   View all
                 </a>
@@ -395,7 +395,7 @@ function AdminDashboard() {
                     key={lead.id}
                     className="p-3 bg-gray-50 rounded-lg"
                   >
-                    <p className="font-medium text-[#1F2A44] text-sm">{lead.name}</p>
+                    <p className="font-medium text-[#2D4F3E] text-sm">{lead.name}</p>
                     <p className="text-xs text-gray-500">
                       {lead.students} student{lead.students !== 1 ? 's' : ''} • {lead.date}
                     </p>
@@ -408,7 +408,7 @@ function AdminDashboard() {
             </div>
 
             {/* Enrollment Period */}
-            <div className="bg-[#2F5D50] rounded-xl p-6 text-white">
+            <div className="bg-[#5B7F6D] rounded-xl p-6 text-white">
               <div className="flex items-center gap-2 mb-2">
                 <Calendar className="w-5 h-5" />
                 <span className="text-sm text-white/70">Current School Year</span>
@@ -444,8 +444,8 @@ function StatCard({
   color: 'evergreen' | 'navy' | 'blue' | 'amber' | 'purple';
 }) {
   const colors = {
-    evergreen: 'bg-[#2F5D50]/10 text-[#2F5D50]',
-    navy: 'bg-[#1F2A44]/10 text-[#1F2A44]',
+    evergreen: 'bg-[#5B7F6D]/10 text-[#5B7F6D]',
+    navy: 'bg-[#2D4F3E]/10 text-[#2D4F3E]',
     blue: 'bg-blue-100 text-blue-600',
     amber: 'bg-amber-100 text-amber-600',
     purple: 'bg-purple-100 text-purple-600',
@@ -463,7 +463,7 @@ function StatCard({
           </span>
         )}
       </div>
-      <p className="text-2xl font-bold text-[#1F2A44]">{value}</p>
+      <p className="text-2xl font-bold text-[#2D4F3E]">{value}</p>
       <p className="text-sm text-gray-500">{label}</p>
     </div>
   );
@@ -480,7 +480,7 @@ function StatusBadge({ status }: { status: string }) {
     waitlisted: 'bg-orange-100 text-orange-700',
     denied: 'bg-red-100 text-red-700',
     withdrawn: 'bg-gray-100 text-gray-700',
-    enrolled: 'bg-[#2F5D50]/20 text-[#2F5D50]',
+    enrolled: 'bg-[#5B7F6D]/20 text-[#5B7F6D]',
   };
 
   const labels: Record<string, string> = {
@@ -509,7 +509,7 @@ function LeadStageBadge({ stage }: { stage: string }) {
     tour_scheduled: 'bg-purple-100 text-purple-700',
     tour_completed: 'bg-amber-100 text-amber-700',
     applied: 'bg-green-100 text-green-700',
-    converted: 'bg-[#2F5D50]/20 text-[#2F5D50]',
+    converted: 'bg-[#5B7F6D]/20 text-[#5B7F6D]',
     lost: 'bg-gray-100 text-gray-500',
   };
 

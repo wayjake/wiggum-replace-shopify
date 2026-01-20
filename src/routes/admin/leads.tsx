@@ -126,7 +126,7 @@ function formatRelativeTime(date: Date | null | undefined): string {
 export const Route = createFileRoute('/admin/leads')({
   head: () => ({
     meta: [
-      { title: 'Leads | School Dashboard | Enrollsy' },
+      { title: 'Leads | School Dashboard | EnrollSage' },
       { name: 'description', content: 'Track and manage prospective family inquiries.' },
     ],
   }),
@@ -158,8 +158,8 @@ function LeadsPage() {
 
   if (!authResult.authenticated || !authResult.isAdmin) {
     return (
-      <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#2F5D50] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#5B7F6D] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -189,29 +189,29 @@ function LeadsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Admin Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <Link to="/" className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#2F5D50] rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
                   <span className="text-xl">🎓</span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-[#1F2A44] font-display">School Dashboard</h1>
+                  <h1 className="text-lg font-bold text-[#2D4F3E] font-display">School Dashboard</h1>
                   <p className="text-xs text-gray-500">Westlake Academy</p>
                 </div>
               </Link>
             </div>
             <nav className="flex items-center gap-6">
-              <Link to="/admin" className="text-gray-600 hover:text-[#2F5D50]">Dashboard</Link>
-              <Link to="/admin/applications" className="text-gray-600 hover:text-[#2F5D50]">Applications</Link>
-              <Link to="/admin/leads" className="text-[#2F5D50] font-medium">Leads</Link>
-              <Link to="/admin/families" className="text-gray-600 hover:text-[#2F5D50]">Families</Link>
-              <Link to="/admin/students" className="text-gray-600 hover:text-[#2F5D50]">Students</Link>
-              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#2F5D50] text-sm">
+              <Link to="/admin" className="text-gray-600 hover:text-[#5B7F6D]">Dashboard</Link>
+              <Link to="/admin/applications" className="text-gray-600 hover:text-[#5B7F6D]">Applications</Link>
+              <Link to="/admin/leads" className="text-[#5B7F6D] font-medium">Leads</Link>
+              <Link to="/admin/families" className="text-gray-600 hover:text-[#5B7F6D]">Families</Link>
+              <Link to="/admin/students" className="text-gray-600 hover:text-[#5B7F6D]">Students</Link>
+              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#5B7F6D] text-sm">
                 <LogOut className="w-4 h-4" /> Sign Out
               </button>
             </nav>
@@ -223,8 +223,8 @@ function LeadsPage() {
         {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-[#1F2A44] font-display flex items-center gap-3">
-              <UserPlus className="w-7 h-7 text-[#2F5D50]" />
+            <h2 className="text-2xl font-bold text-[#2D4F3E] font-display flex items-center gap-3">
+              <UserPlus className="w-7 h-7 text-[#5B7F6D]" />
               Leads
             </h2>
             <p className="text-gray-600">
@@ -233,7 +233,7 @@ function LeadsPage() {
           </div>
           <a
             href="/admin/leads/new"
-            className="flex items-center gap-2 bg-[#2F5D50] text-white px-4 py-2 rounded-lg hover:bg-[#1F2A44] transition-colors"
+            className="flex items-center gap-2 bg-[#5B7F6D] text-white px-4 py-2 rounded-lg hover:bg-[#2D4F3E] transition-colors"
           >
             <Plus className="w-4 h-4" />
             Add Lead
@@ -249,7 +249,7 @@ function LeadsPage() {
               className={cn(
                 'flex items-center gap-2 px-4 py-2 rounded-lg border whitespace-nowrap transition-colors',
                 stageFilter === stage.value
-                  ? 'bg-[#2F5D50] text-white border-[#2F5D50]'
+                  ? 'bg-[#5B7F6D] text-white border-[#5B7F6D]'
                   : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
               )}
             >
@@ -275,7 +275,7 @@ function LeadsPage() {
               placeholder="Search leads by name or email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
             />
           </div>
         </div>
@@ -296,7 +296,7 @@ function LeadsPage() {
                         <UserPlus className="w-6 h-6 text-purple-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-[#1F2A44]">
+                        <h3 className="font-semibold text-[#2D4F3E]">
                           {lead.firstName} {lead.lastName}
                         </h3>
                         <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
@@ -364,7 +364,7 @@ function LeadsPage() {
               {!searchQuery && stageFilter === 'all' && (
                 <a
                   href="/admin/leads/new"
-                  className="inline-flex items-center gap-2 bg-[#2F5D50] text-white px-4 py-2 rounded-lg hover:bg-[#1F2A44]"
+                  className="inline-flex items-center gap-2 bg-[#5B7F6D] text-white px-4 py-2 rounded-lg hover:bg-[#2D4F3E]"
                 >
                   <Plus className="w-4 h-4" />
                   Add Lead
@@ -384,7 +384,7 @@ function StageBadge({ stage }: { stage: string }) {
     tour_scheduled: 'bg-purple-100 text-purple-700',
     tour_completed: 'bg-amber-100 text-amber-700',
     applied: 'bg-green-100 text-green-700',
-    converted: 'bg-[#2F5D50]/20 text-[#2F5D50]',
+    converted: 'bg-[#5B7F6D]/20 text-[#5B7F6D]',
     lost: 'bg-gray-100 text-gray-500',
   };
 

@@ -8,12 +8,12 @@ import { useState } from 'react';
 export const Route = createFileRoute('/privacy')({
   head: () => ({
     meta: [
-      { title: 'Privacy Policy | Enrollsy' },
+      { title: 'Privacy Policy | EnrollSage' },
       {
         name: 'description',
-        content: 'Learn how Enrollsy protects your data. Our privacy policy explains what data we collect, how we use it, and your rights under GDPR and other privacy regulations.',
+        content: 'Learn how EnrollSage protects your data. Our privacy policy explains what data we collect, how we use it, and your rights under GDPR and other privacy regulations.',
       },
-      { property: 'og:title', content: 'Privacy Policy | Enrollsy' },
+      { property: 'og:title', content: 'Privacy Policy | EnrollSage' },
     ],
   }),
   component: PrivacyPage,
@@ -21,18 +21,18 @@ export const Route = createFileRoute('/privacy')({
 
 function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       <Navigation />
       <main className="py-16 px-6">
         <article className="max-w-3xl mx-auto">
           <header className="mb-12">
-            <h1 className="text-4xl font-display text-[#1F2A44] mb-4">Privacy Policy</h1>
+            <h1 className="text-4xl font-display text-[#2D4F3E] mb-4">Privacy Policy</h1>
             <p className="text-[#5F6368]">Last updated: January 2026</p>
           </header>
 
           {/* Quick summary box */}
           <div className="bg-white p-6 rounded-lg border border-gray-200 mb-12">
-            <h2 className="text-lg font-display text-[#1F2A44] mb-4">Privacy at a Glance</h2>
+            <h2 className="text-lg font-display text-[#2D4F3E] mb-4">Privacy at a Glance</h2>
             <ul className="space-y-2 text-[#5F6368] text-sm">
               <li><strong className="text-[#1E1E1E]">What we collect:</strong> Information you provide (contact details, school data, student records) and usage data</li>
               <li><strong className="text-[#1E1E1E]">How we use it:</strong> To provide our enrollment platform services and improve the product</li>
@@ -45,7 +45,7 @@ function PrivacyPage() {
           <div className="prose prose-lg max-w-none">
             <Section title="1. Introduction">
               <p>
-                Enrollsy ("we," "us," or "our") respects your privacy and is committed to protecting
+                EnrollSage ("we," "us," or "our") respects your privacy and is committed to protecting
                 the personal data of schools, families, and students who use our enrollment platform.
               </p>
               <p>
@@ -60,7 +60,7 @@ function PrivacyPage() {
             </Section>
 
             <Section title="2. Information We Collect">
-              <h3 className="text-lg font-medium text-[#1F2A44] mt-6 mb-3">2.1 Information You Provide</h3>
+              <h3 className="text-lg font-medium text-[#2D4F3E] mt-6 mb-3">2.1 Information You Provide</h3>
               <p>We collect information you voluntarily provide, including:</p>
               <ul>
                 <li><strong>Account Information:</strong> Name, email address, phone number, and role (administrator, staff, parent)</li>
@@ -71,7 +71,7 @@ function PrivacyPage() {
                 <li><strong>Communications:</strong> Messages you send through our contact forms or support channels</li>
               </ul>
 
-              <h3 className="text-lg font-medium text-[#1F2A44] mt-6 mb-3">2.2 Information Collected Automatically</h3>
+              <h3 className="text-lg font-medium text-[#2D4F3E] mt-6 mb-3">2.2 Information Collected Automatically</h3>
               <p>When you use our Service, we automatically collect:</p>
               <ul>
                 <li><strong>Usage Data:</strong> Pages visited, features used, time spent on the Service</li>
@@ -132,7 +132,7 @@ function PrivacyPage() {
                 Depending on your location, you have certain rights regarding your personal data:
               </p>
 
-              <h3 className="text-lg font-medium text-[#1F2A44] mt-6 mb-3">6.1 Rights Under GDPR (EEA/UK Users)</h3>
+              <h3 className="text-lg font-medium text-[#2D4F3E] mt-6 mb-3">6.1 Rights Under GDPR (EEA/UK Users)</h3>
               <ul>
                 <li><strong>Right to Access:</strong> Request a copy of your personal data</li>
                 <li><strong>Right to Rectification:</strong> Correct inaccurate or incomplete data</li>
@@ -144,7 +144,7 @@ function PrivacyPage() {
                 <li><strong>Right to Lodge a Complaint:</strong> File a complaint with your local data protection authority</li>
               </ul>
 
-              <h3 className="text-lg font-medium text-[#1F2A44] mt-6 mb-3">6.2 Rights Under CCPA (California Users)</h3>
+              <h3 className="text-lg font-medium text-[#2D4F3E] mt-6 mb-3">6.2 Rights Under CCPA (California Users)</h3>
               <ul>
                 <li><strong>Right to Know:</strong> Request information about data collection, use, and sharing</li>
                 <li><strong>Right to Delete:</strong> Request deletion of your personal information</li>
@@ -154,8 +154,8 @@ function PrivacyPage() {
 
               <p className="mt-4">
                 <strong>To exercise your rights:</strong> Contact us at{' '}
-                <a href="mailto:jake@dubsado.com" className="text-[#2F5D50] hover:underline">jake@dubsado.com</a>{' '}
-                or use our <Link to="/contact" className="text-[#2F5D50] hover:underline">contact form</Link>.
+                <a href="mailto:jake@dubsado.com" className="text-[#5B7F6D] hover:underline">jake@dubsado.com</a>{' '}
+                or use our <Link to="/contact" className="text-[#5B7F6D] hover:underline">contact form</Link>.
                 We will respond within 30 days (or sooner as required by law).
               </p>
             </Section>
@@ -259,13 +259,13 @@ function PrivacyPage() {
                 please contact us:
               </p>
               <ul>
-                <li><strong>Email:</strong> <a href="mailto:jake@dubsado.com" className="text-[#2F5D50] hover:underline">jake@dubsado.com</a></li>
-                <li><strong>Contact Form:</strong> <Link to="/contact" className="text-[#2F5D50] hover:underline">enrollsy.com/contact</Link></li>
+                <li><strong>Email:</strong> <a href="mailto:jake@dubsado.com" className="text-[#5B7F6D] hover:underline">jake@dubsado.com</a></li>
+                <li><strong>Contact Form:</strong> <Link to="/contact" className="text-[#5B7F6D] hover:underline">enrollsage.com/contact</Link></li>
               </ul>
               <p className="mt-4">
                 For GDPR-related inquiries, you may also contact your local data protection authority.
                 A list of EU data protection authorities can be found at{' '}
-                <a href="https://edpb.europa.eu/about-edpb/board/members_en" target="_blank" rel="noopener noreferrer" className="text-[#2F5D50] hover:underline">
+                <a href="https://edpb.europa.eu/about-edpb/board/members_en" target="_blank" rel="noopener noreferrer" className="text-[#5B7F6D] hover:underline">
                   edpb.europa.eu
                 </a>.
               </p>
@@ -285,7 +285,7 @@ function PrivacyPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-10">
-      <h2 className="text-xl font-display text-[#1F2A44] mb-4">{title}</h2>
+      <h2 className="text-xl font-display text-[#2D4F3E] mb-4">{title}</h2>
       <div className="text-[#5F6368] space-y-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2 [&_li]:text-[#5F6368] [&_ul_ul]:mt-2">
         {children}
       </div>
@@ -305,24 +305,24 @@ function Navigation() {
       <div className="max-w-6xl mx-auto px-6 py-4">
         <nav className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#1F2A44] rounded flex items-center justify-center">
-              <span className="text-white font-display font-bold text-sm">E</span>
+            <div className="w-8 h-8 bg-[#2D4F3E] rounded flex items-center justify-center">
+              <span className="text-white font-display font-bold text-sm">🌿</span>
             </div>
-            <span className="text-xl font-display text-[#1F2A44]">Enrollsy</span>
+            <span className="text-xl font-display text-[#2D4F3E]">EnrollSage</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
-            <Link to="/about" className="text-[#5F6368] hover:text-[#1F2A44] transition-colors">About</Link>
-            <Link to="/contact" className="text-[#5F6368] hover:text-[#1F2A44] transition-colors">Contact</Link>
+            <Link to="/about" className="text-[#5F6368] hover:text-[#2D4F3E] transition-colors">About</Link>
+            <Link to="/contact" className="text-[#5F6368] hover:text-[#2D4F3E] transition-colors">Contact</Link>
           </div>
 
           <div className="hidden md:flex items-center gap-4">
-            <Link to="/login" className="text-[#5F6368] hover:text-[#1F2A44] transition-colors">
+            <Link to="/login" className="text-[#5F6368] hover:text-[#2D4F3E] transition-colors">
               Sign In
             </Link>
             <Link
               to="/contact"
-              className="bg-[#2F5D50] text-white px-5 py-2 rounded-md hover:bg-[#234840] transition-colors font-medium"
+              className="bg-[#5B7F6D] text-white px-5 py-2 rounded-md hover:bg-[#4a6a5a] transition-colors font-medium"
             >
               Request Demo
             </Link>
@@ -353,15 +353,15 @@ function Navigation() {
 
 function Footer() {
   return (
-    <footer className="bg-[#1F2A44] text-white py-12 px-6">
+    <footer className="bg-[#2D4F3E] text-white py-12 px-6">
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
-                <span className="text-[#1F2A44] font-display font-bold text-sm">E</span>
+                <span className="text-[#2D4F3E] font-display font-bold text-sm">🌿</span>
               </div>
-              <span className="text-lg font-display">Enrollsy</span>
+              <span className="text-lg font-display">EnrollSage</span>
             </div>
             <p className="text-white/60 text-sm">
               The modern front door for private schools.
@@ -396,7 +396,7 @@ function Footer() {
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-white/40 text-sm">
-            &copy; {new Date().getFullYear()} Enrollsy. All rights reserved.
+            &copy; {new Date().getFullYear()} EnrollSage. All rights reserved.
           </p>
           <p className="text-white/40 text-sm">
             Made with care for schools that care.

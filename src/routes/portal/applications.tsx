@@ -173,7 +173,7 @@ function formatDate(dateStr: string | Date | null): string {
 export const Route = createFileRoute('/portal/applications')({
   head: () => ({
     meta: [
-      { title: 'Applications | Family Portal | Enrollsy' },
+      { title: 'Applications | Family Portal | EnrollSage' },
       { name: 'description', content: 'View and track your children\'s enrollment applications.' },
     ],
   }),
@@ -225,24 +225,24 @@ function ApplicationsPage() {
   ) || [];
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-6">
               <Link to="/portal" className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-[#2F5D50] rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
                   <span className="text-lg">🎓</span>
                 </div>
-                <span className="font-bold text-lg text-[#1F2A44] font-display">Family Portal</span>
+                <span className="font-bold text-lg text-[#2D4F3E] font-display">Family Portal</span>
               </Link>
             </div>
             <nav className="flex items-center gap-6">
-              <Link to="/portal" className="text-gray-600 hover:text-[#2F5D50] text-sm">Dashboard</Link>
-              <Link to="/portal/applications" className="text-[#2F5D50] font-medium text-sm">Applications</Link>
-              <Link to="/portal/billing" className="text-gray-600 hover:text-[#2F5D50] text-sm">Billing</Link>
-              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#2F5D50] text-sm">
+              <Link to="/portal" className="text-gray-600 hover:text-[#5B7F6D] text-sm">Dashboard</Link>
+              <Link to="/portal/applications" className="text-[#5B7F6D] font-medium text-sm">Applications</Link>
+              <Link to="/portal/billing" className="text-gray-600 hover:text-[#5B7F6D] text-sm">Billing</Link>
+              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#5B7F6D] text-sm">
                 <LogOut className="w-4 h-4" /> Sign Out
               </button>
             </nav>
@@ -253,15 +253,15 @@ function ApplicationsPage() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-[#1F2A44] font-display flex items-center gap-3">
-              <FileText className="w-7 h-7 text-[#2F5D50]" />
+            <h1 className="text-2xl font-bold text-[#2D4F3E] font-display flex items-center gap-3">
+              <FileText className="w-7 h-7 text-[#5B7F6D]" />
               Applications
             </h1>
             <p className="text-gray-600">Track the status of your enrollment applications</p>
           </div>
           <a
             href="/portal/apply"
-            className="flex items-center gap-2 bg-[#2F5D50] text-white px-4 py-2 rounded-lg hover:bg-[#1F2A44] transition-colors"
+            className="flex items-center gap-2 bg-[#5B7F6D] text-white px-4 py-2 rounded-lg hover:bg-[#2D4F3E] transition-colors"
           >
             <Plus className="w-4 h-4" />
             New Application
@@ -275,7 +275,7 @@ function ApplicationsPage() {
             <p className="text-gray-500 mb-4">Complete your family registration to start an application.</p>
             <Link
               to="/contact"
-              className="text-[#2F5D50] hover:underline"
+              className="text-[#5B7F6D] hover:underline"
             >
               Contact the school to get started
             </Link>
@@ -285,7 +285,7 @@ function ApplicationsPage() {
             {/* Active Applications */}
             {activeApps.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-[#1F2A44] mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-[#2D4F3E] mb-4 flex items-center gap-2">
                   <Clock className="w-5 h-5 text-blue-600" />
                   In Progress ({activeApps.length})
                 </h2>
@@ -302,7 +302,7 @@ function ApplicationsPage() {
             {/* Decisions */}
             {decisionApps.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-[#1F2A44] mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-[#2D4F3E] mb-4 flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                   Decisions ({decisionApps.length})
                 </h2>
@@ -319,7 +319,7 @@ function ApplicationsPage() {
             {/* Completed */}
             {completedApps.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-[#1F2A44] mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-[#2D4F3E] mb-4 flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-gray-400" />
                   Completed ({completedApps.length})
                 </h2>
@@ -343,7 +343,7 @@ function ApplicationsPage() {
                 </p>
                 <a
                   href="/portal/apply"
-                  className="inline-flex items-center gap-2 bg-[#2F5D50] text-white px-6 py-3 rounded-lg hover:bg-[#1F2A44] transition-colors"
+                  className="inline-flex items-center gap-2 bg-[#5B7F6D] text-white px-6 py-3 rounded-lg hover:bg-[#2D4F3E] transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                   Start Application
@@ -367,11 +367,11 @@ function ApplicationCard({ application }: { application: any }) {
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-[#2F5D50]/10 rounded-full flex items-center justify-center">
-            <User className="w-6 h-6 text-[#2F5D50]" />
+          <div className="w-12 h-12 bg-[#5B7F6D]/10 rounded-full flex items-center justify-center">
+            <User className="w-6 h-6 text-[#5B7F6D]" />
           </div>
           <div>
-            <h3 className="font-semibold text-[#1F2A44]">{application.studentName}</h3>
+            <h3 className="font-semibold text-[#2D4F3E]">{application.studentName}</h3>
             <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
               <span>
                 {application.gradeApplyingFor === 'PK' ? 'Pre-K' :
@@ -419,15 +419,15 @@ function ApplicationCard({ application }: { application: any }) {
                 <div
                   className={cn(
                     'w-3 h-3 rounded-full',
-                    isActive ? 'bg-[#2F5D50]' : 'bg-gray-200',
-                    isCurrent && 'ring-2 ring-[#2F5D50] ring-offset-2'
+                    isActive ? 'bg-[#5B7F6D]' : 'bg-gray-200',
+                    isCurrent && 'ring-2 ring-[#5B7F6D] ring-offset-2'
                   )}
                 />
                 {index < 4 && (
                   <div
                     className={cn(
                       'w-8 h-0.5 mx-1',
-                      isActive ? 'bg-[#2F5D50]' : 'bg-gray-200'
+                      isActive ? 'bg-[#5B7F6D]' : 'bg-gray-200'
                     )}
                   />
                 )}
@@ -458,7 +458,7 @@ function StatusBadge({ status }: { status: string }) {
     waitlisted: 'bg-orange-100 text-orange-700',
     denied: 'bg-red-100 text-red-700',
     withdrawn: 'bg-gray-100 text-gray-700',
-    enrolled: 'bg-[#2F5D50]/20 text-[#2F5D50]',
+    enrolled: 'bg-[#5B7F6D]/20 text-[#5B7F6D]',
   };
 
   const labels: Record<string, string> = {

@@ -268,8 +268,8 @@ const linkExistingAccount = createServerFn({ method: 'POST' })
 export const Route = createFileRoute('/invite/accept')({
   head: () => ({
     meta: [
-      { title: 'Accept Invitation | Enrollsy' },
-      { name: 'description', content: 'Accept your invitation to join a school on Enrollsy.' },
+      { title: 'Accept Invitation | EnrollSage' },
+      { name: 'description', content: 'Accept your invitation to join a school on EnrollSage.' },
     ],
   }),
   validateSearch: (search: Record<string, unknown>) => ({
@@ -312,12 +312,12 @@ function AcceptInvitePage() {
   // Invalid invitation
   if (!loaderData.valid) {
     return (
-      <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 max-w-md text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <XCircle className="w-8 h-8 text-red-600" />
           </div>
-          <h1 className="text-xl font-bold text-[#1F2A44] mb-2 font-display">
+          <h1 className="text-xl font-bold text-[#2D4F3E] mb-2 font-display">
             Invalid Invitation
           </h1>
           <p className="text-gray-600 mb-6">
@@ -325,7 +325,7 @@ function AcceptInvitePage() {
           </p>
           <Link
             to="/login"
-            className="inline-flex items-center gap-2 bg-[#2F5D50] text-white px-6 py-3 rounded-lg hover:bg-[#1F2A44] transition-colors"
+            className="inline-flex items-center gap-2 bg-[#5B7F6D] text-white px-6 py-3 rounded-lg hover:bg-[#2D4F3E] transition-colors"
           >
             Go to Login
             <ArrowRight className="w-4 h-4" />
@@ -403,10 +403,10 @@ function AcceptInvitePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 w-full max-w-md overflow-hidden">
         {/* Header */}
-        <div className="bg-[#2F5D50] text-white p-6 text-center">
+        <div className="bg-[#5B7F6D] text-white p-6 text-center">
           <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
             {school?.logoUrl ? (
               <img src={school.logoUrl} alt={school.name} className="w-10 h-10 rounded-full" />
@@ -453,7 +453,7 @@ function AcceptInvitePage() {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="John"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
                   />
                 </div>
                 <div>
@@ -465,7 +465,7 @@ function AcceptInvitePage() {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="Doe"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
                   />
                 </div>
               </div>
@@ -525,7 +525,7 @@ function AcceptInvitePage() {
           {/* Info for existing users */}
           {userExists && (
             <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
-              You already have an Enrollsy account. Enter your password to join this school.
+              You already have an EnrollSage account. Enter your password to join this school.
             </div>
           )}
 
@@ -537,7 +537,7 @@ function AcceptInvitePage() {
               'w-full flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-all',
               isLoading
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-[#2F5D50] text-white hover:bg-[#1F2A44]'
+                : 'bg-[#5B7F6D] text-white hover:bg-[#2D4F3E]'
             )}
           >
             {isLoading ? (

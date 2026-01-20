@@ -1,5 +1,5 @@
 // 🔧 Installation Wizard - The magical onboarding journey
-// Configure your Enrollsy instance with the required environment variables
+// Configure your EnrollSage instance with the required environment variables
 
 import { createFileRoute } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
@@ -231,10 +231,10 @@ const runDatabaseSetup = createServerFn({ method: 'POST' }).handler(async () => 
 export const Route = createFileRoute('/install/')({
   head: () => ({
     meta: [
-      { title: 'Setup Wizard | Enrollsy' },
+      { title: 'Setup Wizard | EnrollSage' },
       {
         name: 'description',
-        content: 'Configure your Enrollsy instance environment variables to get started.',
+        content: 'Configure your EnrollSage instance environment variables to get started.',
       },
     ],
   }),
@@ -284,16 +284,16 @@ turso auth login    # Returning user
 ### Step 3: Create Your Database
 
 \`\`\`bash
-turso db create enrollsy
+turso db create enrollsage
 \`\`\`
 
 ### Step 4: Get Your Credentials
 
 \`\`\`bash
-turso db show enrollsy --url
+turso db show enrollsage --url
 # Copy this as TURSO_DATABASE_URL
 
-turso db tokens create enrollsy
+turso db tokens create enrollsage
 # Copy this as TURSO_AUTH_TOKEN
 \`\`\`
 
@@ -340,7 +340,7 @@ npx tsx src/db/seed.ts
 
 After seeding, you can log in with:
 
-- **Superadmin**: superadmin@enrollsy.com / admin123
+- **Superadmin**: superadmin@enrollsage.com / admin123
 - **School Admin**: admin@demo-school.edu / admin123
 - **Parent**: parent@example.com / customer123
 
@@ -412,7 +412,7 @@ Go to [brevo.com](https://www.brevo.com) and sign up (300 emails/day free).
 
 1. Go to Settings → API Keys (or SMTP & API)
 2. Click "Generate a new API key"
-3. Name it (e.g., "Enrollsy Production")
+3. Name it (e.g., "EnrollSage Production")
 4. Copy the key immediately (shown only once!)
 
 ### Step 3: Verify Your Sender
@@ -521,7 +521,7 @@ Visit [Google Cloud Console](https://console.cloud.google.com/) and sign in.
 
 1. Click the project dropdown in the top bar
 2. Click "New Project" or select an existing one
-3. Give it a name like "Enrollsy"
+3. Give it a name like "EnrollSage"
 
 ### Step 3: Enable the Google+ API
 
@@ -534,7 +534,7 @@ Visit [Google Cloud Console](https://console.cloud.google.com/) and sign in.
 1. Go to "APIs & Services" → "OAuth consent screen"
 2. Choose "External" (for any Google user)
 3. Fill in required fields:
-   - App name: "Enrollsy"
+   - App name: "EnrollSage"
    - User support email: your email
    - Developer contact: your email
 4. Add scopes: \`email\`, \`profile\`, \`openid\`
@@ -545,7 +545,7 @@ Visit [Google Cloud Console](https://console.cloud.google.com/) and sign in.
 1. Go to "APIs & Services" → "Credentials"
 2. Click "Create Credentials" → "OAuth client ID"
 3. Application type: "Web application"
-4. Name: "Enrollsy Web Client"
+4. Name: "EnrollSage Web Client"
 5. Authorized JavaScript origins:
    - \`http://localhost:3000\` (development)
    - \`https://yourdomain.com\` (production)
@@ -658,20 +658,20 @@ function InstallWizard() {
 
   if (configured) {
     return (
-      <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center p-6">
         <div className="max-w-md text-center">
-          <div className="w-20 h-20 mx-auto mb-6 bg-[#2F5D50] rounded-full flex items-center justify-center">
+          <div className="w-20 h-20 mx-auto mb-6 bg-[#5B7F6D] rounded-full flex items-center justify-center">
             <CheckCircle2 className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-[#1F2A44] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h1 className="text-3xl font-bold text-[#2D4F3E] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
             All Set!
           </h1>
           <p className="text-gray-600 mb-8">
-            Your environment is configured. You're ready to start using Enrollsy!
+            Your environment is configured. You're ready to start using EnrollSage!
           </p>
           <a
             href="/"
-            className="inline-flex items-center gap-2 bg-[#2F5D50] text-white px-6 py-3 rounded-lg hover:bg-[#1F2A44] transition-colors"
+            className="inline-flex items-center gap-2 bg-[#5B7F6D] text-white px-6 py-3 rounded-lg hover:bg-[#2D4F3E] transition-colors"
           >
             Go to Dashboard
             <ChevronRight className="w-4 h-4" />
@@ -685,16 +685,16 @@ function InstallWizard() {
   const stepStatus = getStepStatus(currentStep);
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center gap-4">
-          <div className="w-10 h-10 bg-[#2F5D50] rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
             <span className="text-white text-xl">🎓</span>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-[#1F2A44]" style={{ fontFamily: "'Playfair Display', serif" }}>
-              Enrollsy
+            <h1 className="text-xl font-bold text-[#2D4F3E]" style={{ fontFamily: "'Playfair Display', serif" }}>
+              EnrollSage
             </h1>
             <p className="text-sm text-gray-500">Setup Wizard</p>
           </div>
@@ -720,8 +720,8 @@ function InstallWizard() {
                     className={cn(
                       'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all',
                       isActive
-                        ? 'bg-[#2F5D50] text-white shadow-md'
-                        : 'bg-white hover:bg-gray-100 text-[#1F2A44] border border-gray-200'
+                        ? 'bg-[#5B7F6D] text-white shadow-md'
+                        : 'bg-white hover:bg-gray-100 text-[#2D4F3E] border border-gray-200'
                     )}
                   >
                     <div
@@ -731,7 +731,7 @@ function InstallWizard() {
                           ? 'bg-green-500 text-white'
                           : isActive
                             ? 'bg-white/20 text-white'
-                            : 'bg-gray-100 text-[#2F5D50]'
+                            : 'bg-gray-100 text-[#5B7F6D]'
                       )}
                     >
                       {status.complete ? (
@@ -797,12 +797,12 @@ function InstallWizard() {
 
             {/* Overall Progress */}
             <div className="mt-6 bg-white rounded-lg border border-gray-200 p-4">
-              <p className="text-sm font-medium text-[#1F2A44] mb-2">
+              <p className="text-sm font-medium text-[#2D4F3E] mb-2">
                 Setup Progress
               </p>
               <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#2F5D50] transition-all duration-500"
+                  className="h-full bg-[#5B7F6D] transition-all duration-500"
                   style={{
                     width: `${(results.filter((r) => r.present && r.valid).length / results.length) * 100}%`,
                   }}
@@ -824,7 +824,7 @@ function InstallWizard() {
                     'w-12 h-12 rounded-xl flex items-center justify-center',
                     stepStatus.complete
                       ? 'bg-green-100 text-green-600'
-                      : 'bg-gray-100 text-[#2F5D50]'
+                      : 'bg-gray-100 text-[#5B7F6D]'
                   )}
                 >
                   {stepStatus.complete ? (
@@ -834,7 +834,7 @@ function InstallWizard() {
                   )}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-[#1F2A44]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  <h2 className="text-2xl font-bold text-[#2D4F3E]" style={{ fontFamily: "'Playfair Display', serif" }}>
                     {currentStep.title}
                   </h2>
                   <p className="text-gray-500">{currentStep.description}</p>
@@ -905,7 +905,7 @@ function InstallWizard() {
                           href={result.helpUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-[#2F5D50] hover:underline flex items-center gap-1"
+                          className="text-xs text-[#5B7F6D] hover:underline flex items-center gap-1"
                         >
                           Get key
                           <ExternalLink className="w-3 h-3" />
@@ -927,12 +927,12 @@ function InstallWizard() {
                                 [result.label]: e.target.value,
                               }))
                             }
-                            className="flex-1 px-3 py-2 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2F5D50]/20 focus:border-[#2F5D50]"
+                            className="flex-1 px-3 py-2 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5B7F6D]/20 focus:border-[#5B7F6D]"
                           />
                           <button
                             onClick={() => saveEnvVar(result.label)}
                             disabled={!envInputs[result.label] || savingKey === result.label}
-                            className="px-4 py-2 bg-[#2F5D50] text-white text-sm rounded-lg hover:bg-[#1F2A44] disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="px-4 py-2 bg-[#5B7F6D] text-white text-sm rounded-lg hover:bg-[#2D4F3E] disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
                           >
                             {savingKey === result.label ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
@@ -942,7 +942,7 @@ function InstallWizard() {
                           </button>
                         </div>
                         {saveMessage?.key === result.label && (
-                          <p className="mt-2 text-xs text-[#2F5D50]">
+                          <p className="mt-2 text-xs text-[#5B7F6D]">
                             {saveMessage.message}
                           </p>
                         )}
@@ -970,7 +970,7 @@ function InstallWizard() {
                         <Database className="w-6 h-6 text-amber-600" />
                       )}
                       <div>
-                        <p className="font-medium text-[#1F2A44]">
+                        <p className="font-medium text-[#2D4F3E]">
                           {dbStatus.hasData
                             ? 'Database is seeded and ready!'
                             : 'Database needs initialization'}
@@ -992,7 +992,7 @@ function InstallWizard() {
                             'w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors',
                             isRunningDbSetup
                               ? 'bg-gray-200 text-gray-500 cursor-wait'
-                              : 'bg-[#2F5D50] text-white hover:bg-[#1F2A44]'
+                              : 'bg-[#5B7F6D] text-white hover:bg-[#2D4F3E]'
                           )}
                         >
                           {isRunningDbSetup ? (
@@ -1051,7 +1051,7 @@ function InstallWizard() {
 
             {/* Instructions */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-[#1F2A44] mb-4">
+              <h3 className="text-lg font-semibold text-[#2D4F3E] mb-4">
                 Setup Instructions
               </h3>
               <div className="prose prose-sm max-w-none">
@@ -1064,14 +1064,14 @@ function InstallWizard() {
               <button
                 onClick={() => setActiveStep((prev) => Math.max(0, prev - 1))}
                 disabled={activeStep === 0}
-                className="px-4 py-2 text-[#2F5D50] hover:bg-gray-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-[#5B7F6D] hover:bg-gray-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 ← Previous
               </button>
               <div className="flex gap-3">
                 <a
                   href="/install"
-                  className="px-4 py-2 text-[#2F5D50] hover:bg-gray-100 rounded-lg flex items-center gap-2"
+                  className="px-4 py-2 text-[#5B7F6D] hover:bg-gray-100 rounded-lg flex items-center gap-2"
                 >
                   <Loader2 className="w-4 h-4" />
                   Refresh Status
@@ -1079,7 +1079,7 @@ function InstallWizard() {
                 {activeStep < SETUP_STEPS.length - 1 ? (
                   <button
                     onClick={() => setActiveStep((prev) => prev + 1)}
-                    className="px-4 py-2 bg-[#2F5D50] text-white rounded-lg hover:bg-[#1F2A44] flex items-center gap-2"
+                    className="px-4 py-2 bg-[#5B7F6D] text-white rounded-lg hover:bg-[#2D4F3E] flex items-center gap-2"
                   >
                     Next Step
                     <ChevronRight className="w-4 h-4" />
@@ -1087,7 +1087,7 @@ function InstallWizard() {
                 ) : (
                   <a
                     href="/"
-                    className="px-4 py-2 bg-[#2F5D50] text-white rounded-lg hover:bg-[#1F2A44] flex items-center gap-2"
+                    className="px-4 py-2 bg-[#5B7F6D] text-white rounded-lg hover:bg-[#2D4F3E] flex items-center gap-2"
                   >
                     Complete Setup
                     <ChevronRight className="w-4 h-4" />
@@ -1161,7 +1161,7 @@ function InstructionsRenderer({
 
     if (line.startsWith('## ')) {
       elements.push(
-        <h2 key={i} className="text-xl font-bold text-[#1F2A44] mt-6 mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h2 key={i} className="text-xl font-bold text-[#2D4F3E] mt-6 mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
           {line.slice(3)}
         </h2>
       );
@@ -1170,7 +1170,7 @@ function InstructionsRenderer({
 
     if (line.startsWith('### ')) {
       elements.push(
-        <h3 key={i} className="text-lg font-semibold text-[#1F2A44] mt-4 mb-2">
+        <h3 key={i} className="text-lg font-semibold text-[#2D4F3E] mt-4 mb-2">
           {line.slice(4)}
         </h3>
       );
@@ -1189,7 +1189,7 @@ function InstructionsRenderer({
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#2F5D50] hover:underline"
+            className="text-[#5B7F6D] hover:underline"
           >
             {text}
           </a>
@@ -1207,7 +1207,7 @@ function InstructionsRenderer({
             part.startsWith('`') && part.endsWith('`') ? (
               <code
                 key={j}
-                className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-[#2F5D50]"
+                className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-[#5B7F6D]"
               >
                 {part.slice(1, -1)}
               </code>

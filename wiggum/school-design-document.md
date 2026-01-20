@@ -1,56 +1,67 @@
 Visual Trust System: Colors & Google Fonts
 
+**Brand: EnrollSage** — "Wise guidance for enrollment journeys"
+
 You are designing for:
 	•	Heads of school
 	•	Business managers
 	•	Parents aged 35–60
-	•	An industry allergic to “startup vibes”
+	•	An industry allergic to "startup vibes"
 
 Visual Principles
 
 Your site should feel:
-	•	Calm
-	•	Established
-	•	Neutral
+	•	Calm & Wise (like sage advice)
+	•	Grounded & Natural (like the sage herb)
+	•	Established & Trustworthy
 	•	Quietly modern
 
 Not:
 	•	Playful
 	•	Trendy
 	•	Loud
-	•	“Edtech blue gradients”
+	•	"Edtech blue gradients"
 
 ⸻
 
-Color System (Trust-First Palette)
+Color System (Sage-Inspired Trust Palette)
 
-Primary Color: Deep Academic Navy
+Primary Color: Sage Green
 
-Use for headers, nav, anchors
-	•	Hex: #1F2A44
-	•	Signals: authority, permanence, competence
-	•	Feels “school-like” without being childish
+Use for headers, nav, CTAs, key actions
+	•	Hex: #5B7F6D
+	•	Signals: wisdom, growth, natural calm
+	•	Feels grounded, professional, and approachable
 
-This color performs extremely well in:
-	•	Finance
-	•	Education
-	•	Legal
-	•	Healthcare
-
-⸻
-
-Secondary Color: Muted Evergreen
-
-Use for accents, CTAs, success states
-	•	Hex: #2F5D50
-	•	Signals: growth, stewardship, responsibility
-	•	Feels institutional, not “startup green”
-
-Avoid neon or saturated greens.
+This color evokes:
+	•	The wisdom of sage advice
+	•	Natural growth and guidance
+	•	Calm, considered decisions
+	•	Trustworthy stewardship
 
 ⸻
 
-Backgrounds: Warm Off-White (Critical)
+Secondary Color: Deep Forest
+
+Use for text, dark accents, emphasis
+	•	Hex: #2D4F3E
+	•	Signals: depth, stability, expertise
+	•	Anchors the lighter sage tones
+
+Provides visual hierarchy and gravitas.
+
+⸻
+
+Tertiary Color: Warm Sage
+
+Use for highlights, secondary CTAs, hover states
+	•	Hex: #8AA896
+	•	Signals: approachability, openness
+	•	Softens the palette for friendly touches
+
+⸻
+
+Backgrounds: Sage Cream (Critical)
 
 Pure white feels:
 	•	Techy
@@ -58,12 +69,12 @@ Pure white feels:
 	•	Fatiguing
 
 Use instead:
-	•	Hex: #F7F5F2 (primary background)
+	•	Hex: #F8F9F6 (primary background - subtle sage undertone)
 	•	Secondary panels: #FFFFFF
 
 This subtly signals:
 
-“Paper. Trust. Forms. Records.”
+"Natural. Trustworthy. Thoughtful."
 
 ⸻
 
@@ -76,12 +87,12 @@ High contrast = accessibility = trust.
 
 ⸻
 
-Status Colors (Muted)
-	•	Success: #3A7F6B
-	•	Warning: #C9A227 (muted gold, not orange)
-	•	Error: #9C2F2F (brick red, not alarm red)
+Status Colors (Muted, Sage-Harmonious)
+	•	Success: #5B7F6D (matches primary sage)
+	•	Warning: #B8A044 (muted gold-sage)
+	•	Error: #8B4444 (muted terracotta, not alarm red)
 
-Avoid bright reds or greens.
+Colors harmonize with the sage palette.
 
 ⸻
 

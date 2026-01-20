@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Enrollsy** is a multi-tenant school enrollment and admissions management SaaS platform. Think "Shopify for school enrollment" - schools subscribe to manage admissions, enrollment, and billing, while families use the portal to apply and manage their children's enrollment.
+**EnrollSage** is a multi-tenant school enrollment and admissions management SaaS platform. Think "Shopify for school enrollment" - schools subscribe to manage admissions, enrollment, and billing, while families use the portal to apply and manage their children's enrollment.
 
 ## Development Commands
 
@@ -148,7 +148,7 @@ Every route MUST include proper metadata:
 ```typescript
 head: () => ({
   meta: [
-    { title: 'Page Name | Enrollsy' },
+    { title: 'Page Name | EnrollSage' },
     { name: 'description', content: '150-160 char description' },
     { property: 'og:title', content: 'Page Title' },
   ],

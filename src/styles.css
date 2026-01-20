@@ -1,41 +1,51 @@
-/* 🎨 Global Styles - The visual trust system for private schools
+/* 🌿 EnrollSage Global Styles - Wise guidance for enrollment journeys
    "This company understands schools." - First impression in 3 seconds
 
    ╭─────────────────────────────────────────────────────────────╮
    │  DESIGN PRINCIPLES                                          │
    │  ─────────────────────────────────────────────────────────  │
-   │  Calm • Established • Neutral • Quietly Modern              │
+   │  Calm & Wise • Grounded & Natural • Established • Modern    │
    │  NOT: Playful • Trendy • Loud • "Edtech blue gradients"     │
+   │                                                              │
+   │  🌿 Sage evokes: wisdom, growth, natural calm, guidance     │
    ╰─────────────────────────────────────────────────────────────╯
 */
 
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════════
-   DESIGN TOKENS - Trust-First Palette for Education
+   DESIGN TOKENS - Sage-Inspired Trust Palette
    Target: Heads of school, Business managers, Parents 35-60
+   Brand: EnrollSage — "Wise guidance for enrollment journeys"
    ═══════════════════════════════════════════════════════════ */
 
 :root {
-  /* Primary Colors - Academic Trust Palette */
-  --navy: #1F2A44;             /* Deep Academic Navy - authority, permanence */
-  --evergreen: #2F5D50;        /* Muted Evergreen - growth, stewardship */
-  --offwhite: #F7F5F2;         /* Warm Off-White - paper, trust, records */
+  /* Primary Colors - Sage Trust Palette 🌿 */
+  --sage: #5B7F6D;             /* Sage Green - wisdom, growth, natural calm */
+  --forest: #2D4F3E;           /* Deep Forest - depth, stability, expertise */
+  --sage-light: #8AA896;       /* Warm Sage - approachability, openness */
+  --sage-cream: #F8F9F6;       /* Sage Cream - subtle sage undertone background */
   --white: #FFFFFF;            /* Pure white - secondary panels */
+
+  /* Legacy aliases for backward compatibility */
+  --navy: #2D4F3E;             /* Maps to forest for any old references */
+  --evergreen: #5B7F6D;        /* Maps to sage for any old references */
+  --offwhite: #F8F9F6;         /* Maps to sage-cream */
 
   /* Text Colors - High contrast = accessibility = trust */
   --text-primary: #1E1E1E;     /* Primary text */
   --text-secondary: #5F6368;   /* Secondary text */
   --text-muted: #9AA0A6;       /* Disabled/muted */
 
-  /* Status Colors (Muted - not alarming) */
-  --success: #3A7F6B;          /* Muted success green */
-  --warning: #C9A227;          /* Muted gold, not orange */
-  --error: #9C2F2F;            /* Brick red, not alarm red */
+  /* Status Colors (Muted, Sage-Harmonious) */
+  --success: #5B7F6D;          /* Matches primary sage */
+  --warning: #B8A044;          /* Muted gold-sage */
+  --error: #8B4444;            /* Muted terracotta, not alarm red */
 
   /* Accent - For CTAs and key actions */
-  --accent: #2F5D50;           /* Same as evergreen for consistency */
-  --accent-hover: #234840;     /* Darker evergreen on hover */
+  --accent: #5B7F6D;           /* Primary sage for CTAs */
+  --accent-hover: #4A6B5B;     /* Darker sage on hover */
+  --accent-light: #8AA896;     /* Light sage for secondary actions */
 
   /* Typography - Trust + Readability combo */
   --font-display: 'Libre Baskerville', serif;  /* Academic, timeless, not experimental */
@@ -87,7 +97,7 @@ code {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   CUSTOM UTILITY CLASSES - Academic Trust System
+   CUSTOM UTILITY CLASSES - EnrollSage Trust System 🌿
    ═══════════════════════════════════════════════════════════ */
 
 /* Font families */
@@ -99,17 +109,29 @@ code {
   font-family: var(--font-body);
 }
 
-/* Brand colors - Trust palette */
-.bg-navy { background-color: var(--navy); }
-.bg-evergreen { background-color: var(--evergreen); }
-.bg-offwhite { background-color: var(--offwhite); }
+/* Brand colors - Sage Trust Palette 🌿 */
+.bg-sage { background-color: var(--sage); }
+.bg-forest { background-color: var(--forest); }
+.bg-sage-light { background-color: var(--sage-light); }
+.bg-sage-cream { background-color: var(--sage-cream); }
 
-.text-navy { color: var(--navy); }
-.text-evergreen { color: var(--evergreen); }
+.text-sage { color: var(--sage); }
+.text-forest { color: var(--forest); }
+.text-sage-light { color: var(--sage-light); }
 .text-primary { color: var(--text-primary); }
 .text-secondary { color: var(--text-secondary); }
 .text-muted { color: var(--text-muted); }
 
+.border-sage { border-color: var(--sage); }
+.border-forest { border-color: var(--forest); }
+.border-sage-light { border-color: var(--sage-light); }
+
+/* Legacy aliases - backward compatibility */
+.bg-navy { background-color: var(--navy); }
+.bg-evergreen { background-color: var(--evergreen); }
+.bg-offwhite { background-color: var(--offwhite); }
+.text-navy { color: var(--navy); }
+.text-evergreen { color: var(--evergreen); }
 .border-navy { border-color: var(--navy); }
 .border-evergreen { border-color: var(--evergreen); }
 

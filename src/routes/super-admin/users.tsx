@@ -3,7 +3,7 @@
 //
 // ╭────────────────────────────────────────────────────────────╮
 // │  USER DIRECTORY                                            │
-// │  View and manage all users across the Enrollsy platform.  │
+// │  View and manage all users across the EnrollSage platform.  │
 // │  Superadmins, school staff, and parents all in one view.  │
 // ╰────────────────────────────────────────────────────────────╯
 
@@ -152,8 +152,8 @@ function formatRelativeTime(date: Date | null | undefined): string {
 export const Route = createFileRoute('/super-admin/users')({
   head: () => ({
     meta: [
-      { title: 'Users | Enrollsy Super Admin' },
-      { name: 'description', content: 'View and manage all users on the Enrollsy platform.' },
+      { title: 'Users | EnrollSage Super Admin' },
+      { name: 'description', content: 'View and manage all users on the EnrollSage platform.' },
     ],
   }),
   loader: async () => {
@@ -198,17 +198,17 @@ function UsersPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Top Navigation */}
-      <nav className="bg-[#1F2A44] text-white">
+      <nav className="bg-[#2D4F3E] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <Link to="/" className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-[#2F5D50] rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
                   <span className="text-lg">🎓</span>
                 </div>
-                <span className="font-bold text-lg font-display">Enrollsy</span>
+                <span className="font-bold text-lg font-display">EnrollSage</span>
               </Link>
               <span className="text-xs bg-white/10 px-2 py-1 rounded">Super Admin</span>
             </div>
@@ -229,8 +229,8 @@ function UsersPage() {
         {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-[#1F2A44] font-display flex items-center gap-3">
-              <Users className="w-8 h-8 text-[#2F5D50]" />
+            <h1 className="text-3xl font-bold text-[#2D4F3E] font-display flex items-center gap-3">
+              <Users className="w-8 h-8 text-[#5B7F6D]" />
               Users
             </h1>
             <p className="text-gray-600">
@@ -253,7 +253,7 @@ function UsersPage() {
               className={cn(
                 'flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors',
                 roleFilter === tab.value
-                  ? 'bg-[#2F5D50] text-white border-[#2F5D50]'
+                  ? 'bg-[#5B7F6D] text-white border-[#5B7F6D]'
                   : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
               )}
             >
@@ -277,7 +277,7 @@ function UsersPage() {
               placeholder="Search by name or email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
             />
           </div>
         </div>
@@ -310,7 +310,7 @@ function UsersPage() {
                         )}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-[#1F2A44]">
+                        <h3 className="font-semibold text-[#2D4F3E]">
                           {user.firstName} {user.lastName}
                           {user.id === currentUser.id && (
                             <span className="text-xs text-gray-500 font-normal ml-2">(you)</span>

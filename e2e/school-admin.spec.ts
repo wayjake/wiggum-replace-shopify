@@ -340,9 +340,9 @@ test.describe('School Admin Dashboard', () => {
         return;
       }
 
-      // Should show school name or Enrollsy branding
+      // Should show school name or EnrollSage branding
       const pageContent = await page.textContent('body');
-      expect(pageContent?.toLowerCase()).toMatch(/enrollsy|academy|school|dashboard/);
+      expect(pageContent?.toLowerCase()).toMatch(/enrollsage|academy|school|dashboard/);
     });
 
     test('has logout option', async ({ page }) => {

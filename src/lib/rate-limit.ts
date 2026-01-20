@@ -1,4 +1,4 @@
-// 🚦 Rate Limiting - Keeping Enrollsy safe from abuse
+// 🚦 Rate Limiting - Keeping EnrollSage safe from abuse
 // Sliding window rate limiter for auth protection
 //
 // ╭────────────────────────────────────────────────────────────╮

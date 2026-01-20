@@ -183,7 +183,7 @@ const logoutUser = createServerFn({ method: 'POST' }).handler(async () => {
 export const Route = createFileRoute('/admin/settings')({
   head: () => ({
     meta: [
-      { title: 'Settings | School Dashboard | Enrollsy' },
+      { title: 'Settings | School Dashboard | EnrollSage' },
       { name: 'description', content: 'Configure your school settings, branding, and integrations.' },
     ],
   }),
@@ -213,8 +213,8 @@ function SettingsPage() {
   const [oauthMessage, setOauthMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Branding state
-  const [primaryColor, setPrimaryColor] = useState('#2F5D50');
-  const [accentColor, setAccentColor] = useState('#1F2A44');
+  const [primaryColor, setPrimaryColor] = useState('#5B7F6D');
+  const [accentColor, setAccentColor] = useState('#2D4F3E');
   const [logoUrl, setLogoUrl] = useState('');
   const [brandingSaving, setBrandingSaving] = useState(false);
   const [brandingMessage, setBrandingMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -223,8 +223,8 @@ function SettingsPage() {
   useEffect(() => {
     if (school) {
       setGoogleClientId(school.googleClientId || '');
-      setPrimaryColor(school.primaryColor || '#2F5D50');
-      setAccentColor(school.accentColor || '#1F2A44');
+      setPrimaryColor(school.primaryColor || '#5B7F6D');
+      setAccentColor(school.accentColor || '#2D4F3E');
       setLogoUrl(school.logoUrl || '');
     }
   }, [school]);
@@ -238,8 +238,8 @@ function SettingsPage() {
 
   if (!authResult.authenticated || !authResult.isAdmin) {
     return (
-      <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#2F5D50] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#5B7F6D] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -299,30 +299,30 @@ function SettingsPage() {
   const canEditSettings = userRole === 'owner' || userRole === 'admin';
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Admin Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <Link to="/" className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#2F5D50] rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
                   <span className="text-xl">🎓</span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-[#1F2A44] font-display">School Dashboard</h1>
+                  <h1 className="text-lg font-bold text-[#2D4F3E] font-display">School Dashboard</h1>
                   <p className="text-xs text-gray-500">{school?.name || 'Loading...'}</p>
                 </div>
               </Link>
             </div>
             <nav className="flex items-center gap-6">
-              <Link to="/admin" className="text-gray-600 hover:text-[#2F5D50]">Dashboard</Link>
-              <Link to="/admin/applications" className="text-gray-600 hover:text-[#2F5D50]">Applications</Link>
-              <Link to="/admin/leads" className="text-gray-600 hover:text-[#2F5D50]">Leads</Link>
-              <Link to="/admin/families" className="text-gray-600 hover:text-[#2F5D50]">Families</Link>
-              <Link to="/admin/students" className="text-gray-600 hover:text-[#2F5D50]">Students</Link>
-              <Link to="/admin/settings" className="text-[#2F5D50] font-medium">Settings</Link>
-              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#2F5D50] text-sm">
+              <Link to="/admin" className="text-gray-600 hover:text-[#5B7F6D]">Dashboard</Link>
+              <Link to="/admin/applications" className="text-gray-600 hover:text-[#5B7F6D]">Applications</Link>
+              <Link to="/admin/leads" className="text-gray-600 hover:text-[#5B7F6D]">Leads</Link>
+              <Link to="/admin/families" className="text-gray-600 hover:text-[#5B7F6D]">Families</Link>
+              <Link to="/admin/students" className="text-gray-600 hover:text-[#5B7F6D]">Students</Link>
+              <Link to="/admin/settings" className="text-[#5B7F6D] font-medium">Settings</Link>
+              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#5B7F6D] text-sm">
                 <LogOut className="w-4 h-4" /> Sign Out
               </button>
             </nav>
@@ -333,8 +333,8 @@ function SettingsPage() {
       <main className="max-w-4xl mx-auto px-6 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-[#1F2A44] font-display flex items-center gap-3">
-            <Settings className="w-7 h-7 text-[#2F5D50]" />
+          <h2 className="text-2xl font-bold text-[#2D4F3E] font-display flex items-center gap-3">
+            <Settings className="w-7 h-7 text-[#5B7F6D]" />
             School Settings
           </h2>
           <p className="text-gray-600">
@@ -351,8 +351,8 @@ function SettingsPage() {
             {/* School Info Card */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <div className="flex items-center gap-3 mb-4">
-                <Building2 className="w-5 h-5 text-[#2F5D50]" />
-                <h3 className="font-semibold text-[#1F2A44] font-display">School Information</h3>
+                <Building2 className="w-5 h-5 text-[#5B7F6D]" />
+                <h3 className="font-semibold text-[#2D4F3E] font-display">School Information</h3>
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
@@ -361,7 +361,7 @@ function SettingsPage() {
                 </div>
                 <div>
                   <span className="text-gray-500">Slug:</span>
-                  <span className="ml-2 font-mono text-[#2F5D50]">/{school?.slug}</span>
+                  <span className="ml-2 font-mono text-[#5B7F6D]">/{school?.slug}</span>
                 </div>
                 <div>
                   <span className="text-gray-500">Your Role:</span>
@@ -370,7 +370,7 @@ function SettingsPage() {
                 {school?.subdomain && (
                   <div>
                     <span className="text-gray-500">Subdomain:</span>
-                    <span className="ml-2 font-mono">{school.subdomain}.enrollsy.com</span>
+                    <span className="ml-2 font-mono">{school.subdomain}.enrollsage.com</span>
                   </div>
                 )}
               </div>
@@ -379,8 +379,8 @@ function SettingsPage() {
             {/* Google OAuth Settings */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <div className="flex items-center gap-3 mb-2">
-                <Key className="w-5 h-5 text-[#2F5D50]" />
-                <h3 className="font-semibold text-[#1F2A44] font-display">Google Sign-In</h3>
+                <Key className="w-5 h-5 text-[#5B7F6D]" />
+                <h3 className="font-semibold text-[#2D4F3E] font-display">Google Sign-In</h3>
               </div>
               <p className="text-sm text-gray-600 mb-6">
                 Allow families and staff to sign in with their Google accounts. You'll need to create OAuth credentials in the{' '}
@@ -388,7 +388,7 @@ function SettingsPage() {
                   href="https://console.cloud.google.com/apis/credentials"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#2F5D50] hover:underline inline-flex items-center gap-1"
+                  className="text-[#5B7F6D] hover:underline inline-flex items-center gap-1"
                 >
                   Google Cloud Console <ExternalLink className="w-3 h-3" />
                 </a>
@@ -434,7 +434,7 @@ function SettingsPage() {
                     placeholder="123456789-abc123.apps.googleusercontent.com"
                     disabled={!canEditSettings}
                     className={cn(
-                      'w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10 font-mono text-sm',
+                      'w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10 font-mono text-sm',
                       !canEditSettings && 'bg-gray-50 cursor-not-allowed'
                     )}
                   />
@@ -455,7 +455,7 @@ function SettingsPage() {
                       placeholder={school?.hasGoogleClientSecret ? '••••••••••••••••' : 'Enter client secret'}
                       disabled={!canEditSettings}
                       className={cn(
-                        'w-full px-4 py-3 pr-12 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10 font-mono text-sm',
+                        'w-full px-4 py-3 pr-12 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10 font-mono text-sm',
                         !canEditSettings && 'bg-gray-50 cursor-not-allowed'
                       )}
                     />
@@ -488,7 +488,7 @@ function SettingsPage() {
                       'flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors',
                       oauthSaving
                         ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                        : 'bg-[#2F5D50] text-white hover:bg-[#1F2A44]'
+                        : 'bg-[#5B7F6D] text-white hover:bg-[#2D4F3E]'
                     )}
                   >
                     {oauthSaving ? (
@@ -508,13 +508,13 @@ function SettingsPage() {
 
               {/* OAuth Setup Instructions */}
               <div className="mt-6 pt-6 border-t border-gray-200">
-                <h4 className="font-medium text-[#1F2A44] mb-3">Setup Instructions</h4>
+                <h4 className="font-medium text-[#2D4F3E] mb-3">Setup Instructions</h4>
                 <ol className="text-sm text-gray-600 space-y-2 list-decimal list-inside">
                   <li>Go to the Google Cloud Console and create a new project (or use an existing one)</li>
                   <li>Navigate to "APIs & Services" → "Credentials"</li>
                   <li>Click "Create Credentials" → "OAuth client ID"</li>
                   <li>Select "Web application" as the application type</li>
-                  <li>Add your redirect URI: <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">https://yourschool.enrollsy.com/api/auth/google/callback</code></li>
+                  <li>Add your redirect URI: <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">https://yourschool.enrollsage.com/api/auth/google/callback</code></li>
                   <li>Copy the Client ID and Client Secret into the fields above</li>
                 </ol>
               </div>
@@ -523,8 +523,8 @@ function SettingsPage() {
             {/* Branding Settings */}
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <div className="flex items-center gap-3 mb-2">
-                <Palette className="w-5 h-5 text-[#2F5D50]" />
-                <h3 className="font-semibold text-[#1F2A44] font-display">Branding</h3>
+                <Palette className="w-5 h-5 text-[#5B7F6D]" />
+                <h3 className="font-semibold text-[#2D4F3E] font-display">Branding</h3>
               </div>
               <p className="text-sm text-gray-600 mb-6">
                 Customize your school's appearance on the enrollment portal.
@@ -556,7 +556,7 @@ function SettingsPage() {
                         onChange={(e) => setPrimaryColor(e.target.value)}
                         disabled={!canEditSettings}
                         className={cn(
-                          'flex-1 px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] font-mono text-sm',
+                          'flex-1 px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] font-mono text-sm',
                           !canEditSettings && 'bg-gray-50 cursor-not-allowed'
                         )}
                       />
@@ -581,7 +581,7 @@ function SettingsPage() {
                         onChange={(e) => setAccentColor(e.target.value)}
                         disabled={!canEditSettings}
                         className={cn(
-                          'flex-1 px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] font-mono text-sm',
+                          'flex-1 px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] font-mono text-sm',
                           !canEditSettings && 'bg-gray-50 cursor-not-allowed'
                         )}
                       />
@@ -600,7 +600,7 @@ function SettingsPage() {
                     placeholder="https://example.com/logo.png"
                     disabled={!canEditSettings}
                     className={cn(
-                      'w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10 text-sm',
+                      'w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10 text-sm',
                       !canEditSettings && 'bg-gray-50 cursor-not-allowed'
                     )}
                   />
@@ -642,7 +642,7 @@ function SettingsPage() {
                       'flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors',
                       brandingSaving
                         ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                        : 'bg-[#2F5D50] text-white hover:bg-[#1F2A44]'
+                        : 'bg-[#5B7F6D] text-white hover:bg-[#2D4F3E]'
                     )}
                   >
                     {brandingSaving ? (

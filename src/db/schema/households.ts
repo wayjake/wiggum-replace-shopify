@@ -1,4 +1,4 @@
-// 👨‍👩‍👧‍👦 Households Schema - The family-centric core of Enrollsy
+// 👨‍👩‍👧‍👦 Households Schema - The family-centric core of EnrollSage
 // "Families, not just students. One household, one bill, one portal."
 
 import { sqliteTable, text, integer, unique } from 'drizzle-orm/sqlite-core';

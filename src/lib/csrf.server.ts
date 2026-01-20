@@ -1,4 +1,4 @@
-// 🛡️ CSRF Protection (Server-Side) - Keeping Enrollsy safe from cross-site attacks
+// 🛡️ CSRF Protection (Server-Side) - Keeping EnrollSage safe from cross-site attacks
 // Generates and validates CSRF tokens with HMAC signatures
 //
 // ╭────────────────────────────────────────────────────────────╮

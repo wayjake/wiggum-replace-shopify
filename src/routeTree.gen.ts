@@ -21,8 +21,11 @@ import { Route as PortalIndexRouteImport } from './routes/portal/index'
 import { Route as InstallIndexRouteImport } from './routes/install/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as SuperAdminUsersRouteImport } from './routes/super-admin/users'
+import { Route as SuperAdminSettingsRouteImport } from './routes/super-admin/settings'
 import { Route as SuperAdminSchoolsRouteImport } from './routes/super-admin/schools'
+import { Route as PortalSettingsRouteImport } from './routes/portal/settings'
 import { Route as PortalBillingRouteImport } from './routes/portal/billing'
+import { Route as PortalApplyRouteImport } from './routes/portal/apply'
 import { Route as PortalApplicationsRouteImport } from './routes/portal/applications'
 import { Route as InviteAcceptRouteImport } from './routes/invite/accept'
 import { Route as DemoFamilyRouteImport } from './routes/demo/family'
@@ -33,6 +36,12 @@ import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
 import { Route as AdminFamiliesRouteImport } from './routes/admin/families'
 import { Route as AdminApplicationsRouteImport } from './routes/admin/applications'
+import { Route as SuperAdminSchoolsNewRouteImport } from './routes/super-admin/schools/new'
+import { Route as SuperAdminSchoolsIdRouteImport } from './routes/super-admin/schools/$id'
+import { Route as AdminLeadsNewRouteImport } from './routes/admin/leads/new'
+import { Route as AdminLeadsIdRouteImport } from './routes/admin/leads/$id'
+import { Route as AdminFamiliesNewRouteImport } from './routes/admin/families/new'
+import { Route as AdminApplicationsIdRouteImport } from './routes/admin/applications/$id'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -94,14 +103,29 @@ const SuperAdminUsersRoute = SuperAdminUsersRouteImport.update({
   path: '/super-admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuperAdminSettingsRoute = SuperAdminSettingsRouteImport.update({
+  id: '/super-admin/settings',
+  path: '/super-admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SuperAdminSchoolsRoute = SuperAdminSchoolsRouteImport.update({
   id: '/super-admin/schools',
   path: '/super-admin/schools',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PortalSettingsRoute = PortalSettingsRouteImport.update({
+  id: '/portal/settings',
+  path: '/portal/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PortalBillingRoute = PortalBillingRouteImport.update({
   id: '/portal/billing',
   path: '/portal/billing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalApplyRoute = PortalApplyRouteImport.update({
+  id: '/portal/apply',
+  path: '/portal/apply',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PortalApplicationsRoute = PortalApplicationsRouteImport.update({
@@ -154,6 +178,36 @@ const AdminApplicationsRoute = AdminApplicationsRouteImport.update({
   path: '/admin/applications',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuperAdminSchoolsNewRoute = SuperAdminSchoolsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => SuperAdminSchoolsRoute,
+} as any)
+const SuperAdminSchoolsIdRoute = SuperAdminSchoolsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => SuperAdminSchoolsRoute,
+} as any)
+const AdminLeadsNewRoute = AdminLeadsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminLeadsRoute,
+} as any)
+const AdminLeadsIdRoute = AdminLeadsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminLeadsRoute,
+} as any)
+const AdminFamiliesNewRoute = AdminFamiliesNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminFamiliesRoute,
+} as any)
+const AdminApplicationsIdRoute = AdminApplicationsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminApplicationsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -163,9 +217,9 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
-  '/admin/applications': typeof AdminApplicationsRoute
-  '/admin/families': typeof AdminFamiliesRoute
-  '/admin/leads': typeof AdminLeadsRoute
+  '/admin/applications': typeof AdminApplicationsRouteWithChildren
+  '/admin/families': typeof AdminFamiliesRouteWithChildren
+  '/admin/leads': typeof AdminLeadsRouteWithChildren
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -173,13 +227,22 @@ export interface FileRoutesByFullPath {
   '/demo/family': typeof DemoFamilyRoute
   '/invite/accept': typeof InviteAcceptRoute
   '/portal/applications': typeof PortalApplicationsRoute
+  '/portal/apply': typeof PortalApplyRoute
   '/portal/billing': typeof PortalBillingRoute
-  '/super-admin/schools': typeof SuperAdminSchoolsRoute
+  '/portal/settings': typeof PortalSettingsRoute
+  '/super-admin/schools': typeof SuperAdminSchoolsRouteWithChildren
+  '/super-admin/settings': typeof SuperAdminSettingsRoute
   '/super-admin/users': typeof SuperAdminUsersRoute
   '/admin/': typeof AdminIndexRoute
   '/install/': typeof InstallIndexRoute
   '/portal/': typeof PortalIndexRoute
   '/super-admin/': typeof SuperAdminIndexRoute
+  '/admin/applications/$id': typeof AdminApplicationsIdRoute
+  '/admin/families/new': typeof AdminFamiliesNewRoute
+  '/admin/leads/$id': typeof AdminLeadsIdRoute
+  '/admin/leads/new': typeof AdminLeadsNewRoute
+  '/super-admin/schools/$id': typeof SuperAdminSchoolsIdRoute
+  '/super-admin/schools/new': typeof SuperAdminSchoolsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -189,9 +252,9 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
-  '/admin/applications': typeof AdminApplicationsRoute
-  '/admin/families': typeof AdminFamiliesRoute
-  '/admin/leads': typeof AdminLeadsRoute
+  '/admin/applications': typeof AdminApplicationsRouteWithChildren
+  '/admin/families': typeof AdminFamiliesRouteWithChildren
+  '/admin/leads': typeof AdminLeadsRouteWithChildren
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -199,13 +262,22 @@ export interface FileRoutesByTo {
   '/demo/family': typeof DemoFamilyRoute
   '/invite/accept': typeof InviteAcceptRoute
   '/portal/applications': typeof PortalApplicationsRoute
+  '/portal/apply': typeof PortalApplyRoute
   '/portal/billing': typeof PortalBillingRoute
-  '/super-admin/schools': typeof SuperAdminSchoolsRoute
+  '/portal/settings': typeof PortalSettingsRoute
+  '/super-admin/schools': typeof SuperAdminSchoolsRouteWithChildren
+  '/super-admin/settings': typeof SuperAdminSettingsRoute
   '/super-admin/users': typeof SuperAdminUsersRoute
   '/admin': typeof AdminIndexRoute
   '/install': typeof InstallIndexRoute
   '/portal': typeof PortalIndexRoute
   '/super-admin': typeof SuperAdminIndexRoute
+  '/admin/applications/$id': typeof AdminApplicationsIdRoute
+  '/admin/families/new': typeof AdminFamiliesNewRoute
+  '/admin/leads/$id': typeof AdminLeadsIdRoute
+  '/admin/leads/new': typeof AdminLeadsNewRoute
+  '/super-admin/schools/$id': typeof SuperAdminSchoolsIdRoute
+  '/super-admin/schools/new': typeof SuperAdminSchoolsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -216,9 +288,9 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
-  '/admin/applications': typeof AdminApplicationsRoute
-  '/admin/families': typeof AdminFamiliesRoute
-  '/admin/leads': typeof AdminLeadsRoute
+  '/admin/applications': typeof AdminApplicationsRouteWithChildren
+  '/admin/families': typeof AdminFamiliesRouteWithChildren
+  '/admin/leads': typeof AdminLeadsRouteWithChildren
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/students': typeof AdminStudentsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -226,13 +298,22 @@ export interface FileRoutesById {
   '/demo/family': typeof DemoFamilyRoute
   '/invite/accept': typeof InviteAcceptRoute
   '/portal/applications': typeof PortalApplicationsRoute
+  '/portal/apply': typeof PortalApplyRoute
   '/portal/billing': typeof PortalBillingRoute
-  '/super-admin/schools': typeof SuperAdminSchoolsRoute
+  '/portal/settings': typeof PortalSettingsRoute
+  '/super-admin/schools': typeof SuperAdminSchoolsRouteWithChildren
+  '/super-admin/settings': typeof SuperAdminSettingsRoute
   '/super-admin/users': typeof SuperAdminUsersRoute
   '/admin/': typeof AdminIndexRoute
   '/install/': typeof InstallIndexRoute
   '/portal/': typeof PortalIndexRoute
   '/super-admin/': typeof SuperAdminIndexRoute
+  '/admin/applications/$id': typeof AdminApplicationsIdRoute
+  '/admin/families/new': typeof AdminFamiliesNewRoute
+  '/admin/leads/$id': typeof AdminLeadsIdRoute
+  '/admin/leads/new': typeof AdminLeadsNewRoute
+  '/super-admin/schools/$id': typeof SuperAdminSchoolsIdRoute
+  '/super-admin/schools/new': typeof SuperAdminSchoolsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -254,13 +335,22 @@ export interface FileRouteTypes {
     | '/demo/family'
     | '/invite/accept'
     | '/portal/applications'
+    | '/portal/apply'
     | '/portal/billing'
+    | '/portal/settings'
     | '/super-admin/schools'
+    | '/super-admin/settings'
     | '/super-admin/users'
     | '/admin/'
     | '/install/'
     | '/portal/'
     | '/super-admin/'
+    | '/admin/applications/$id'
+    | '/admin/families/new'
+    | '/admin/leads/$id'
+    | '/admin/leads/new'
+    | '/super-admin/schools/$id'
+    | '/super-admin/schools/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -280,13 +370,22 @@ export interface FileRouteTypes {
     | '/demo/family'
     | '/invite/accept'
     | '/portal/applications'
+    | '/portal/apply'
     | '/portal/billing'
+    | '/portal/settings'
     | '/super-admin/schools'
+    | '/super-admin/settings'
     | '/super-admin/users'
     | '/admin'
     | '/install'
     | '/portal'
     | '/super-admin'
+    | '/admin/applications/$id'
+    | '/admin/families/new'
+    | '/admin/leads/$id'
+    | '/admin/leads/new'
+    | '/super-admin/schools/$id'
+    | '/super-admin/schools/new'
   id:
     | '__root__'
     | '/'
@@ -306,13 +405,22 @@ export interface FileRouteTypes {
     | '/demo/family'
     | '/invite/accept'
     | '/portal/applications'
+    | '/portal/apply'
     | '/portal/billing'
+    | '/portal/settings'
     | '/super-admin/schools'
+    | '/super-admin/settings'
     | '/super-admin/users'
     | '/admin/'
     | '/install/'
     | '/portal/'
     | '/super-admin/'
+    | '/admin/applications/$id'
+    | '/admin/families/new'
+    | '/admin/leads/$id'
+    | '/admin/leads/new'
+    | '/super-admin/schools/$id'
+    | '/super-admin/schools/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -323,9 +431,9 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   RegisterRoute: typeof RegisterRoute
   TermsRoute: typeof TermsRoute
-  AdminApplicationsRoute: typeof AdminApplicationsRoute
-  AdminFamiliesRoute: typeof AdminFamiliesRoute
-  AdminLeadsRoute: typeof AdminLeadsRoute
+  AdminApplicationsRoute: typeof AdminApplicationsRouteWithChildren
+  AdminFamiliesRoute: typeof AdminFamiliesRouteWithChildren
+  AdminLeadsRoute: typeof AdminLeadsRouteWithChildren
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminStudentsRoute: typeof AdminStudentsRoute
   AdminTeamRoute: typeof AdminTeamRoute
@@ -333,8 +441,11 @@ export interface RootRouteChildren {
   DemoFamilyRoute: typeof DemoFamilyRoute
   InviteAcceptRoute: typeof InviteAcceptRoute
   PortalApplicationsRoute: typeof PortalApplicationsRoute
+  PortalApplyRoute: typeof PortalApplyRoute
   PortalBillingRoute: typeof PortalBillingRoute
-  SuperAdminSchoolsRoute: typeof SuperAdminSchoolsRoute
+  PortalSettingsRoute: typeof PortalSettingsRoute
+  SuperAdminSchoolsRoute: typeof SuperAdminSchoolsRouteWithChildren
+  SuperAdminSettingsRoute: typeof SuperAdminSettingsRoute
   SuperAdminUsersRoute: typeof SuperAdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
   InstallIndexRoute: typeof InstallIndexRoute
@@ -428,6 +539,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuperAdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/super-admin/settings': {
+      id: '/super-admin/settings'
+      path: '/super-admin/settings'
+      fullPath: '/super-admin/settings'
+      preLoaderRoute: typeof SuperAdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/super-admin/schools': {
       id: '/super-admin/schools'
       path: '/super-admin/schools'
@@ -435,11 +553,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuperAdminSchoolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/portal/settings': {
+      id: '/portal/settings'
+      path: '/portal/settings'
+      fullPath: '/portal/settings'
+      preLoaderRoute: typeof PortalSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/portal/billing': {
       id: '/portal/billing'
       path: '/portal/billing'
       fullPath: '/portal/billing'
       preLoaderRoute: typeof PortalBillingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal/apply': {
+      id: '/portal/apply'
+      path: '/portal/apply'
+      fullPath: '/portal/apply'
+      preLoaderRoute: typeof PortalApplyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/portal/applications': {
@@ -512,8 +644,100 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminApplicationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/super-admin/schools/new': {
+      id: '/super-admin/schools/new'
+      path: '/new'
+      fullPath: '/super-admin/schools/new'
+      preLoaderRoute: typeof SuperAdminSchoolsNewRouteImport
+      parentRoute: typeof SuperAdminSchoolsRoute
+    }
+    '/super-admin/schools/$id': {
+      id: '/super-admin/schools/$id'
+      path: '/$id'
+      fullPath: '/super-admin/schools/$id'
+      preLoaderRoute: typeof SuperAdminSchoolsIdRouteImport
+      parentRoute: typeof SuperAdminSchoolsRoute
+    }
+    '/admin/leads/new': {
+      id: '/admin/leads/new'
+      path: '/new'
+      fullPath: '/admin/leads/new'
+      preLoaderRoute: typeof AdminLeadsNewRouteImport
+      parentRoute: typeof AdminLeadsRoute
+    }
+    '/admin/leads/$id': {
+      id: '/admin/leads/$id'
+      path: '/$id'
+      fullPath: '/admin/leads/$id'
+      preLoaderRoute: typeof AdminLeadsIdRouteImport
+      parentRoute: typeof AdminLeadsRoute
+    }
+    '/admin/families/new': {
+      id: '/admin/families/new'
+      path: '/new'
+      fullPath: '/admin/families/new'
+      preLoaderRoute: typeof AdminFamiliesNewRouteImport
+      parentRoute: typeof AdminFamiliesRoute
+    }
+    '/admin/applications/$id': {
+      id: '/admin/applications/$id'
+      path: '/$id'
+      fullPath: '/admin/applications/$id'
+      preLoaderRoute: typeof AdminApplicationsIdRouteImport
+      parentRoute: typeof AdminApplicationsRoute
+    }
   }
 }
+
+interface AdminApplicationsRouteChildren {
+  AdminApplicationsIdRoute: typeof AdminApplicationsIdRoute
+}
+
+const AdminApplicationsRouteChildren: AdminApplicationsRouteChildren = {
+  AdminApplicationsIdRoute: AdminApplicationsIdRoute,
+}
+
+const AdminApplicationsRouteWithChildren =
+  AdminApplicationsRoute._addFileChildren(AdminApplicationsRouteChildren)
+
+interface AdminFamiliesRouteChildren {
+  AdminFamiliesNewRoute: typeof AdminFamiliesNewRoute
+}
+
+const AdminFamiliesRouteChildren: AdminFamiliesRouteChildren = {
+  AdminFamiliesNewRoute: AdminFamiliesNewRoute,
+}
+
+const AdminFamiliesRouteWithChildren = AdminFamiliesRoute._addFileChildren(
+  AdminFamiliesRouteChildren,
+)
+
+interface AdminLeadsRouteChildren {
+  AdminLeadsIdRoute: typeof AdminLeadsIdRoute
+  AdminLeadsNewRoute: typeof AdminLeadsNewRoute
+}
+
+const AdminLeadsRouteChildren: AdminLeadsRouteChildren = {
+  AdminLeadsIdRoute: AdminLeadsIdRoute,
+  AdminLeadsNewRoute: AdminLeadsNewRoute,
+}
+
+const AdminLeadsRouteWithChildren = AdminLeadsRoute._addFileChildren(
+  AdminLeadsRouteChildren,
+)
+
+interface SuperAdminSchoolsRouteChildren {
+  SuperAdminSchoolsIdRoute: typeof SuperAdminSchoolsIdRoute
+  SuperAdminSchoolsNewRoute: typeof SuperAdminSchoolsNewRoute
+}
+
+const SuperAdminSchoolsRouteChildren: SuperAdminSchoolsRouteChildren = {
+  SuperAdminSchoolsIdRoute: SuperAdminSchoolsIdRoute,
+  SuperAdminSchoolsNewRoute: SuperAdminSchoolsNewRoute,
+}
+
+const SuperAdminSchoolsRouteWithChildren =
+  SuperAdminSchoolsRoute._addFileChildren(SuperAdminSchoolsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -523,9 +747,9 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   RegisterRoute: RegisterRoute,
   TermsRoute: TermsRoute,
-  AdminApplicationsRoute: AdminApplicationsRoute,
-  AdminFamiliesRoute: AdminFamiliesRoute,
-  AdminLeadsRoute: AdminLeadsRoute,
+  AdminApplicationsRoute: AdminApplicationsRouteWithChildren,
+  AdminFamiliesRoute: AdminFamiliesRouteWithChildren,
+  AdminLeadsRoute: AdminLeadsRouteWithChildren,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminStudentsRoute: AdminStudentsRoute,
   AdminTeamRoute: AdminTeamRoute,
@@ -533,8 +757,11 @@ const rootRouteChildren: RootRouteChildren = {
   DemoFamilyRoute: DemoFamilyRoute,
   InviteAcceptRoute: InviteAcceptRoute,
   PortalApplicationsRoute: PortalApplicationsRoute,
+  PortalApplyRoute: PortalApplyRoute,
   PortalBillingRoute: PortalBillingRoute,
-  SuperAdminSchoolsRoute: SuperAdminSchoolsRoute,
+  PortalSettingsRoute: PortalSettingsRoute,
+  SuperAdminSchoolsRoute: SuperAdminSchoolsRouteWithChildren,
+  SuperAdminSettingsRoute: SuperAdminSettingsRoute,
   SuperAdminUsersRoute: SuperAdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
   InstallIndexRoute: InstallIndexRoute,

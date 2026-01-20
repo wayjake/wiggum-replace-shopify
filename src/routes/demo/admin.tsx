@@ -4,7 +4,7 @@
 // ╭────────────────────────────────────────────────────────────╮
 // │  SCHOOL ADMIN DEMO                                          │
 // │  An interactive walkthrough of what school administrators   │
-// │  see when they log into Enrollsy. No login required!        │
+// │  see when they log into EnrollSage. No login required!        │
 // ╰────────────────────────────────────────────────────────────╯
 
 import { createFileRoute, Link } from '@tanstack/react-router';
@@ -66,7 +66,7 @@ const mockLeads = [
 const tourSteps = [
   {
     id: 'welcome',
-    title: 'Welcome to Your Dashboard! 🎓',
+    title: 'Welcome to Your Dashboard! 🌿',
     description: 'This is your command center. At a glance, see everything happening in your school - families, students, applications, and leads.',
     target: 'dashboard-stats',
     position: 'bottom',
@@ -108,9 +108,9 @@ const tourSteps = [
 export const Route = createFileRoute('/demo/admin')({
   head: () => ({
     meta: [
-      { title: 'School Admin Demo | Enrollsy' },
-      { name: 'description', content: 'See what school administrators can do with Enrollsy. Interactive demo - no login required.' },
-      { property: 'og:title', content: 'School Admin Demo | Enrollsy' },
+      { title: 'School Admin Demo | EnrollSage' },
+      { name: 'description', content: 'See what school administrators can do with EnrollSage. Interactive demo - no login required.' },
+      { property: 'og:title', content: 'School Admin Demo | EnrollSage' },
     ],
   }),
   component: AdminDemo,
@@ -147,9 +147,9 @@ function AdminDemo() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Demo Banner */}
-      <div className="bg-gradient-to-r from-[#2F5D50] to-[#1F2A44] text-white py-3 px-6">
+      <div className="bg-gradient-to-r from-[#5B7F6D] to-[#2D4F3E] text-white py-3 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Sparkles className="w-5 h-5" />
@@ -174,7 +174,7 @@ function AdminDemo() {
             </Link>
             <Link
               to="/contact"
-              className="bg-white text-[#2F5D50] px-4 py-1.5 rounded-md text-sm font-medium hover:bg-white/90"
+              className="bg-white text-[#5B7F6D] px-4 py-1.5 rounded-md text-sm font-medium hover:bg-white/90"
             >
               Get Started
             </Link>
@@ -188,11 +188,11 @@ function AdminDemo() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#2F5D50] rounded-lg flex items-center justify-center">
-                  <span className="text-xl">🎓</span>
+                <div className="w-10 h-10 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
+                  <span className="text-xl">🌿</span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-[#1F2A44] font-display">School Dashboard</h1>
+                  <h1 className="text-lg font-bold text-[#2D4F3E] font-display">School Dashboard</h1>
                   <p className="text-xs text-gray-500">Westlake Academy</p>
                 </div>
               </div>
@@ -200,7 +200,7 @@ function AdminDemo() {
 
             {/* Admin Nav */}
             <nav className="flex items-center gap-6">
-              <span className="text-[#2F5D50] font-medium cursor-default">Dashboard</span>
+              <span className="text-[#5B7F6D] font-medium cursor-default">Dashboard</span>
               <span className="text-gray-400 cursor-not-allowed">Applications</span>
               <span className="text-gray-400 cursor-not-allowed">Leads</span>
               <span className="text-gray-400 cursor-not-allowed">Families</span>
@@ -220,7 +220,7 @@ function AdminDemo() {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Welcome Header */}
         <div className="mb-8" id="dashboard-stats">
-          <h2 className="text-2xl font-bold text-[#1F2A44] font-display">
+          <h2 className="text-2xl font-bold text-[#2D4F3E] font-display">
             Welcome back, Sarah!
           </h2>
           <p className="text-gray-600">Here's what's happening with your school today.</p>
@@ -271,16 +271,16 @@ function AdminDemo() {
           <div
             className={cn(
               "lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6 transition-all",
-              showTour && currentStep === 2 && "ring-2 ring-[#2F5D50] ring-offset-2"
+              showTour && currentStep === 2 && "ring-2 ring-[#5B7F6D] ring-offset-2"
             )}
             id="applications-section"
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-[#1F2A44] font-display flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#2F5D50]" />
+              <h3 className="text-lg font-semibold text-[#2D4F3E] font-display flex items-center gap-2">
+                <FileText className="w-5 h-5 text-[#5B7F6D]" />
                 Recent Applications
               </h3>
-              <span className="text-sm text-[#2F5D50] flex items-center gap-1 cursor-pointer hover:underline">
+              <span className="text-sm text-[#5B7F6D] flex items-center gap-1 cursor-pointer hover:underline">
                 View all <ArrowRight className="w-4 h-4" />
               </span>
             </div>
@@ -291,7 +291,7 @@ function AdminDemo() {
                   className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50 px-2 -mx-2 rounded cursor-pointer"
                 >
                   <div>
-                    <p className="font-medium text-[#1F2A44]">{app.studentName}</p>
+                    <p className="font-medium text-[#2D4F3E]">{app.studentName}</p>
                     <p className="text-sm text-gray-500">
                       Grade {app.grade} • {app.schoolYear} • {app.date}
                     </p>
@@ -310,19 +310,19 @@ function AdminDemo() {
             <div
               className={cn(
                 "bg-white rounded-xl border border-gray-200 p-6 transition-all",
-                showTour && currentStep === 4 && "ring-2 ring-[#2F5D50] ring-offset-2"
+                showTour && currentStep === 4 && "ring-2 ring-[#5B7F6D] ring-offset-2"
               )}
               id="quick-actions"
             >
-              <h3 className="font-semibold text-[#1F2A44] mb-4 font-display">Quick Actions</h3>
+              <h3 className="font-semibold text-[#2D4F3E] mb-4 font-display">Quick Actions</h3>
               <div className="space-y-2">
-                <button className="block w-full py-2 px-4 bg-[#2F5D50] text-white rounded-lg text-center hover:bg-[#1F2A44] transition-colors">
+                <button className="block w-full py-2 px-4 bg-[#5B7F6D] text-white rounded-lg text-center hover:bg-[#2D4F3E] transition-colors">
                   + Add New Lead
                 </button>
-                <button className="block w-full py-2 px-4 bg-gray-100 text-[#1F2A44] rounded-lg text-center hover:bg-gray-200 transition-colors">
+                <button className="block w-full py-2 px-4 bg-gray-100 text-[#2D4F3E] rounded-lg text-center hover:bg-gray-200 transition-colors">
                   + Register Family
                 </button>
-                <button className="block w-full py-2 px-4 bg-gray-100 text-[#1F2A44] rounded-lg text-center hover:bg-gray-200 transition-colors">
+                <button className="block w-full py-2 px-4 bg-gray-100 text-[#2D4F3E] rounded-lg text-center hover:bg-gray-200 transition-colors">
                   Review Applications
                 </button>
               </div>
@@ -332,16 +332,16 @@ function AdminDemo() {
             <div
               className={cn(
                 "bg-white rounded-xl border border-gray-200 p-6 transition-all",
-                showTour && currentStep === 3 && "ring-2 ring-[#2F5D50] ring-offset-2"
+                showTour && currentStep === 3 && "ring-2 ring-[#5B7F6D] ring-offset-2"
               )}
               id="leads-section"
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-[#1F2A44] font-display flex items-center gap-2">
-                  <UserPlus className="w-4 h-4 text-[#2F5D50]" />
+                <h3 className="font-semibold text-[#2D4F3E] font-display flex items-center gap-2">
+                  <UserPlus className="w-4 h-4 text-[#5B7F6D]" />
                   Recent Leads
                 </h3>
-                <span className="text-xs text-[#2F5D50] cursor-pointer hover:underline">
+                <span className="text-xs text-[#5B7F6D] cursor-pointer hover:underline">
                   View all
                 </span>
               </div>
@@ -351,7 +351,7 @@ function AdminDemo() {
                     key={lead.id}
                     className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
                   >
-                    <p className="font-medium text-[#1F2A44] text-sm">{lead.name}</p>
+                    <p className="font-medium text-[#2D4F3E] text-sm">{lead.name}</p>
                     <p className="text-xs text-gray-500">
                       {lead.students} student{lead.students !== 1 ? 's' : ''} • {lead.date}
                     </p>
@@ -362,7 +362,7 @@ function AdminDemo() {
             </div>
 
             {/* Enrollment Period */}
-            <div className="bg-[#2F5D50] rounded-xl p-6 text-white">
+            <div className="bg-[#5B7F6D] rounded-xl p-6 text-white">
               <div className="flex items-center gap-2 mb-2">
                 <Calendar className="w-5 h-5" />
                 <span className="text-sm text-white/70">Current School Year</span>
@@ -395,20 +395,20 @@ function AdminDemo() {
       {/* Completion CTA */}
       {tourCompleted && !showTour && (
         <div className="fixed bottom-6 right-6 bg-white rounded-xl shadow-lg border border-gray-200 p-6 max-w-sm animate-slide-up">
-          <h3 className="font-semibold text-[#1F2A44] mb-2">Ready to transform your admissions?</h3>
+          <h3 className="font-semibold text-[#2D4F3E] mb-2">Ready to transform your admissions?</h3>
           <p className="text-sm text-gray-600 mb-4">
-            See how Enrollsy can work for your school. Schedule a personalized demo with our team.
+            See how EnrollSage can work for your school. Schedule a personalized demo with our team.
           </p>
           <div className="flex gap-3">
             <Link
               to="/contact"
-              className="flex-1 bg-[#2F5D50] text-white px-4 py-2 rounded-lg text-center text-sm font-medium hover:bg-[#1F2A44]"
+              className="flex-1 bg-[#5B7F6D] text-white px-4 py-2 rounded-lg text-center text-sm font-medium hover:bg-[#2D4F3E]"
             >
               Schedule Demo
             </Link>
             <Link
               to="/demo/family"
-              className="flex-1 border border-gray-200 text-[#1F2A44] px-4 py-2 rounded-lg text-center text-sm hover:bg-gray-50"
+              className="flex-1 border border-gray-200 text-[#2D4F3E] px-4 py-2 rounded-lg text-center text-sm hover:bg-gray-50"
             >
               Family Demo
             </Link>
@@ -453,12 +453,12 @@ function TourOverlay({
         </button>
 
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs text-[#2F5D50] font-medium bg-[#2F5D50]/10 px-2 py-1 rounded-full">
+          <span className="text-xs text-[#5B7F6D] font-medium bg-[#5B7F6D]/10 px-2 py-1 rounded-full">
             Step {currentStep + 1} of {totalSteps}
           </span>
         </div>
 
-        <h3 className="text-lg font-semibold text-[#1F2A44] mb-2">{step.title}</h3>
+        <h3 className="text-lg font-semibold text-[#2D4F3E] mb-2">{step.title}</h3>
         <p className="text-gray-600 text-sm mb-6">{step.description}</p>
 
         {/* Progress bar */}
@@ -468,7 +468,7 @@ function TourOverlay({
               key={i}
               className={cn(
                 "h-1 flex-1 rounded-full transition-colors",
-                i <= currentStep ? "bg-[#2F5D50]" : "bg-gray-200"
+                i <= currentStep ? "bg-[#5B7F6D]" : "bg-gray-200"
               )}
             />
           ))}
@@ -480,14 +480,14 @@ function TourOverlay({
             disabled={currentStep === 0}
             className={cn(
               "flex items-center gap-1 text-sm",
-              currentStep === 0 ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-[#2F5D50]"
+              currentStep === 0 ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-[#5B7F6D]"
             )}
           >
             <ChevronLeft className="w-4 h-4" /> Back
           </button>
           <button
             onClick={onNext}
-            className="flex items-center gap-1 bg-[#2F5D50] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1F2A44]"
+            className="flex items-center gap-1 bg-[#5B7F6D] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#2D4F3E]"
           >
             {currentStep === totalSteps - 1 ? 'Finish Tour' : 'Next'}
             <ChevronRight className="w-4 h-4" />
@@ -518,8 +518,8 @@ function StatCard({
   highlighted?: boolean;
 }) {
   const colors = {
-    evergreen: 'bg-[#2F5D50]/10 text-[#2F5D50]',
-    navy: 'bg-[#1F2A44]/10 text-[#1F2A44]',
+    evergreen: 'bg-[#5B7F6D]/10 text-[#5B7F6D]',
+    navy: 'bg-[#2D4F3E]/10 text-[#2D4F3E]',
     blue: 'bg-blue-100 text-blue-600',
     amber: 'bg-amber-100 text-amber-600',
     purple: 'bg-purple-100 text-purple-600',
@@ -528,7 +528,7 @@ function StatCard({
   return (
     <div className={cn(
       "bg-white rounded-xl border border-gray-200 p-6 transition-all",
-      highlighted && "ring-2 ring-[#2F5D50] ring-offset-2"
+      highlighted && "ring-2 ring-[#5B7F6D] ring-offset-2"
     )}>
       <div className="flex items-center justify-between mb-4">
         <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center', colors[color])}>
@@ -540,7 +540,7 @@ function StatCard({
           </span>
         )}
       </div>
-      <p className="text-2xl font-bold text-[#1F2A44]">{value}</p>
+      <p className="text-2xl font-bold text-[#2D4F3E]">{value}</p>
       <p className="text-sm text-gray-500">{label}</p>
     </div>
   );
@@ -557,7 +557,7 @@ function StatusBadge({ status }: { status: string }) {
     waitlisted: 'bg-orange-100 text-orange-700',
     denied: 'bg-red-100 text-red-700',
     withdrawn: 'bg-gray-100 text-gray-700',
-    enrolled: 'bg-[#2F5D50]/20 text-[#2F5D50]',
+    enrolled: 'bg-[#5B7F6D]/20 text-[#5B7F6D]',
   };
 
   const labels: Record<string, string> = {
@@ -586,7 +586,7 @@ function LeadStageBadge({ stage }: { stage: string }) {
     tour_scheduled: 'bg-purple-100 text-purple-700',
     tour_completed: 'bg-amber-100 text-amber-700',
     applied: 'bg-green-100 text-green-700',
-    converted: 'bg-[#2F5D50]/20 text-[#2F5D50]',
+    converted: 'bg-[#5B7F6D]/20 text-[#5B7F6D]',
     lost: 'bg-gray-100 text-gray-500',
   };
 

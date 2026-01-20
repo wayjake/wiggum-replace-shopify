@@ -136,7 +136,7 @@ function formatRelativeTime(date: Date | null | undefined): string {
 export const Route = createFileRoute('/admin/applications')({
   head: () => ({
     meta: [
-      { title: 'Applications | School Dashboard | Enrollsy' },
+      { title: 'Applications | School Dashboard | EnrollSage' },
       { name: 'description', content: 'Review and manage student applications.' },
     ],
   }),
@@ -168,8 +168,8 @@ function ApplicationsPage() {
 
   if (!authResult.authenticated || !authResult.isAdmin) {
     return (
-      <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#2F5D50] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#5B7F6D] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -190,29 +190,29 @@ function ApplicationsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Admin Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <Link to="/" className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#2F5D50] rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
                   <span className="text-xl">🎓</span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-[#1F2A44] font-display">School Dashboard</h1>
+                  <h1 className="text-lg font-bold text-[#2D4F3E] font-display">School Dashboard</h1>
                   <p className="text-xs text-gray-500">Westlake Academy</p>
                 </div>
               </Link>
             </div>
             <nav className="flex items-center gap-6">
-              <Link to="/admin" className="text-gray-600 hover:text-[#2F5D50]">Dashboard</Link>
-              <Link to="/admin/applications" className="text-[#2F5D50] font-medium">Applications</Link>
-              <a href="/admin/leads" className="text-gray-600 hover:text-[#2F5D50]">Leads</a>
-              <Link to="/admin/families" className="text-gray-600 hover:text-[#2F5D50]">Families</Link>
-              <Link to="/admin/students" className="text-gray-600 hover:text-[#2F5D50]">Students</Link>
-              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#2F5D50] text-sm">
+              <Link to="/admin" className="text-gray-600 hover:text-[#5B7F6D]">Dashboard</Link>
+              <Link to="/admin/applications" className="text-[#5B7F6D] font-medium">Applications</Link>
+              <a href="/admin/leads" className="text-gray-600 hover:text-[#5B7F6D]">Leads</a>
+              <Link to="/admin/families" className="text-gray-600 hover:text-[#5B7F6D]">Families</Link>
+              <Link to="/admin/students" className="text-gray-600 hover:text-[#5B7F6D]">Students</Link>
+              <button onClick={handleLogout} className="flex items-center gap-1 text-gray-500 hover:text-[#5B7F6D] text-sm">
                 <LogOut className="w-4 h-4" /> Sign Out
               </button>
             </nav>
@@ -224,8 +224,8 @@ function ApplicationsPage() {
         {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-[#1F2A44] font-display flex items-center gap-3">
-              <FileText className="w-7 h-7 text-[#2F5D50]" />
+            <h2 className="text-2xl font-bold text-[#2D4F3E] font-display flex items-center gap-3">
+              <FileText className="w-7 h-7 text-[#5B7F6D]" />
               Applications
             </h2>
             <p className="text-gray-600">
@@ -241,7 +241,7 @@ function ApplicationsPage() {
             className={cn(
               'p-4 rounded-lg border text-left transition-colors',
               statusFilter === 'all'
-                ? 'bg-[#2F5D50] text-white border-[#2F5D50]'
+                ? 'bg-[#5B7F6D] text-white border-[#5B7F6D]'
                 : 'bg-white border-gray-200 hover:bg-gray-50'
             )}
           >
@@ -295,13 +295,13 @@ function ApplicationsPage() {
               placeholder="Search by student or family name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
             />
           </div>
           {statusFilter !== 'all' && (
             <button
               onClick={() => setStatusFilter('all')}
-              className="text-sm text-[#2F5D50] hover:underline"
+              className="text-sm text-[#5B7F6D] hover:underline"
             >
               Clear filter
             </button>
@@ -324,7 +324,7 @@ function ApplicationsPage() {
                         <User className="w-6 h-6 text-blue-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-[#1F2A44]">{app.studentName}</h3>
+                        <h3 className="font-semibold text-[#2D4F3E]">{app.studentName}</h3>
                         <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
                           <span>{app.householdName}</span>
                           <span>•</span>
@@ -385,7 +385,7 @@ function StatusBadge({ status }: { status: string }) {
     waitlisted: 'bg-orange-100 text-orange-700',
     denied: 'bg-red-100 text-red-700',
     withdrawn: 'bg-gray-100 text-gray-700',
-    enrolled: 'bg-[#2F5D50]/20 text-[#2F5D50]',
+    enrolled: 'bg-[#5B7F6D]/20 text-[#5B7F6D]',
   };
 
   const labels: Record<string, string> = {

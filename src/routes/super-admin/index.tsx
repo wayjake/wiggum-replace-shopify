@@ -3,7 +3,7 @@
 //
 // ╭────────────────────────────────────────────────────────────╮
 // │  🛡️ SUPERADMIN ONLY                                        │
-// │  This dashboard is for Enrollsy platform administrators.   │
+// │  This dashboard is for EnrollSage platform administrators.   │
 // │  Manage schools, monitor usage, and configure platform.    │
 // ╰────────────────────────────────────────────────────────────╯
 
@@ -98,10 +98,10 @@ const logoutUser = createServerFn({ method: 'POST' }).handler(async () => {
 export const Route = createFileRoute('/super-admin/')({
   head: () => ({
     meta: [
-      { title: 'Platform Dashboard | Enrollsy Super Admin' },
+      { title: 'Platform Dashboard | EnrollSage Super Admin' },
       {
         name: 'description',
-        content: 'Manage schools, monitor platform usage, and configure Enrollsy settings.',
+        content: 'Manage schools, monitor platform usage, and configure EnrollSage settings.',
       },
     ],
   }),
@@ -148,16 +148,16 @@ function SuperAdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Top Navigation */}
-      <nav className="bg-[#1F2A44] text-white">
+      <nav className="bg-[#2D4F3E] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#2F5D50] rounded-lg flex items-center justify-center">
-                <span className="text-lg">🎓</span>
+              <div className="w-8 h-8 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
+                <span className="text-lg">🌿</span>
               </div>
-              <span className="font-bold text-lg font-display">Enrollsy</span>
+              <span className="font-bold text-lg font-display">EnrollSage</span>
               <span className="text-xs bg-white/10 px-2 py-1 rounded">Super Admin</span>
             </div>
 
@@ -181,11 +181,11 @@ function SuperAdminDashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#1F2A44] font-display">
+          <h1 className="text-3xl font-bold text-[#2D4F3E] font-display">
             Platform Dashboard
           </h1>
           <p className="text-gray-600 mt-1">
-            Monitor and manage all Enrollsy schools from one place.
+            Monitor and manage all EnrollSage schools from one place.
           </p>
         </div>
 
@@ -195,13 +195,13 @@ function SuperAdminDashboard() {
             icon={Building2}
             label="Schools"
             value={stats.schools}
-            color="bg-[#2F5D50]"
+            color="bg-[#5B7F6D]"
           />
           <StatCard
             icon={Users}
             label="Users"
             value={stats.users}
-            color="bg-[#1F2A44]"
+            color="bg-[#2D4F3E]"
           />
           <StatCard
             icon={Home}
@@ -222,7 +222,7 @@ function SuperAdminDashboard() {
           {/* Quick Actions */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h2 className="text-lg font-semibold text-[#1F2A44] mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-[#2D4F3E] mb-4 flex items-center gap-2">
                 <Activity className="w-5 h-5" />
                 Quick Actions
               </h2>
@@ -255,13 +255,13 @@ function SuperAdminDashboard() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-[#1F2A44] flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-[#2D4F3E] flex items-center gap-2">
                   <Building2 className="w-5 h-5" />
                   Recent Schools
                 </h2>
                 <a
                   href="/super-admin/schools"
-                  className="text-sm text-[#2F5D50] hover:underline"
+                  className="text-sm text-[#5B7F6D] hover:underline"
                 >
                   View all
                 </a>
@@ -273,7 +273,7 @@ function SuperAdminDashboard() {
                   <p>No schools yet</p>
                   <a
                     href="/super-admin/schools/new"
-                    className="text-[#2F5D50] hover:underline text-sm"
+                    className="text-[#5B7F6D] hover:underline text-sm"
                   >
                     Create your first school
                   </a>
@@ -286,11 +286,11 @@ function SuperAdminDashboard() {
                       className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-[#2F5D50] rounded-lg flex items-center justify-center text-white">
+                        <div className="w-10 h-10 bg-[#5B7F6D] rounded-lg flex items-center justify-center text-white">
                           <Building2 className="w-5 h-5" />
                         </div>
                         <div>
-                          <p className="font-medium text-[#1F2A44]">{school.name}</p>
+                          <p className="font-medium text-[#2D4F3E]">{school.name}</p>
                           <p className="text-sm text-gray-500">/{school.slug}</p>
                         </div>
                       </div>
@@ -309,7 +309,7 @@ function SuperAdminDashboard() {
                         </span>
                         <a
                           href={`/super-admin/schools/${school.id}`}
-                          className="text-[#2F5D50] hover:underline text-sm"
+                          className="text-[#5B7F6D] hover:underline text-sm"
                         >
                           Manage
                         </a>
@@ -324,7 +324,7 @@ function SuperAdminDashboard() {
 
         {/* Platform Health Section */}
         <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-semibold text-[#1F2A44] mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-[#2D4F3E] mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5" />
             Platform Health
           </h2>
@@ -373,7 +373,7 @@ function StatCard({
           <Icon className="w-6 h-6" />
         </div>
         <div>
-          <p className="text-2xl font-bold text-[#1F2A44]">{value}</p>
+          <p className="text-2xl font-bold text-[#2D4F3E]">{value}</p>
           <p className="text-sm text-gray-500">{label}</p>
         </div>
       </div>
@@ -395,7 +395,7 @@ function QuickAction({
       href={href}
       className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
     >
-      <div className="w-8 h-8 bg-[#2F5D50]/10 rounded-lg flex items-center justify-center text-[#2F5D50] group-hover:bg-[#2F5D50] group-hover:text-white transition-colors">
+      <div className="w-8 h-8 bg-[#5B7F6D]/10 rounded-lg flex items-center justify-center text-[#5B7F6D] group-hover:bg-[#5B7F6D] group-hover:text-white transition-colors">
         <Icon className="w-4 h-4" />
       </div>
       <span className="text-sm font-medium text-gray-700">{label}</span>
@@ -427,7 +427,7 @@ function HealthCard({
   return (
     <div className="p-4 rounded-lg bg-gray-50">
       <div className="flex items-center justify-between mb-2">
-        <span className="font-medium text-[#1F2A44]">{label}</span>
+        <span className="font-medium text-[#2D4F3E]">{label}</span>
         <span className={cn('text-xs px-2 py-1 rounded-full', statusColors[status])}>
           <span className={cn('inline-block w-2 h-2 rounded-full mr-1', statusDot[status])} />
           {status}

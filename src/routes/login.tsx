@@ -1,4 +1,4 @@
-// 🔐 Login Page - The gateway to Enrollsy
+// 🌿 Login Page - The gateway to EnrollSage
 // "One login to rule them all" - The Fellowship of the Login
 //
 // ╭────────────────────────────────────────────────────────────╮
@@ -148,7 +148,7 @@ const checkGoogleOAuth = createServerFn({ method: 'GET' }).handler(async () => {
 export const Route = createFileRoute('/login')({
   head: () => ({
     meta: [
-      { title: 'Sign In | Enrollsy' },
+      { title: 'Sign In | EnrollSage' },
       {
         name: 'description',
         content: 'Sign in to access your school management dashboard or family portal.',
@@ -174,8 +174,7 @@ function LoginPage() {
   const navigate = useNavigate();
   const { isAuthenticated, user, googleOAuthEnabled } = Route.useLoaderData();
   const { token: csrfToken } = useCsrf();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  // 🌿 Removed controlled state - read from form directly to capture autofill
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -192,9 +191,14 @@ function LoginPage() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+
+    // Read values directly from form to capture browser autofill
+    const form = e.currentTarget;
+    const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+    const password = (form.elements.namedItem('password') as HTMLInputElement).value;
 
     if (!email || !password) {
       setError('Please fill in all fields');
@@ -244,15 +248,15 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F5F2] flex">
+    <div className="min-h-screen bg-[#F8F9F6] flex">
       {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#2F5D50] text-white p-12 flex-col justify-between">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#5B7F6D] text-white p-12 flex-col justify-between">
         <div>
           <Link to="/" className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-              <span className="text-2xl">🎓</span>
+              <span className="text-2xl">🌿</span>
             </div>
-            <span className="text-2xl font-bold font-display">Enrollsy</span>
+            <span className="text-2xl font-bold font-display">EnrollSage</span>
           </Link>
         </div>
 
@@ -266,7 +270,7 @@ function LoginPage() {
         </div>
 
         <div className="text-white/60 text-sm">
-          &copy; {new Date().getFullYear()} Enrollsy. School enrollment made simple.
+          &copy; {new Date().getFullYear()} EnrollSage. Wise guidance for enrollment journeys.
         </div>
       </div>
 
@@ -276,14 +280,14 @@ function LoginPage() {
           {/* Mobile Logo */}
           <div className="lg:hidden mb-8 text-center">
             <Link to="/" className="inline-flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#2F5D50] rounded-full flex items-center justify-center">
-                <span className="text-xl">🎓</span>
+              <div className="w-10 h-10 bg-[#5B7F6D] rounded-full flex items-center justify-center">
+                <span className="text-xl">🌿</span>
               </div>
-              <span className="text-xl font-bold text-[#1F2A44] font-display">Enrollsy</span>
+              <span className="text-xl font-bold text-[#2D4F3E] font-display">EnrollSage</span>
             </Link>
           </div>
 
-          <h1 className="text-3xl font-bold text-[#1F2A44] mb-2 font-display">
+          <h1 className="text-3xl font-bold text-[#2D4F3E] mb-2 font-display">
             Sign In
           </h1>
           <p className="text-gray-600 mb-8">
@@ -308,10 +312,10 @@ function LoginPage() {
                 <input
                   type="email"
                   id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  name="email"
                   placeholder="you@example.com"
-                  className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+                  autoComplete="email"
+                  className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
                 />
               </div>
             </div>
@@ -324,7 +328,7 @@ function LoginPage() {
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-sm text-[#2F5D50] hover:underline"
+                  className="text-sm text-[#5B7F6D] hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -334,10 +338,10 @@ function LoginPage() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  name="password"
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-12 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+                  autoComplete="current-password"
+                  className="w-full pl-12 pr-12 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
                 />
                 <button
                   type="button"
@@ -357,7 +361,7 @@ function LoginPage() {
                 'w-full flex items-center justify-center gap-2 py-4 rounded-lg font-medium transition-all',
                 isLoading
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-[#2F5D50] text-white hover:bg-[#1F2A44]'
+                  : 'bg-[#5B7F6D] text-white hover:bg-[#2D4F3E]'
               )}
             >
               {isLoading ? (
@@ -381,7 +385,7 @@ function LoginPage() {
                     <div className="w-full border-t border-gray-200" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-[#F7F5F2] text-gray-500">or continue with</span>
+                    <span className="px-4 bg-[#F8F9F6] text-gray-500">or continue with</span>
                   </div>
                 </div>
 
@@ -416,7 +420,7 @@ function LoginPage() {
           {/* Register Link */}
           <p className="mt-8 text-center text-gray-600">
             Don't have an account?{' '}
-            <Link to="/register" className="text-[#2F5D50] font-medium hover:underline">
+            <Link to="/register" className="text-[#5B7F6D] font-medium hover:underline">
               Create one
             </Link>
           </p>
@@ -425,7 +429,7 @@ function LoginPage() {
           <div className="mt-8 pt-8 border-t border-gray-200 text-center">
             <Link
               to="/"
-              className="text-gray-500 hover:text-[#2F5D50] transition-colors"
+              className="text-gray-500 hover:text-[#5B7F6D] transition-colors"
             >
               Back to homepage
             </Link>

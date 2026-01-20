@@ -1,5 +1,5 @@
-// 🏫 Landing Page - The modern front door for private schools
-// "From first inquiry to tuition paid—without spreadsheets, PDFs, or duct tape."
+// 🌿 Landing Page - Wise guidance for enrollment journeys
+// EnrollSage: "From first inquiry to tuition paid—with wisdom, not chaos."
 
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
@@ -66,13 +66,13 @@ const subscribeToNewsletter = createServerFn({ method: 'POST' })
 export const Route = createFileRoute('/')({
   head: () => ({
     meta: [
-      { title: 'Enrollsy | Modern School Enrollment & Payments' },
+      { title: 'EnrollSage | Wise Guidance for School Enrollment' },
       {
         name: 'description',
-        content: 'The modern front door for private schools. From first inquiry to tuition paid—admissions, enrollment, and billing in one clean system.',
+        content: 'Wise guidance for enrollment journeys. From first inquiry to tuition paid—admissions, enrollment, and billing with clarity and calm.',
       },
-      { property: 'og:title', content: 'Enrollsy | Modern School Enrollment' },
-      { property: 'og:description', content: 'From first inquiry to tuition paid—without spreadsheets, PDFs, or duct tape.' },
+      { property: 'og:title', content: 'EnrollSage | Wise Guidance for School Enrollment' },
+      { property: 'og:description', content: 'From first inquiry to tuition paid—with wisdom, not chaos.' },
       { property: 'og:type', content: 'website' },
     ],
   }),
@@ -85,7 +85,7 @@ export const Route = createFileRoute('/')({
 
 function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#F7F5F2]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       <Navigation />
       <HeroSection />
       <ProblemSection />
@@ -111,20 +111,20 @@ function Navigation() {
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <div className="max-w-6xl mx-auto px-6 py-4">
         <nav className="flex items-center justify-between">
-          {/* Logo */}
+          {/* Logo - 🌿 Sage leaf icon */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#1F2A44] rounded flex items-center justify-center">
-              <span className="text-white font-display font-bold text-sm">E</span>
+            <div className="w-8 h-8 bg-[#5B7F6D] rounded flex items-center justify-center">
+              <span className="text-white text-lg">🌿</span>
             </div>
-            <span className="text-xl font-display text-[#1F2A44]">Enrollsy</span>
+            <span className="text-xl font-display text-[#2D4F3E]">EnrollSage</span>
           </Link>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            <Link to="/about" className="text-[#5F6368] hover:text-[#1F2A44] transition-colors">
+            <Link to="/about" className="text-[#5F6368] hover:text-[#2D4F3E] transition-colors">
               About
             </Link>
-            <Link to="/contact" className="text-[#5F6368] hover:text-[#1F2A44] transition-colors">
+            <Link to="/contact" className="text-[#5F6368] hover:text-[#2D4F3E] transition-colors">
               Contact
             </Link>
           </div>
@@ -133,19 +133,19 @@ function Navigation() {
           <div className="hidden md:flex items-center gap-4">
             <Link
               to="/demo/admin"
-              className="text-[#5F6368] hover:text-[#1F2A44] transition-colors"
+              className="text-[#5F6368] hover:text-[#2D4F3E] transition-colors"
             >
               Try Demo
             </Link>
             <Link
               to="/login"
-              className="text-[#5F6368] hover:text-[#1F2A44] transition-colors"
+              className="text-[#5F6368] hover:text-[#2D4F3E] transition-colors"
             >
               Sign In
             </Link>
             <Link
               to="/contact"
-              className="bg-[#2F5D50] text-white px-5 py-2 rounded-md hover:bg-[#234840] transition-colors font-medium"
+              className="bg-[#5B7F6D] text-white px-5 py-2 rounded-md hover:bg-[#4A6B5B] transition-colors font-medium"
             >
               Get Started
             </Link>
@@ -164,13 +164,13 @@ function Navigation() {
         {mobileMenuOpen && (
           <div className="md:hidden pt-4 pb-2 border-t border-gray-100 mt-4">
             <div className="flex flex-col gap-4">
-              <Link to="/about" className="text-[#5F6368] hover:text-[#1F2A44]">About</Link>
-              <Link to="/contact" className="text-[#5F6368] hover:text-[#1F2A44]">Contact</Link>
-              <Link to="/demo/admin" className="text-[#5F6368] hover:text-[#1F2A44]">Try Demo</Link>
-              <Link to="/login" className="text-[#5F6368] hover:text-[#1F2A44]">Sign In</Link>
+              <Link to="/about" className="text-[#5F6368] hover:text-[#2D4F3E]">About</Link>
+              <Link to="/contact" className="text-[#5F6368] hover:text-[#2D4F3E]">Contact</Link>
+              <Link to="/demo/admin" className="text-[#5F6368] hover:text-[#2D4F3E]">Try Demo</Link>
+              <Link to="/login" className="text-[#5F6368] hover:text-[#2D4F3E]">Sign In</Link>
               <Link
                 to="/contact"
-                className="bg-[#2F5D50] text-white px-5 py-2 rounded-md text-center font-medium"
+                className="bg-[#5B7F6D] text-white px-5 py-2 rounded-md text-center font-medium"
               >
                 Get Started
               </Link>
@@ -192,34 +192,34 @@ function HeroSection() {
     <section className="py-20 md:py-28 px-6 bg-white">
       <div className="max-w-4xl mx-auto text-center">
         {/* Subtle badge */}
-        <div className="inline-flex items-center gap-2 bg-[#F7F5F2] text-[#5F6368] px-4 py-2 rounded-md text-sm mb-8">
-          <span className="w-2 h-2 bg-[#3A7F6B] rounded-full"></span>
-          Built for schools with 300-800 students
+        <div className="inline-flex items-center gap-2 bg-[#F8F9F6] text-[#5F6368] px-4 py-2 rounded-md text-sm mb-8">
+          <span className="w-2 h-2 bg-[#5B7F6D] rounded-full"></span>
+          Wise guidance for schools with 300-800 students
         </div>
 
         {/* Main headline - Serif for authority */}
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-display text-[#1F2A44] mb-6 leading-tight">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-display text-[#2D4F3E] mb-6 leading-tight">
           From first inquiry to tuition paid—
-          <span className="block text-[#2F5D50]">without the chaos</span>
+          <span className="block text-[#5B7F6D]">with wisdom, not chaos</span>
         </h1>
 
         <p className="text-lg md:text-xl text-[#5F6368] mb-10 max-w-2xl mx-auto leading-relaxed">
-          The modern admissions and enrollment platform for private schools.
-          One clean system for leads, applications, contracts, and payments.
+          The thoughtful admissions and enrollment platform for private schools.
+          One calm system for leads, applications, contracts, and payments.
         </p>
 
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             to="/demo/admin"
-            className="inline-flex items-center justify-center gap-2 bg-[#2F5D50] text-white px-8 py-4 rounded-md hover:bg-[#234840] transition-colors font-medium"
+            className="inline-flex items-center justify-center gap-2 bg-[#5B7F6D] text-white px-8 py-4 rounded-md hover:bg-[#4A6B5B] transition-colors font-medium"
           >
             Try Interactive Demo
             <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
             to="/contact"
-            className="inline-flex items-center justify-center gap-2 border border-[#1F2A44] text-[#1F2A44] px-8 py-4 rounded-md hover:bg-[#1F2A44] hover:text-white transition-colors font-medium"
+            className="inline-flex items-center justify-center gap-2 border border-[#2D4F3E] text-[#2D4F3E] px-8 py-4 rounded-md hover:bg-[#2D4F3E] hover:text-white transition-colors font-medium"
           >
             Schedule a Call
           </Link>
@@ -264,11 +264,11 @@ function ProblemSection() {
   ];
 
   return (
-    <section className="py-20 px-6 bg-[#F7F5F2]">
+    <section className="py-20 px-6 bg-[#F8F9F6]">
       <div className="max-w-5xl mx-auto">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <h2 className="text-3xl md:text-4xl font-display text-[#1F2A44] mb-6">
+            <h2 className="text-3xl md:text-4xl font-display text-[#2D4F3E] mb-6">
               Sound familiar?
             </h2>
             <p className="text-[#5F6368] mb-8 text-lg">
@@ -278,7 +278,7 @@ function ProblemSection() {
             <ul className="space-y-3">
               {problems.map((problem, index) => (
                 <li key={index} className="flex items-start gap-3 text-[#5F6368]">
-                  <X className="w-5 h-5 text-[#9C2F2F] flex-shrink-0 mt-0.5" />
+                  <X className="w-5 h-5 text-[#8B4444] flex-shrink-0 mt-0.5" />
                   {problem}
                 </li>
               ))}
@@ -287,11 +287,11 @@ function ProblemSection() {
 
           <div className="bg-white p-8 rounded-lg border border-gray-200">
             <blockquote className="text-lg text-[#1E1E1E] mb-6">
-              "Before Enrollsy, our admissions team spent more time managing
+              "Before EnrollSage, our admissions team spent more time managing
               spreadsheets than talking to families. Now enrollment just... works."
             </blockquote>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-[#1F2A44] rounded-full flex items-center justify-center text-white font-display">
+              <div className="w-12 h-12 bg-[#5B7F6D] rounded-full flex items-center justify-center text-white font-display">
                 JM
               </div>
               <div>
@@ -334,7 +334,7 @@ function FeaturesSection() {
     <section className="py-20 px-6 bg-white">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-display text-[#1F2A44] mb-4">
+          <h2 className="text-3xl md:text-4xl font-display text-[#2D4F3E] mb-4">
             Everything you need to fill seats
           </h2>
           <p className="text-[#5F6368] max-w-2xl mx-auto text-lg">
@@ -347,12 +347,12 @@ function FeaturesSection() {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="p-6 border border-gray-200 rounded-lg bg-white hover:border-gray-300 transition-colors"
+              className="p-6 border border-gray-200 rounded-lg bg-white hover:border-[#8AA896] transition-colors"
             >
-              <div className="w-12 h-12 bg-[#F7F5F2] rounded-lg flex items-center justify-center mb-4">
-                <feature.icon className="w-6 h-6 text-[#2F5D50]" />
+              <div className="w-12 h-12 bg-[#F8F9F6] rounded-lg flex items-center justify-center mb-4">
+                <feature.icon className="w-6 h-6 text-[#5B7F6D]" />
               </div>
-              <h3 className="text-xl font-display text-[#1F2A44] mb-2">
+              <h3 className="text-xl font-display text-[#2D4F3E] mb-2">
                 {feature.title}
               </h3>
               <p className="text-[#5F6368]">
@@ -371,7 +371,7 @@ function FeaturesSection() {
             { label: 'Reporting', desc: 'Know your numbers' },
           ].map((item, i) => (
             <div key={i} className="text-center">
-              <p className="font-medium text-[#1F2A44]">{item.label}</p>
+              <p className="font-medium text-[#2D4F3E]">{item.label}</p>
               <p className="text-sm text-[#5F6368]">{item.desc}</p>
             </div>
           ))}
@@ -406,7 +406,7 @@ function HowItWorksSection() {
   ];
 
   return (
-    <section className="py-20 px-6 bg-[#1F2A44] text-white">
+    <section className="py-20 px-6 bg-[#2D4F3E] text-white">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-display mb-4">
@@ -463,7 +463,7 @@ function TestimonialsSection() {
     <section className="py-20 px-6 bg-white">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-display text-[#1F2A44] mb-4">
+          <h2 className="text-3xl md:text-4xl font-display text-[#2D4F3E] mb-4">
             Schools that made the switch
           </h2>
           <p className="text-[#5F6368]">
@@ -475,11 +475,11 @@ function TestimonialsSection() {
           {testimonials.map((t, index) => (
             <div
               key={index}
-              className="p-6 bg-[#F7F5F2] rounded-lg"
+              className="p-6 bg-[#F8F9F6] rounded-lg"
             >
               <p className="text-[#1E1E1E] mb-6">"{t.quote}"</p>
               <div>
-                <p className="font-medium text-[#1F2A44]">{t.name}</p>
+                <p className="font-medium text-[#2D4F3E]">{t.name}</p>
                 <p className="text-sm text-[#5F6368]">{t.role}</p>
               </div>
             </div>
@@ -497,9 +497,9 @@ function TestimonialsSection() {
 
 function PricingTeaser() {
   return (
-    <section className="py-20 px-6 bg-[#F7F5F2]">
+    <section className="py-20 px-6 bg-[#F8F9F6]">
       <div className="max-w-3xl mx-auto text-center">
-        <h2 className="text-3xl md:text-4xl font-display text-[#1F2A44] mb-4">
+        <h2 className="text-3xl md:text-4xl font-display text-[#2D4F3E] mb-4">
           Straightforward pricing
         </h2>
         <p className="text-[#5F6368] mb-8 text-lg">
@@ -509,7 +509,7 @@ function PricingTeaser() {
 
         <div className="bg-white p-8 rounded-lg border border-gray-200 mb-8">
           <p className="text-sm text-[#5F6368] mb-2">Starting at</p>
-          <p className="text-4xl font-display text-[#1F2A44] mb-2">
+          <p className="text-4xl font-display text-[#2D4F3E] mb-2">
             $55 <span className="text-lg text-[#5F6368] font-sans">/ student / year</span>
           </p>
           <p className="text-sm text-[#5F6368]">
@@ -527,7 +527,7 @@ function PricingTeaser() {
             'Email communications',
           ].map((feature, i) => (
             <li key={i} className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#3A7F6B]" />
+              <CheckCircle2 className="w-4 h-4 text-[#5B7F6D]" />
               {feature}
             </li>
           ))}
@@ -535,7 +535,7 @@ function PricingTeaser() {
 
         <Link
           to="/contact"
-          className="inline-flex items-center justify-center gap-2 bg-[#2F5D50] text-white px-8 py-4 rounded-md hover:bg-[#234840] transition-colors font-medium"
+          className="inline-flex items-center justify-center gap-2 bg-[#5B7F6D] text-white px-8 py-4 rounded-md hover:bg-[#4A6B5B] transition-colors font-medium"
         >
           Get a Custom Quote
           <ArrowRight className="w-4 h-4" />
@@ -574,10 +574,10 @@ function NewsletterSection() {
     return (
       <section className="py-16 px-6 bg-white border-t border-gray-200">
         <div className="max-w-xl mx-auto text-center">
-          <div className="w-12 h-12 mx-auto mb-4 bg-[#3A7F6B]/10 rounded-full flex items-center justify-center">
-            <CheckCircle2 className="w-6 h-6 text-[#3A7F6B]" />
+          <div className="w-12 h-12 mx-auto mb-4 bg-[#5B7F6D]/10 rounded-full flex items-center justify-center">
+            <CheckCircle2 className="w-6 h-6 text-[#5B7F6D]" />
           </div>
-          <h3 className="text-xl font-display text-[#1F2A44] mb-2">Check your inbox</h3>
+          <h3 className="text-xl font-display text-[#2D4F3E] mb-2">Check your inbox</h3>
           <p className="text-[#5F6368]">
             We've sent you a confirmation email. Click the link to confirm your subscription.
           </p>
@@ -589,7 +589,7 @@ function NewsletterSection() {
   return (
     <section className="py-16 px-6 bg-white border-t border-gray-200">
       <div className="max-w-xl mx-auto text-center">
-        <h3 className="text-xl font-display text-[#1F2A44] mb-2">
+        <h3 className="text-xl font-display text-[#2D4F3E] mb-2">
           Stay in the loop
         </h3>
         <p className="text-[#5F6368] mb-6">
@@ -603,12 +603,12 @@ function NewsletterSection() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="flex-1 px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
+            className="flex-1 px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
           />
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="bg-[#1F2A44] text-white px-6 py-3 rounded-md hover:bg-[#161D33] transition-colors font-medium whitespace-nowrap disabled:bg-gray-400 flex items-center justify-center gap-2"
+            className="bg-[#2D4F3E] text-white px-6 py-3 rounded-md hover:bg-[#1F3A2D] transition-colors font-medium whitespace-nowrap disabled:bg-gray-400 flex items-center justify-center gap-2"
           >
             {status === 'loading' ? (
               <>
@@ -622,7 +622,7 @@ function NewsletterSection() {
         </form>
 
         {status === 'error' && (
-          <p className="text-sm text-[#9C2F2F] mt-3">{errorMsg}</p>
+          <p className="text-sm text-[#8B4444] mt-3">{errorMsg}</p>
         )}
 
         <p className="text-xs text-[#9AA0A6] mt-4">
@@ -641,19 +641,19 @@ function NewsletterSection() {
 
 function Footer() {
   return (
-    <footer className="bg-[#1F2A44] text-white py-12 px-6">
+    <footer className="bg-[#2D4F3E] text-white py-12 px-6">
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
-                <span className="text-[#1F2A44] font-display font-bold text-sm">E</span>
+                <span className="text-lg">🌿</span>
               </div>
-              <span className="text-lg font-display">Enrollsy</span>
+              <span className="text-lg font-display">EnrollSage</span>
             </div>
             <p className="text-white/60 text-sm">
-              The modern front door for private schools.
+              Wise guidance for enrollment journeys.
             </p>
           </div>
 
@@ -689,10 +689,10 @@ function Footer() {
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-white/40 text-sm">
-            &copy; {new Date().getFullYear()} Enrollsy. All rights reserved.
+            &copy; {new Date().getFullYear()} EnrollSage. All rights reserved.
           </p>
           <p className="text-white/40 text-sm">
-            Made with care for schools that care.
+            Made with wisdom for schools that care.
           </p>
         </div>
       </div>

@@ -8,7 +8,7 @@
  * │  All our database tables and their relationships live    │
  * │  here. Import * from this file to get everything.        │
  * │                                                          │
- * │  🏫 Enrollsy Schema Architecture:                        │
+ * │  🏫 EnrollSage Schema Architecture:                      │
  * │  ┌─────────┐    ┌────────────┐    ┌──────────┐          │
  * │  │  Users  │───▶│  Schools   │───▶│Households│          │
  * │  └─────────┘    └────────────┘    └──────────┘          │

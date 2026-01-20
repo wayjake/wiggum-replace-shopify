@@ -12,11 +12,11 @@ test.describe('Marketing Pages', () => {
   // ═══════════════════════════════════════════════════════════
 
   test.describe('Home Page', () => {
-    test('displays Enrollsy branding and hero section', async ({ page }) => {
+    test('displays EnrollSage branding and hero section', async ({ page }) => {
       await page.goto('/');
 
       // Check branding - use first() to avoid strict mode issues
-      await expect(page.getByText('Enrollsy').first()).toBeVisible();
+      await expect(page.getByText('EnrollSage').first()).toBeVisible();
 
       // Hero section with key messaging
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();

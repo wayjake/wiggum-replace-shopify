@@ -1,5 +1,5 @@
-> **Enrollsy** - The modern front door for private schools
-> "From first inquiry to tuition paid—without spreadsheets, PDFs, or duct tape."
+> **EnrollSage** - Wise guidance for enrollment journeys
+> "From first inquiry to tuition paid—with wisdom, not chaos."
 
 ## Where to Find Things
 
@@ -18,37 +18,33 @@
 ## Status
 
 ### Completed
-- [x] update ./wiggum/notes and ./wiggum/context/* files to match the new ./wiggum/school-cms-prd.md ./wiggum/school-cms-pricing.md ./wiggum/school-design-document.md requirements
-- [x] Market research and competitive teardown: "Why we beat FACTS for 500-student school" (see ./context/competitive-teardown.md)
-- [x] Refactor marketing pages to match new design style and marketing copy and mission
-  - Updated global styles (src/styles.css) with trust-first palette: Navy (#1F2A44), Evergreen (#2F5D50), Off-white (#F7F5F2)
-  - Updated root layout with Libre Baskerville + Inter fonts
-  - Completely rewrote home page (index.tsx) with school enrollment messaging
-  - Completely rewrote about page with Enrollsy mission and values
-  - Updated contact page with form that sends email to jake@dubsado.com
-  - Newsletter signup has double opt-in via Brevo (sends confirmation email)
-- [x] Create terms of service page (/terms) and privacy policy (/privacy) with GDPR specific guidelines
-  - Terms of Service covers: acceptable use, data ownership, payment terms, liability
-  - Privacy Policy covers: data collection, GDPR rights, CCPA rights, data retention, security, international transfers
-- [x] use Playwright MCP and Playwright testing standards to create a suite of tests to cover 80% or more of the student management software user stories
-  - Installed Playwright testing framework with Chromium browser
-  - Created comprehensive E2E test suite in `/e2e/` directory:
-    - `marketing-pages.spec.ts` - Tests for home, about, contact, terms, privacy pages
-    - `authentication.spec.ts` - Login, registration, session management tests
-    - `demo-pages.spec.ts` - Interactive demo testing for admin and family demos
-    - `super-admin.spec.ts` - Platform super admin dashboard tests
-    - `school-admin.spec.ts` - School administration dashboard tests
-    - `family-portal.spec.ts` - Parent/family portal tests
-    - `fixtures.ts` - Reusable test utilities and authentication helpers
-  - Added npm scripts: `test:e2e`, `test:e2e:ui`, `test:e2e:headed`, `test:e2e:report`
-  - Coverage includes all user journeys: Platform Admin, School Staff, Family
-  - Tests validate: navigation, authentication, access control, UI elements
-- [x] run the e2e tests in headless mode and fix the tests until they are all passing (and not skipped)
 
 ### Todo
 
-- [ ] rebrand to Sage Enroll (come up up updated colors; make messaging feel more sage like)
+#### Super Admin Dashboard (`/super-admin`)
+- [ ] Create `/super-admin/schools/new` - School creation form
+- [ ] Create `/super-admin/schools/$id` - Individual school management page
+- [ ] Create `/super-admin/settings` - Platform settings page
 
+#### School Admin Dashboard (`/admin`)
+- [ ] Create `/admin/leads/new` - Add new lead form
+- [ ] Create `/admin/families/new` - Register new family form
+- [ ] Implement lead stage progression (convert lead to applicant)
+- [ ] Implement application status workflow (review, accept, deny, waitlist)
+- [ ] Add student enrollment actions (enroll accepted students)
+
+#### Family Portal (`/portal`)
+- [ ] Create `/portal/apply` - Start new application flow
+- [ ] Create `/portal/settings` - Family account settings
+- [ ] Create `/portal/applications/$id` - Application detail view
+- [ ] Implement "Pay Now" button (Stripe integration)
+- [ ] Implement "Add Card" payment method (Stripe Elements)
+
+#### Misc UI Fixes
+- [ ] Fix emoji in `/portal/billing` header (shows 🎓 instead of 🌿) 
+
+#### Testing
+- [ ] Add tests for each of the newly created features
 ---
 
 ## Quick Commands

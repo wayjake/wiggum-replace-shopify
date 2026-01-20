@@ -1,4 +1,4 @@
-// 🛡️ Authentication System - The bouncer at the door of Enrollsy
+// 🛡️ Authentication System - The bouncer at the door of EnrollSage
 // Guards the gates for superadmins, school staff, and families
 
 import { createId } from '@paralleldrive/cuid2';
@@ -15,7 +15,7 @@ import { getDb, users, sessions } from '../db';
  * ╰─────────────────────────────────────────────────────────╯
  */
 const SESSION_EXPIRY_DAYS = 30;
-const SESSION_COOKIE_NAME = 'enrollsy_session';
+const SESSION_COOKIE_NAME = 'enrollsage_session';
 
 // ═══════════════════════════════════════════════════════════
 // PASSWORD UTILITIES
