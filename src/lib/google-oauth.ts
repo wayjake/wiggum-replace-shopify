@@ -8,9 +8,13 @@
 // │  3. Google redirects back with auth code                    │
 // │  4. Exchange code for tokens                                │
 // │  5. Get user info and create/link account                   │
+// │                                                              │
+// │  🏫 MULTI-TENANT SUPPORT                                     │
+// │  Schools can configure their own Google OAuth credentials   │
+// │  in their settings. Falls back to platform-level config.    │
 // ╰────────────────────────────────────────────────────────────╯
 
-import { getDb, users, oauthAccounts } from '../db';
+import { getDb, users, oauthAccounts, schools } from '../db';
 import { eq, and } from 'drizzle-orm';
 import { createSession, type SessionUser } from './auth';
 
@@ -23,10 +27,70 @@ const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo';
 
 /**
- * Check if Google OAuth is configured
+ * OAuth credentials - can come from platform env or school-specific config
+ */
+type OAuthCredentials = {
+  clientId: string;
+  clientSecret: string;
+  schoolId?: string;
+};
+
+/**
+ * Check if Google OAuth is configured at platform level
  */
 export function isGoogleOAuthConfigured(): boolean {
   return !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+}
+
+/**
+ * Check if Google OAuth is configured for a specific school
+ */
+export async function isSchoolGoogleOAuthConfigured(schoolId: string): Promise<boolean> {
+  const db = getDb();
+  const school = await db.query.schools.findFirst({
+    where: eq(schools.id, schoolId),
+    columns: {
+      googleClientId: true,
+      googleClientSecret: true,
+    },
+  });
+  return !!(school?.googleClientId && school?.googleClientSecret);
+}
+
+/**
+ * Get Google OAuth credentials - school-specific if available, otherwise platform
+ */
+export async function getGoogleCredentials(schoolId?: string): Promise<OAuthCredentials | null> {
+  // If schoolId provided, try school-specific credentials first
+  if (schoolId) {
+    const db = getDb();
+    const school = await db.query.schools.findFirst({
+      where: eq(schools.id, schoolId),
+      columns: {
+        id: true,
+        googleClientId: true,
+        googleClientSecret: true,
+      },
+    });
+
+    if (school?.googleClientId && school?.googleClientSecret) {
+      return {
+        clientId: school.googleClientId,
+        clientSecret: school.googleClientSecret,
+        schoolId: school.id,
+      };
+    }
+  }
+
+  // Fall back to platform-level credentials
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    return {
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    };
+  }
+
+  return null;
 }
 
 /**
@@ -36,12 +100,20 @@ export function getGoogleClientId(): string | null {
   return process.env.GOOGLE_CLIENT_ID || null;
 }
 
+/**
+ * Get Google OAuth client ID for a school (safe to expose to client)
+ */
+export async function getSchoolGoogleClientId(schoolId: string): Promise<string | null> {
+  const credentials = await getGoogleCredentials(schoolId);
+  return credentials?.clientId || null;
+}
+
 // ═══════════════════════════════════════════════════════════
 // OAUTH URL GENERATION
 // ═══════════════════════════════════════════════════════════
 
 /**
- * Generate the Google OAuth authorization URL
+ * Generate the Google OAuth authorization URL (platform-level)
  */
 export function getGoogleAuthUrl(redirectUri: string, state?: string): string {
   const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -62,6 +134,53 @@ export function getGoogleAuthUrl(redirectUri: string, state?: string): string {
   return `${GOOGLE_AUTH_URL}?${params.toString()}`;
 }
 
+/**
+ * Generate the Google OAuth authorization URL for a specific school
+ * Falls back to platform credentials if school doesn't have OAuth configured
+ */
+export async function getSchoolGoogleAuthUrl(
+  redirectUri: string,
+  schoolId: string,
+  state?: string
+): Promise<string> {
+  const credentials = await getGoogleCredentials(schoolId);
+
+  if (!credentials) {
+    throw new Error('Google OAuth is not configured for this school');
+  }
+
+  // Encode school ID in state for the callback to know which credentials to use
+  const stateData = {
+    schoolId: credentials.schoolId, // Will be undefined if using platform creds
+    originalState: state,
+  };
+
+  const params = new URLSearchParams({
+    client_id: credentials.clientId,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: 'openid email profile',
+    access_type: 'offline',
+    prompt: 'consent',
+    state: Buffer.from(JSON.stringify(stateData)).toString('base64'),
+  });
+
+  return `${GOOGLE_AUTH_URL}?${params.toString()}`;
+}
+
+/**
+ * Parse the state parameter from OAuth callback
+ */
+export function parseOAuthState(state: string): { schoolId?: string; originalState?: string } {
+  try {
+    const decoded = Buffer.from(state, 'base64').toString('utf-8');
+    return JSON.parse(decoded);
+  } catch {
+    // Legacy state format - just a plain string
+    return { originalState: state };
+  }
+}
+
 // ═══════════════════════════════════════════════════════════
 // TOKEN EXCHANGE
 // ═══════════════════════════════════════════════════════════
@@ -75,7 +194,7 @@ type GoogleTokens = {
 };
 
 /**
- * Exchange authorization code for tokens
+ * Exchange authorization code for tokens (platform-level)
  */
 export async function exchangeCodeForTokens(
   code: string,
@@ -96,6 +215,43 @@ export async function exchangeCodeForTokens(
     body: new URLSearchParams({
       client_id: clientId,
       client_secret: clientSecret,
+      code,
+      grant_type: 'authorization_code',
+      redirect_uri: redirectUri,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error('Google token exchange failed:', error);
+    throw new Error('Failed to exchange code for tokens');
+  }
+
+  return response.json();
+}
+
+/**
+ * Exchange authorization code for tokens with school-specific credentials
+ */
+export async function exchangeCodeForTokensWithSchool(
+  code: string,
+  redirectUri: string,
+  schoolId?: string
+): Promise<GoogleTokens> {
+  const credentials = await getGoogleCredentials(schoolId);
+
+  if (!credentials) {
+    throw new Error('Google OAuth is not configured');
+  }
+
+  const response = await fetch(GOOGLE_TOKEN_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      client_id: credentials.clientId,
+      client_secret: credentials.clientSecret,
       code,
       grant_type: 'authorization_code',
       redirect_uri: redirectUri,
@@ -156,14 +312,20 @@ type GoogleAuthResult = {
 
 /**
  * Handle Google OAuth callback - creates or links account
+ * Supports school-specific OAuth credentials via the state parameter
  */
 export async function handleGoogleCallback(
   code: string,
-  redirectUri: string
+  redirectUri: string,
+  state?: string
 ): Promise<GoogleAuthResult> {
   try {
-    // 1. Exchange code for tokens
-    const tokens = await exchangeCodeForTokens(code, redirectUri);
+    // Parse state to get school ID if present
+    const stateData = state ? parseOAuthState(state) : {};
+    const schoolId = stateData.schoolId;
+
+    // 1. Exchange code for tokens (using school credentials if available)
+    const tokens = await exchangeCodeForTokensWithSchool(code, redirectUri, schoolId);
 
     // 2. Get user info from Google
     const googleUser = await getGoogleUserInfo(tokens.access_token);

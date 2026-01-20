@@ -1,5 +1,5 @@
-// 📝 Register Page - Join the soap family!
-// "My cat's breath smells like cat food." - Ralph's password hint (don't use this!)
+// 📝 Register Page - Join the Enrollsy family portal
+// For parents who want to track their family's enrollment status
 //
 // ╭────────────────────────────────────────────────────────────╮
 // │  🛡️ RATE LIMITED!                                          │
@@ -24,20 +24,19 @@ import { validateCsrfForRequest } from '../lib/csrf.server';
 import { useCsrf } from '../lib/csrf-react';
 
 // ═══════════════════════════════════════════════════════════
-// SERVER FUNCTIONS - Creating new soap enthusiasts
-// "I bent my wookiee!" - Ralph, creating an account
+// SERVER FUNCTIONS - Creating new family accounts
 // ═══════════════════════════════════════════════════════════
 
 const registerUser = createServerFn({ method: 'POST' })
-  .handler(async (data: {
+  .handler(async (input: { data: {
     firstName: string;
     lastName?: string;
     email: string;
     password: string;
     marketingConsent: boolean;
     csrfToken?: string;
-  }) => {
-    const { firstName, lastName, email, password, csrfToken } = data;
+  } }) => {
+    const { firstName, lastName, email, password, csrfToken } = input.data;
 
     // 🛡️ CSRF validation - protect against cross-site request forgery
     const request = getRequest();
@@ -104,10 +103,10 @@ const registerUser = createServerFn({ method: 'POST' })
 export const Route = createFileRoute('/register')({
   head: () => ({
     meta: [
-      { title: "Create Account | Karen's Beautiful Soap" },
+      { title: 'Create Account | Enrollsy' },
       {
         name: 'description',
-        content: 'Create an account to track orders, save your favorite soaps, and get exclusive offers.',
+        content: 'Create a family account to manage your children\'s school applications and enrollment.',
       },
     ],
   }),
@@ -160,17 +159,27 @@ function RegisterPage() {
       return;
     }
 
+    // Get token from context, with cookie fallback
+    let tokenToUse = csrfToken;
+    if (!tokenToUse && typeof document !== 'undefined') {
+      const cookies = document.cookie.split(';').map(c => c.trim());
+      const csrfCookie = cookies.find(c => c.startsWith('csrf-token='));
+      if (csrfCookie) {
+        tokenToUse = csrfCookie.substring('csrf-token='.length);
+      }
+    }
+
     setIsLoading(true);
 
     try {
-      const result = await registerUser({
+      const result = await registerUser({ data: {
         firstName: formData.firstName,
         lastName: formData.lastName || undefined,
         email: formData.email,
         password: formData.password,
         marketingConsent: formData.marketingConsent,
-        csrfToken: csrfToken || undefined,
-      });
+        csrfToken: tokenToUse || undefined,
+      } });
 
       if (!result.success) {
         setError(result.error || 'Registration failed');
@@ -183,8 +192,8 @@ function RegisterPage() {
         document.cookie = result.cookie;
       }
 
-      // 🎉 Welcome to the soap family! Redirect to account page
-      navigate({ to: '/account' });
+      // 🎉 Welcome! Redirect to family portal
+      navigate({ to: '/portal' });
     } catch (err) {
       console.error('Registration error:', err);
       setError('An unexpected error occurred');
@@ -193,31 +202,31 @@ function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] flex">
+    <div className="min-h-screen bg-[#F7F5F2] flex">
       {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#2D5A4A] text-white p-12 flex-col justify-between">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#2F5D50] text-white p-12 flex-col justify-between">
         <div>
           <Link to="/" className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-              <span className="text-2xl">🧼</span>
+              <span className="text-2xl">🎓</span>
             </div>
-            <span className="text-2xl font-bold font-display">Karen's Beautiful Soap</span>
+            <span className="text-2xl font-bold font-display">Enrollsy</span>
           </Link>
         </div>
 
         <div className="max-w-md">
           <h2 className="text-4xl font-bold mb-6 font-display">
-            Join Our Family
+            Family Portal
           </h2>
           <p className="text-white/80 text-lg leading-relaxed mb-8">
-            Create an account to enjoy exclusive benefits:
+            Create an account to manage your family's enrollment:
           </p>
           <ul className="space-y-4">
             {[
-              'Track your orders in real-time',
-              'Save favorite products',
-              'Faster checkout with saved addresses',
-              'Exclusive member-only offers',
+              'Track application status in real-time',
+              'Submit and manage enrollment documents',
+              'View and pay tuition bills online',
+              'Communicate with school admissions',
             ].map((benefit, index) => (
               <li key={index} className="flex items-center gap-3">
                 <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
@@ -230,7 +239,7 @@ function RegisterPage() {
         </div>
 
         <div className="text-white/60 text-sm">
-          &copy; {new Date().getFullYear()} Karen's Beautiful Soap. Handcrafted with love.
+          &copy; {new Date().getFullYear()} Enrollsy. School enrollment made simple.
         </div>
       </div>
 
@@ -240,18 +249,18 @@ function RegisterPage() {
           {/* Mobile Logo */}
           <div className="lg:hidden mb-8 text-center">
             <Link to="/" className="inline-flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#2D5A4A] rounded-full flex items-center justify-center">
-                <span className="text-xl">🧼</span>
+              <div className="w-10 h-10 bg-[#2F5D50] rounded-full flex items-center justify-center">
+                <span className="text-xl">🎓</span>
               </div>
-              <span className="text-xl font-bold text-[#1A1A1A] font-display">Karen's Beautiful Soap</span>
+              <span className="text-xl font-bold text-[#1F2A44] font-display">Enrollsy</span>
             </Link>
           </div>
 
-          <h1 className="text-3xl font-bold text-[#1A1A1A] mb-2 font-display">
+          <h1 className="text-3xl font-bold text-[#1F2A44] mb-2 font-display">
             Create Account
           </h1>
           <p className="text-gray-600 mb-8">
-            Join our community of soap lovers
+            Join to manage your family's enrollment
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -275,8 +284,8 @@ function RegisterPage() {
                     id="firstName"
                     value={formData.firstName}
                     onChange={(e) => updateField('firstName', e.target.value)}
-                    placeholder="Karen"
-                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-[#F5EBE0] focus:outline-none focus:border-[#2D5A4A] focus:ring-2 focus:ring-[#2D5A4A]/10"
+                    placeholder="Jane"
+                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
                   />
                 </div>
               </div>
@@ -290,7 +299,7 @@ function RegisterPage() {
                   value={formData.lastName}
                   onChange={(e) => updateField('lastName', e.target.value)}
                   placeholder="Smith"
-                  className="w-full px-4 py-3 rounded-lg border border-[#F5EBE0] focus:outline-none focus:border-[#2D5A4A] focus:ring-2 focus:ring-[#2D5A4A]/10"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
                 />
               </div>
             </div>
@@ -308,7 +317,7 @@ function RegisterPage() {
                   value={formData.email}
                   onChange={(e) => updateField('email', e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full pl-12 pr-4 py-3 rounded-lg border border-[#F5EBE0] focus:outline-none focus:border-[#2D5A4A] focus:ring-2 focus:ring-[#2D5A4A]/10"
+                  className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
                 />
               </div>
             </div>
@@ -326,7 +335,7 @@ function RegisterPage() {
                   value={formData.password}
                   onChange={(e) => updateField('password', e.target.value)}
                   placeholder="Create a strong password"
-                  className="w-full pl-12 pr-12 py-3 rounded-lg border border-[#F5EBE0] focus:outline-none focus:border-[#2D5A4A] focus:ring-2 focus:ring-[#2D5A4A]/10"
+                  className="w-full pl-12 pr-12 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
                 />
                 <button
                   type="button"
@@ -372,7 +381,7 @@ function RegisterPage() {
                     'w-full pl-12 pr-4 py-3 rounded-lg border focus:outline-none focus:ring-2',
                     formData.confirmPassword && formData.password !== formData.confirmPassword
                       ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                      : 'border-[#F5EBE0] focus:border-[#2D5A4A] focus:ring-[#2D5A4A]/10'
+                      : 'border-gray-200 focus:border-[#2F5D50] focus:ring-[#2F5D50]/10'
                   )}
                 />
               </div>
@@ -385,10 +394,10 @@ function RegisterPage() {
                 id="marketingConsent"
                 checked={formData.marketingConsent}
                 onChange={(e) => updateField('marketingConsent', e.target.checked)}
-                className="mt-1 w-4 h-4 rounded border-gray-300 text-[#2D5A4A] focus:ring-[#2D5A4A]"
+                className="mt-1 w-4 h-4 rounded border-gray-300 text-[#2F5D50] focus:ring-[#2F5D50]"
               />
               <label htmlFor="marketingConsent" className="text-sm text-gray-600">
-                I'd like to receive soap care tips and exclusive offers via email. You can unsubscribe anytime.
+                I'd like to receive enrollment tips and school updates via email. You can unsubscribe anytime.
               </label>
             </div>
 
@@ -400,7 +409,7 @@ function RegisterPage() {
                 'w-full flex items-center justify-center gap-2 py-4 rounded-lg font-medium transition-all',
                 isLoading
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-[#2D5A4A] text-white hover:bg-[#1A1A1A]'
+                  : 'bg-[#2F5D50] text-white hover:bg-[#1F2A44]'
               )}
             >
               {isLoading ? (
@@ -419,19 +428,29 @@ function RegisterPage() {
             {/* Terms */}
             <p className="text-xs text-gray-500 text-center">
               By creating an account, you agree to our{' '}
-              <a href="#" className="text-[#2D5A4A] hover:underline">Terms of Service</a>
+              <Link to="/terms" className="text-[#2F5D50] hover:underline">Terms of Service</Link>
               {' '}and{' '}
-              <a href="#" className="text-[#2D5A4A] hover:underline">Privacy Policy</a>.
+              <Link to="/privacy" className="text-[#2F5D50] hover:underline">Privacy Policy</Link>.
             </p>
           </form>
 
           {/* Login Link */}
           <p className="mt-8 text-center text-gray-600">
             Already have an account?{' '}
-            <Link to="/login" className="text-[#2D5A4A] font-medium hover:underline">
+            <Link to="/login" className="text-[#2F5D50] font-medium hover:underline">
               Sign in
             </Link>
           </p>
+
+          {/* Back to Home */}
+          <div className="mt-8 pt-8 border-t border-gray-200 text-center">
+            <Link
+              to="/"
+              className="text-gray-500 hover:text-[#2F5D50] transition-colors"
+            >
+              Back to homepage
+            </Link>
+          </div>
         </div>
       </div>
     </div>

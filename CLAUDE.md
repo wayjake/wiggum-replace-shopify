@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Wiggum** is a full-stack e-commerce platform built as an educational project demonstrating how to build a Shopify alternative. The base example uses "Karen's Beautiful Soap" as the storefront theme.
+**Enrollsy** is a multi-tenant school enrollment and admissions management SaaS platform. Think "Shopify for school enrollment" - schools subscribe to manage admissions, enrollment, and billing, while families use the portal to apply and manage their children's enrollment.
 
 ## Development Commands
 
@@ -30,7 +30,7 @@ npx inngest-cli@latest dev  # Opens http://localhost:8288
 - **React 19** - Latest React with modern features
 - **Tailwind CSS v4** - Utility-first styling via `@tailwindcss/vite`
 - **Drizzle ORM + Turso** - SQLite at the edge
-- **Stripe** - Payment processing
+- **Stripe** - Payment processing for tuition and fees
 - **Brevo** - Transactional emails and drip campaigns
 - **Inngest** - Event-driven async workflows
 - **Nitro** - Server framework for API routes
@@ -84,8 +84,11 @@ const session = await validateSession(
 ```
 src/
 ├── routes/           # File-based routing (TanStack Start)
+│   ├── admin/        # School admin dashboard routes
+│   ├── super-admin/  # Platform super-admin routes
+│   └── portal/       # Family portal routes
 ├── db/               # Database schema and client (Drizzle + Turso)
-│   ├── schema/       # Table definitions
+│   ├── schema/       # Table definitions (users, schools, households, etc.)
 │   └── migrations/   # Auto-generated migrations (don't edit)
 ├── lib/              # Utilities (auth, brevo, inngest)
 ├── router.tsx        # Router configuration
@@ -145,7 +148,7 @@ Every route MUST include proper metadata:
 ```typescript
 head: () => ({
   meta: [
-    { title: 'Page Name | Store Name' },
+    { title: 'Page Name | Enrollsy' },
     { name: 'description', content: '150-160 char description' },
     { property: 'og:title', content: 'Page Title' },
   ],
@@ -160,13 +163,15 @@ Comments should be story-driven and creative - sprinkle in emojis, ASCII art, or
 - Calculate payment amounts server-side, never trust client values
 - Verify Stripe webhooks with the signing secret
 - Keep secrets in server functions; prefix client-safe vars with `VITE_`
+- Multi-tenant isolation: always filter queries by schoolId
 
 ## User Roles
 
-- **Admin** - Full store management, product CRUD, order fulfillment, analytics
-- **Customer** - Browse, purchase, view order history, manage payment methods
+- **Superadmin** - Platform-level management, school onboarding, global analytics
+- **Admin** - School staff: admissions, business office, teachers (role-based within school)
+- **Customer** - Parents/guardians: apply, enroll, view billing, communicate
 
-Gate logic: Missing env vars → `/install`, Not authenticated → `/login`, Non-admin → `/account`
+Gate logic: Missing env vars → `/install`, Not authenticated → `/login`, Not authorized → `/portal` or `/admin`
 
 ## Git Commits
 

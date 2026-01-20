@@ -1,5 +1,5 @@
-// 🛡️ Authentication System - The bouncer at the door of our soap club
-// "I'm Idaho!" - Ralph, every user identifying themselves
+// 🛡️ Authentication System - The bouncer at the door of Enrollsy
+// Guards the gates for superadmins, school staff, and families
 
 import { createId } from '@paralleldrive/cuid2';
 import bcrypt from 'bcryptjs';
@@ -15,7 +15,7 @@ import { getDb, users, sessions } from '../db';
  * ╰─────────────────────────────────────────────────────────╯
  */
 const SESSION_EXPIRY_DAYS = 30;
-const SESSION_COOKIE_NAME = 'soap_session';
+const SESSION_COOKIE_NAME = 'enrollsy_session';
 
 // ═══════════════════════════════════════════════════════════
 // PASSWORD UTILITIES
@@ -46,7 +46,7 @@ export async function verifyPassword(
 export type SessionUser = {
   id: string;
   email: string;
-  role: 'admin' | 'customer';
+  role: 'superadmin' | 'admin' | 'customer';
   firstName: string | null;
   lastName: string | null;
 };
@@ -173,7 +173,7 @@ export type CreateUserInput = {
   password: string;
   firstName?: string;
   lastName?: string;
-  role?: 'admin' | 'customer';
+  role?: 'superadmin' | 'admin' | 'customer';
 };
 
 /**
@@ -240,7 +240,7 @@ export async function authenticateUser(
   return {
     id: user.id,
     email: user.email,
-    role: user.role as 'admin' | 'customer',
+    role: user.role as 'superadmin' | 'admin' | 'customer',
     firstName: user.firstName,
     lastName: user.lastName,
   };
@@ -413,12 +413,12 @@ export async function requireAuth(sessionId: string | null): Promise<Session> {
 }
 
 /**
- * Requires admin role. Throws if not admin.
+ * Requires admin or superadmin role. Throws if not admin/superadmin.
  */
 export async function requireAdmin(sessionId: string | null): Promise<Session> {
   const session = await requireAuth(sessionId);
 
-  if (session.user.role !== 'admin') {
+  if (session.user.role !== 'admin' && session.user.role !== 'superadmin') {
     throw new AuthorizationError('Admin access required');
   }
 

@@ -1,5 +1,7 @@
-// 👤 The identity layer of our soap empire
-// "I'm Idaho!" - Ralph, probably every user when they sign up
+// 👤 The identity layer of Enrollsy
+// Global user accounts that can span multiple schools
+// "One login to rule them all, one login to find them,
+//  One login to bring them all, and in the dashboard bind them."
 
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 import { createId } from '@paralleldrive/cuid2';
@@ -9,15 +11,15 @@ import { relations } from 'drizzle-orm';
  * ╭─────────────────────────────────────────────────────────╮
  * │  USERS TABLE                                             │
  * │  ─────────────────────────────────────────────────────── │
- * │  Everyone who enters our soap wonderland gets a record.  │
- * │  Admins run the show, customers buy the goods.           │
+ * │  Everyone who enters Enrollsy gets a record.             │
+ * │  superadmin = platform, admin = school staff, customer = parent │
  * ╰─────────────────────────────────────────────────────────╯
  */
 export const users = sqliteTable('users', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash'), // null if using OAuth only
-  role: text('role', { enum: ['admin', 'customer'] }).notNull().default('customer'),
+  role: text('role', { enum: ['superadmin', 'admin', 'customer'] }).notNull().default('customer'),
   stripeCustomerId: text('stripe_customer_id'), // Links to Stripe for payments
   firstName: text('first_name'),
   lastName: text('last_name'),
@@ -88,8 +90,8 @@ export const oauthAccounts = sqliteTable('oauth_accounts', {
  * ╭─────────────────────────────────────────────────────────╮
  * │  ADDRESSES TABLE                                         │
  * │  ─────────────────────────────────────────────────────── │
- * │  Where the soap gets shipped! Multiple per user.         │
- * │  Can designate one as default shipping address.          │
+ * │  User addresses for billing and communication.           │
+ * │  Can designate one as default billing address.           │
  * ╰─────────────────────────────────────────────────────────╯
  */
 export const addresses = sqliteTable('addresses', {
@@ -141,6 +143,47 @@ export const addressesRelations = relations(addresses, ({ one }) => ({
 export const oauthAccountsRelations = relations(oauthAccounts, ({ one }) => ({
   user: one(users, {
     fields: [oauthAccounts.userId],
+    references: [users.id],
+  }),
+}));
+
+/**
+ * ╭─────────────────────────────────────────────────────────╮
+ * │  STAFF INVITATIONS TABLE                                 │
+ * │  ─────────────────────────────────────────────────────── │
+ * │  When a school owner/admin invites staff, we create an  │
+ * │  invitation with a unique token. Email contains the     │
+ * │  link to accept and create their account.               │
+ * ╰─────────────────────────────────────────────────────────╯
+ */
+export const staffInvitations = sqliteTable('staff_invitations', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  email: text('email').notNull(),
+  token: text('token').notNull().unique(),  // Secure random token for the invite link
+
+  // What school are they being invited to?
+  schoolId: text('school_id').notNull(),
+  schoolRole: text('school_role', {
+    enum: ['owner', 'admin', 'admissions', 'business_office', 'readonly']
+  }).notNull().default('readonly'),
+
+  // Who sent the invitation?
+  invitedById: text('invited_by_id').notNull(),
+
+  // Status tracking
+  status: text('status', {
+    enum: ['pending', 'accepted', 'expired', 'revoked']
+  }).notNull().default('pending'),
+
+  // Timestamps
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  acceptedAt: integer('accepted_at', { mode: 'timestamp' }),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+});
+
+export const staffInvitationsRelations = relations(staffInvitations, ({ one }) => ({
+  invitedBy: one(users, {
+    fields: [staffInvitations.invitedById],
     references: [users.id],
   }),
 }));

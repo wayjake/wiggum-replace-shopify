@@ -1,12 +1,12 @@
-// 🧰 Utility functions - the Swiss Army knife of our soap empire
-// "I bent my wookiee!" - What happens when you don't use these helpers
+// 🧰 Utility functions - the Swiss Army knife of Enrollsy
+// Common helpers used throughout the application
 
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 /**
  * Combines class names with Tailwind merge intelligence.
- * Like mixing soap ingredients, but for styles!
+ * Merges conflicting Tailwind classes automatically.
  *
  * Usage: cn("base-styles", condition && "conditional-styles", className)
  */
@@ -27,7 +27,6 @@ export function formatPrice(price: number): string {
 
 /**
  * Truncates text with ellipsis if it exceeds maxLength.
- * Like squeezing too much soap into a small box.
  */
 export function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;

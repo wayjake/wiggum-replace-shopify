@@ -1,5 +1,5 @@
 // 🔐 Environment Variable Detection & Validation
-// "Me fail English? That's unpossible!" - Ralph on missing env vars
+// Validates required env vars and redirects to /install if missing
 
 /**
  * ╔═══════════════════════════════════════════════════════════╗
@@ -129,7 +129,6 @@ export type EnvStatus = {
 
 /**
  * Checks a single environment variable for presence and validity.
- * Like checking if you have all the soap ingredients before mixing!
  */
 export function checkEnvVar(key: EnvKey): EnvCheckResult {
   const config = ENV_CONFIG[key];

@@ -1,11 +1,16 @@
-// 🔐 Login Page - The door to your soap kingdom
-// "I'm Idaho!" - Ralph, logging in successfully
+// 🔐 Login Page - The gateway to Enrollsy
+// "One login to rule them all" - The Fellowship of the Login
 //
 // ╭────────────────────────────────────────────────────────────╮
 // │  🛡️ RATE LIMITED!                                          │
 // │  5 attempts per 15 minutes, 1 hour block after exceeding.  │
 // │  Protects against brute force attacks on accounts.         │
 // ╰────────────────────────────────────────────────────────────╯
+//
+// User Roles & Destinations:
+// ├── superadmin → /super-admin (platform management)
+// ├── admin      → /admin (school staff dashboard)
+// └── customer   → /portal (family portal)
 
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
@@ -35,12 +40,12 @@ import { isGoogleOAuthConfigured } from '../lib/google-oauth';
 // "I'm Idaho!" - Ralph, successfully authenticated
 // ═══════════════════════════════════════════════════════════
 
-const loginUser = createServerFn({ method: 'POST' })
-  .handler(async (data: { email: string; password: string; csrfToken?: string }) => {
-    const { email, password, csrfToken } = data;
+const loginUser = createServerFn({ method: 'POST' }).handler(
+  async (input: { data: { email: string; password: string; csrfToken?: string } }) => {
+    const { email, password, csrfToken } = input.data;
+    const request = getRequest();
 
     // 🛡️ CSRF validation - protect against cross-site request forgery
-    const request = getRequest();
     const csrfResult = validateCsrfForRequest(request, csrfToken);
     if (!csrfResult.valid) {
       return { success: false, error: csrfResult.error || 'Invalid security token' };
@@ -136,10 +141,10 @@ const checkGoogleOAuth = createServerFn({ method: 'GET' }).handler(async () => {
 export const Route = createFileRoute('/login')({
   head: () => ({
     meta: [
-      { title: "Sign In | Karen's Beautiful Soap" },
+      { title: 'Sign In | Enrollsy' },
       {
         name: 'description',
-        content: 'Sign in to your account to track orders, manage payment methods, and more.',
+        content: 'Sign in to access your school management dashboard or family portal.',
       },
     ],
   }),
@@ -169,12 +174,14 @@ function LoginPage() {
   const [error, setError] = useState('');
 
   // If already logged in, redirect based on role
-  // 🎭 Admins go to the control room, customers to their portal
+  // 🎭 Each role has their own kingdom to rule
   if (isAuthenticated && user) {
-    if (user.role === 'admin') {
+    if (user.role === 'superadmin') {
+      navigate({ to: '/super-admin' });
+    } else if (user.role === 'admin') {
       navigate({ to: '/admin' });
     } else {
-      navigate({ to: '/account' });
+      navigate({ to: '/portal' });
     }
   }
 
@@ -187,10 +194,20 @@ function LoginPage() {
       return;
     }
 
+    // Get token from context, with cookie fallback
+    let tokenToUse = csrfToken;
+    if (!tokenToUse && typeof document !== 'undefined') {
+      const cookies = document.cookie.split(';').map(c => c.trim());
+      const csrfCookie = cookies.find(c => c.startsWith('csrf-token='));
+      if (csrfCookie) {
+        tokenToUse = csrfCookie.substring('csrf-token='.length);
+      }
+    }
+
     setIsLoading(true);
 
     try {
-      const result = await loginUser({ email, password, csrfToken: csrfToken || undefined });
+      const result = await loginUser({ data: { email, password, csrfToken: tokenToUse || undefined } });
 
       if (!result.success) {
         setError(result.error || 'Login failed');
@@ -204,11 +221,13 @@ function LoginPage() {
       }
 
       // Redirect based on user role
-      // 🎪 The admin show vs the customer experience
-      if (result.user?.role === 'admin') {
+      // 🎪 Each role gets their own stage
+      if (result.user?.role === 'superadmin') {
+        navigate({ to: '/super-admin' });
+      } else if (result.user?.role === 'admin') {
         navigate({ to: '/admin' });
       } else {
-        navigate({ to: '/account' });
+        navigate({ to: '/portal' });
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -218,15 +237,15 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] flex">
+    <div className="min-h-screen bg-[#F7F5F2] flex">
       {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#2D5A4A] text-white p-12 flex-col justify-between">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#2F5D50] text-white p-12 flex-col justify-between">
         <div>
           <Link to="/" className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-              <span className="text-2xl">🧼</span>
+              <span className="text-2xl">🎓</span>
             </div>
-            <span className="text-2xl font-bold font-display">Karen's Beautiful Soap</span>
+            <span className="text-2xl font-bold font-display">Enrollsy</span>
           </Link>
         </div>
 
@@ -235,12 +254,12 @@ function LoginPage() {
             Welcome Back
           </h2>
           <p className="text-white/80 text-lg leading-relaxed">
-            Sign in to track your orders, manage your payment methods, and get access to exclusive offers.
+            Sign in to access your school dashboard, manage enrollments, or view your family's information.
           </p>
         </div>
 
         <div className="text-white/60 text-sm">
-          &copy; {new Date().getFullYear()} Karen's Beautiful Soap. Handcrafted with love.
+          &copy; {new Date().getFullYear()} Enrollsy. School enrollment made simple.
         </div>
       </div>
 
@@ -250,18 +269,18 @@ function LoginPage() {
           {/* Mobile Logo */}
           <div className="lg:hidden mb-8 text-center">
             <Link to="/" className="inline-flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#2D5A4A] rounded-full flex items-center justify-center">
-                <span className="text-xl">🧼</span>
+              <div className="w-10 h-10 bg-[#2F5D50] rounded-full flex items-center justify-center">
+                <span className="text-xl">🎓</span>
               </div>
-              <span className="text-xl font-bold text-[#1A1A1A] font-display">Karen's Beautiful Soap</span>
+              <span className="text-xl font-bold text-[#1F2A44] font-display">Enrollsy</span>
             </Link>
           </div>
 
-          <h1 className="text-3xl font-bold text-[#1A1A1A] mb-2 font-display">
+          <h1 className="text-3xl font-bold text-[#1F2A44] mb-2 font-display">
             Sign In
           </h1>
           <p className="text-gray-600 mb-8">
-            Enter your credentials to access your account
+            Enter your credentials to access your dashboard
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -285,7 +304,7 @@ function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full pl-12 pr-4 py-3 rounded-lg border border-[#F5EBE0] focus:outline-none focus:border-[#2D5A4A] focus:ring-2 focus:ring-[#2D5A4A]/10"
+                  className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
                 />
               </div>
             </div>
@@ -298,7 +317,7 @@ function LoginPage() {
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-sm text-[#2D5A4A] hover:underline"
+                  className="text-sm text-[#2F5D50] hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -311,7 +330,7 @@ function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-12 py-3 rounded-lg border border-[#F5EBE0] focus:outline-none focus:border-[#2D5A4A] focus:ring-2 focus:ring-[#2D5A4A]/10"
+                  className="w-full pl-12 pr-12 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#2F5D50] focus:ring-2 focus:ring-[#2F5D50]/10"
                 />
                 <button
                   type="button"
@@ -331,7 +350,7 @@ function LoginPage() {
                 'w-full flex items-center justify-center gap-2 py-4 rounded-lg font-medium transition-all',
                 isLoading
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-[#2D5A4A] text-white hover:bg-[#1A1A1A]'
+                  : 'bg-[#2F5D50] text-white hover:bg-[#1F2A44]'
               )}
             >
               {isLoading ? (
@@ -352,16 +371,16 @@ function LoginPage() {
               <>
                 <div className="relative my-6">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-[#F5EBE0]" />
+                    <div className="w-full border-t border-gray-200" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-[#FDFCFB] text-gray-500">or continue with</span>
+                    <span className="px-4 bg-[#F7F5F2] text-gray-500">or continue with</span>
                   </div>
                 </div>
 
                 <a
                   href="/api/auth/google"
-                  className="w-full flex items-center justify-center gap-3 py-3 rounded-lg border border-[#F5EBE0] hover:bg-[#F5EBE0]/50 transition-colors"
+                  className="w-full flex items-center justify-center gap-3 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path
@@ -390,18 +409,18 @@ function LoginPage() {
           {/* Register Link */}
           <p className="mt-8 text-center text-gray-600">
             Don't have an account?{' '}
-            <Link to="/register" className="text-[#2D5A4A] font-medium hover:underline">
+            <Link to="/register" className="text-[#2F5D50] font-medium hover:underline">
               Create one
             </Link>
           </p>
 
-          {/* Continue Shopping */}
-          <div className="mt-8 pt-8 border-t border-[#F5EBE0] text-center">
+          {/* Back to Home */}
+          <div className="mt-8 pt-8 border-t border-gray-200 text-center">
             <Link
-              to="/shop"
-              className="text-gray-500 hover:text-[#2D5A4A] transition-colors"
+              to="/"
+              className="text-gray-500 hover:text-[#2F5D50] transition-colors"
             >
-              Continue shopping as guest
+              Back to homepage
             </Link>
           </div>
         </div>

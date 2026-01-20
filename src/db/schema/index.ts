@@ -1,5 +1,5 @@
 // 📚 Schema Index - The table of contents for our database
-// "I'm learnding!" - Ralph, browsing through schema definitions
+// "The household-first model: because families pay the bills, not kindergartners"
 
 /**
  * ╭─────────────────────────────────────────────────────────╮
@@ -7,54 +7,95 @@
  * │  ─────────────────────────────────────────────────────── │
  * │  All our database tables and their relationships live    │
  * │  here. Import * from this file to get everything.        │
+ * │                                                          │
+ * │  🏫 Enrollsy Schema Architecture:                        │
+ * │  ┌─────────┐    ┌────────────┐    ┌──────────┐          │
+ * │  │  Users  │───▶│  Schools   │───▶│Households│          │
+ * │  └─────────┘    └────────────┘    └──────────┘          │
+ * │       │              │                  │               │
+ * │       ▼              ▼                  ▼               │
+ * │  ┌─────────┐    ┌────────────┐    ┌──────────┐          │
+ * │  │Sessions │    │  Members   │    │ Students │          │
+ * │  └─────────┘    └────────────┘    └──────────┘          │
  * ╰─────────────────────────────────────────────────────────╯
  */
 
-// 👤 User-related tables
+// ═══════════════════════════════════════════════════════════
+// 🔐 IDENTITY LAYER - Global user accounts
+// ═══════════════════════════════════════════════════════════
 export {
   users,
   sessions,
   paymentMethods,
   addresses,
   oauthAccounts,
+  staffInvitations,
   usersRelations,
   sessionsRelations,
   paymentMethodsRelations,
   addressesRelations,
   oauthAccountsRelations,
+  staffInvitationsRelations,
 } from './users';
 
-// 🧼 Product-related tables
+// ═══════════════════════════════════════════════════════════
+// 🏫 MULTI-TENANT LAYER - Schools and their staff
+// ═══════════════════════════════════════════════════════════
 export {
-  products,
-  categories,
-  productReviews,
-  productsRelations,
-  productReviewsRelations,
-} from './products';
+  schools,
+  schoolMembers,
+  schoolYears,
+  schoolsRelations,
+  schoolMembersRelations,
+  schoolYearsRelations,
+} from './schools';
 
-// 📦 Order-related tables
+// ═══════════════════════════════════════════════════════════
+// 👨‍👩‍👧‍👦 HOUSEHOLD LAYER - Families and students
+// ═══════════════════════════════════════════════════════════
 export {
-  orders,
-  orderItems,
-  orderEvents,
-  ordersRelations,
-  orderItemsRelations,
-  orderEventsRelations,
-} from './orders';
+  households,
+  guardians,
+  students,
+  studentHouseholds,
+  householdsRelations,
+  guardiansRelations,
+  studentsRelations,
+  studentHouseholdsRelations,
+} from './households';
 
-// 🏷️ Discount-related tables
+// ═══════════════════════════════════════════════════════════
+// 🎯 ADMISSIONS LAYER - CRM and applications
+// ═══════════════════════════════════════════════════════════
 export {
-  discountCodes,
-  discountUsages,
-  discountCodesRelations,
-  discountUsagesRelations,
-} from './discounts';
+  leads,
+  leadActivities,
+  applications,
+  applicationResponses,
+  applicationDocuments,
+  applicationChecklists,
+  leadsRelations,
+  leadActivitiesRelations,
+  applicationsRelations,
+  applicationResponsesRelations,
+  applicationDocumentsRelations,
+  applicationChecklistsRelations,
+} from './admissions';
 
-// 🎁 Gift card tables
+// ═══════════════════════════════════════════════════════════
+// 💰 BILLING LAYER - Invoices and payments
+// ═══════════════════════════════════════════════════════════
 export {
-  giftCards,
-  giftCardTransactions,
-  giftCardsRelations,
-  giftCardTransactionsRelations,
-} from './giftcards';
+  invoices,
+  invoiceItems,
+  payments,
+  paymentPlans,
+  scheduledPayments,
+  accountCredits,
+  invoicesRelations,
+  invoiceItemsRelations,
+  paymentsRelations,
+  paymentPlansRelations,
+  scheduledPaymentsRelations,
+  accountCreditsRelations,
+} from './billing';

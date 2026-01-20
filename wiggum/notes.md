@@ -1,248 +1,345 @@
 # 📝 Development Notes
 
 ```
-    ╭─────────────────────────────────────────────────────────╮
-    │                                                          │
-    │   "I eated the purple berries..."                        │
-    │                                                          │
-    │   These notes taste better. They're knowledge berries.   │
-    │                                                          │
-    ╰─────────────────────────────────────────────────────────╯
+    ╭─────────────────────────────────────────────────────────────╮
+    │                                                              │
+    │   "Me fail English? That's unpossible!"                      │
+    │                                                              │
+    │   These notes lead the way from first inquiry                │
+    │   to tuition paid—without spreadsheets or duct tape.         │
+    │                                                              │
+    ╰─────────────────────────────────────────────────────────────╯
 ```
+
+---
+
+## 🎯 Product Vision
+
+**"From first inquiry to tuition paid—without spreadsheets, PDFs, or duct tape."**
+
+We're building a modern, admissions-first school management platform that:
+- Nails the front door (leads, enrollment, payments)
+- Is fast to adopt (weeks, not months)
+- Grows into a full SIS without forcing schools to switch later
+
+**Target**: U.S. private high schools (~500 students)
+**Price Point**: $55/student/year → ~$27,500 ARR for a 500-student school
 
 ---
 
 ## 🧭 Project Journey Log
 
-### Day 0: The Beginning
+### The Pivot: From Soap to Schools
 
-Started with a fresh TanStack Start template. It came with demo routes showing off SSR, server functions, and API endpoints. The bones are good - now we build the body.
+Started as an e-commerce demo ("Karen's Beautiful Soap") built on TanStack Start. The architecture is solid—now we're transforming it into something schools desperately need: a unified system for admissions, enrollment, and payments.
+
+**Why schools?**
+- Fragmented systems everywhere (leads in spreadsheets, enrollment in PDFs, payments in... prayer)
+- Legacy SIS platforms are expensive, slow, and hard to use
+- Parents hate clunky portals and unclear billing
+- One clean system from first inquiry → enrolled → paid = massive value
 
 **Current State:**
 - ✅ TanStack Start v1.132.0 working
 - ✅ Tailwind CSS configured
-- ✅ Lucide icons available
 - ✅ File-based routing operational
-- ⏳ Demo routes need cleanup
-- ⏳ No database yet
-- ⏳ No payment system
-- ⏳ No user authentication
-- ⏳ No email system
-- ⏳ No background jobs
+- ✅ Drizzle + Turso database setup
+- ✅ Stripe payments foundation
+- ✅ Brevo email integration
+- ✅ Inngest event system
+- ⏳ Schema redesign for household-centric data model
+- ⏳ Admissions CRM features
+- ⏳ Enrollment workflows
+- ⏳ Parent portal
+
+---
+
+## 🏫 Target Customer Profile (ICP)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  WHO WE'RE BUILDING FOR                                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  School Size: 300-800 students (sweet spot: ~500)           │
+│                                                              │
+│  School Types:                                               │
+│  • Independent private high schools                          │
+│  • Faith-based schools                                       │
+│  • College-prep day schools                                  │
+│                                                              │
+│  Constraints They Face:                                      │
+│  • 1-3 admissions staff (wearing many hats)                 │
+│  • 1 business manager (also overwhelmed)                    │
+│  • Limited IT support (maybe outsourced)                    │
+│  • Budget-sensitive but willing to pay for time savings     │
+│                                                              │
+│  Primary Buyers:                                             │
+│  • Head of School                                            │
+│  • Director of Admissions                                    │
+│  • Business Manager                                          │
+│                                                              │
+│  Primary Users:                                              │
+│  • Admissions staff                                          │
+│  • Business Office                                           │
+│  • Parents (the silent majority who must love it)           │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## 🗺️ Implementation Breadcrumbs
 
-### Phase 1: Foundation
+### Phase 1: Core Data Model (Household-First)
 
 ```
 TODO:
-├── [ ] Create cn() utility in utils.ts
-├── [ ] Install Drizzle + Turso dependencies
-├── [ ] Set up database schema files (users, products, orders, payment_methods)
-├── [ ] Configure drizzle.config.ts
-├── [ ] Create env detection utility
-├── [ ] Set up favicon and site metadata infrastructure
-└── [ ] Build installation wizard route
+├── [ ] Design household-centric schema
+│   ├── households (billing unit, shared across siblings)
+│   ├── guardians (parents/legal guardians linked to households)
+│   ├── students (individual children within households)
+│   └── enrollment_status (per student, per school year)
+├── [ ] Create address schema (shared within household)
+├── [ ] Create emergency_contacts schema
+├── [ ] Set up school year / term structure
+└── [ ] Migrate from e-commerce user model to household model
 ```
 
-### Phase 2: Stripe Integration
-
-```
-TODO:
-├── [ ] Install Stripe SDK
-├── [ ] Create Stripe verification utility
-├── [ ] Build /api/stripe/verify endpoint
-├── [ ] Create Stripe gate middleware
-└── [ ] Design blocked-by-stripe UI component
-```
-
-### Phase 3: Brevo Email Integration
+### Phase 2: Admissions & Lead Management
 
 ```
 TODO:
-├── [ ] Install @sendinblue/client package
-├── [ ] Create Brevo client utility (src/lib/brevo.ts)
-├── [ ] Define email template IDs as constants
-├── [ ] Build sendTransactionalEmail helper
-├── [ ] Build addContactToList helper
-└── [ ] Create Brevo webhook handler for delivery status
+├── [ ] Create leads schema
+│   ├── Lead capture from forms
+│   ├── Pipeline stages: Inquiry → Tour → Applied → Accepted → Enrolled → Lost
+│   └── Activity history (emails, status changes)
+├── [ ] Build embeddable inquiry forms
+├── [ ] Create lead pipeline UI
+├── [ ] Add notes and tasks per lead/family
+├── [ ] Build email templates for admissions
+├── [ ] Implement basic bulk messaging
+└── [ ] Activity timeline per family
 ```
 
-### Phase 4: Inngest Event System
-
-```
-TODO:
-├── [ ] Install inngest package
-├── [ ] Create Inngest client (src/lib/inngest.ts)
-├── [ ] Define event types (shop/order.completed, etc.)
-├── [ ] Build orderCompleted function
-├── [ ] Build welcomeDripCampaign function
-├── [ ] Build fulfillmentWorkflow function
-├── [ ] Create /api/inngest endpoint
-└── [ ] Test with Inngest dev server locally
-```
-
-### Phase 5: User Authentication (Magic Link / Passwordless)
+### Phase 3: Applications & Enrollment
 
 ```
 TODO:
-├── [ ] Create users schema with role field (no password!)
-├── [ ] Create magic_tokens schema for magic link tokens
-├── [ ] Create payment_methods schema
-├── [ ] Build session management utilities
-├── [ ] Create requireAuth middleware
-├── [ ] Create requireAdmin middleware
-├── [ ] Build /login route (email input only)
-├── [ ] Build /auth/verify route (handles magic link tokens)
-├── [ ] Create sendMagicLink utility (generates token + sends via Brevo)
-├── [ ] Create verifyMagicToken utility (validates + creates session)
-├── [ ] Add MAGIC_LINK email template to Brevo
-├── [ ] Add rate limiting for magic link requests
-└── [ ] Build logout functionality
+├── [ ] Create applications schema
+├── [ ] Build configurable form builder
+│   ├── Custom fields and sections
+│   ├── File uploads
+│   ├── Required field validation
+│   └── Conditional logic (accepted → contract unlocked)
+├── [ ] Enrollment contracts with e-signature
+├── [ ] Required documents checklist
+├── [ ] Re-enrollment flow (returning students)
+└── [ ] Application status tracking for parents
 ```
 
-### Phase 6: Storefront UI
+### Phase 4: Payments & Billing
 
 ```
 TODO:
-├── [ ] Design landing page (with proper meta tags!)
-├── [ ] Build product catalog components
-├── [ ] Create product detail page
-├── [ ] Implement shopping cart state
-├── [ ] Build checkout flow
-└── [ ] Style with soap brand aesthetics
+├── [ ] Design household ledger schema
+├── [ ] Create tuition plans
+│   ├── One-time payment
+│   ├── Monthly installments
+│   └── Custom schedules
+├── [ ] Integrate Stripe for payments
+│   ├── ACH bank transfer
+│   ├── Credit/debit cards
+│   └── Auto-pay enrollment
+├── [ ] Build receipts and payment history
+├── [ ] Manual adjustments and credits
+└── [ ] Payment reminder automation (via Inngest)
 ```
 
-### Phase 7: Admin Dashboard
-
-```
-TODO:
-├── [ ] Create admin layout with sidebar navigation
-├── [ ] Build dashboard home with stats/charts
-├── [ ] Create product management CRUD views
-├── [ ] Build order management with fulfillment actions
-├── [ ] Add "Mark as Shipped" (triggers Inngest event)
-├── [ ] Create customer overview page
-└── [ ] Build store settings page
-```
-
-### Phase 8: Customer Portal
+### Phase 5: Parent Portal
 
 ```
 TODO:
-├── [ ] Create customer portal layout
-├── [ ] Build order history view
-├── [ ] Add order detail with tracking
-├── [ ] Create payment method management (Stripe integration)
-├── [ ] Build address management
-├── [ ] Add profile settings
-└── [ ] Implement reorder functionality
+├── [ ] Design parent login flow
+├── [ ] Build application status view
+├── [ ] Create enrollment checklist UI
+├── [ ] Contract signing interface
+├── [ ] Invoice and payment history
+├── [ ] Contact info update form
+└── [ ] Document upload functionality
+```
+
+### Phase 6: Admin Dashboard
+
+```
+TODO:
+├── [ ] Create admin layout with navigation
+├── [ ] Build admissions pipeline dashboard
+├── [ ] Student and household management
+├── [ ] Billing overview and reporting
+├── [ ] Communication center (email templates, bulk send)
+└── [ ] School settings and configuration
 ```
 
 ---
 
-## 💡 Ideas & Considerations
+## 💡 Key Decisions & Rationale
 
-### Cart State Management
+### Household-First vs Student-First Data Model
 
-*Where should cart state live?*
+*The biggest architectural decision we face.*
 
-**Options considered:**
-1. **URL params** - Shareable but ugly for multiple items
-2. **localStorage** - Persists across sessions, client-only
-3. **Server session** - Syncs across devices, requires auth
-4. **Hybrid** - localStorage + sync on checkout
+**The Problem:**
+- Traditional SIS platforms are student-centric
+- But parents pay tuition, not students
+- Siblings share addresses, emergency contacts, and billing
+- Divorced parents = complex custody = multiple households
 
-**Decision:** Start with localStorage for simplicity. Can upgrade to server sessions later if needed.
+**Our Decision:** Household-first architecture
 
-### Product Images
-
-*Where to store product images?*
-
-**Options:**
-1. **Turso** - Base64 in database (bad idea, too slow)
-2. **Vercel Blob** - Good for Vercel deployments
-3. **Cloudflare R2** - Cheap, S3-compatible
-4. **External URLs** - Simple, reference existing images
-
-**Decision:** Use external URLs for MVP. Can migrate to blob storage later.
-
-### Migration Strategy
-
-*How to run migrations in production?*
-
-```typescript
-// Option A: Run at startup
-// In app entry point:
-await migrate(db, { migrationsFolder: './migrations' });
-
-// Option B: Separate deploy step
-// In package.json:
-"deploy": "drizzle-kit push && vercel deploy"
-
-// Option C: Turso automatic
-// Use drizzle-kit push in CI/CD
+```
+┌─────────────────────────────────────────────────────────────┐
+│  HOUSEHOLD-CENTRIC MODEL                                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Household                                                   │
+│  ├── Billing address                                         │
+│  ├── Payment methods                                         │
+│  ├── Ledger (all charges/payments)                          │
+│  │                                                           │
+│  ├── Guardians (0-n)                                        │
+│  │   ├── Parent 1 (email, phone, relationship)              │
+│  │   ├── Parent 2                                           │
+│  │   └── Other guardian                                     │
+│  │                                                           │
+│  └── Students (1-n)                                         │
+│      ├── Child 1 (grade, enrollment status)                 │
+│      └── Child 2                                            │
+│                                                              │
+│  Shared Custody Example:                                     │
+│  ┌────────────────┐     ┌────────────────┐                  │
+│  │ Household A     │     │ Household B     │                  │
+│  │ (Mom's house)   │     │ (Dad's house)   │                  │
+│  │                 │     │                 │                  │
+│  │ Guardian: Mom   │     │ Guardian: Dad   │                  │
+│  │ Student: Alex   │◄───►│ Student: Alex   │                  │
+│  │ (50% billing)   │     │ (50% billing)   │                  │
+│  └────────────────┘     └────────────────┘                  │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-**Decision:** Option C - let drizzle-kit push handle it in deployment.
+**Why this wins:**
+- One bill per household (not per student)
+- Addresses and contacts don't repeat
+- Parents see all their children in one view
+- Split billing is a first-class concept
 
-### User Authentication Strategy
+### Authentication: Magic Links for Everyone
 
-*How to handle user auth?*
+**Parents don't need another password.** They barely remember the ones they have.
 
-**Options considered:**
-1. **Password-based** - Traditional, but users forget passwords
-2. **OAuth only** - Good UX but requires third-party setup
-3. **Magic links** - Passwordless, email-based, simple and secure
-4. **Passkeys** - Future-proof but browser support varies
+- Magic link login: Enter email → Get link → Click → Signed in
+- Works great for parents who login 2-3 times per year
+- School staff can have traditional login (future enhancement)
+- Session-based auth with secure cookies
 
-**Decision:** Magic links (passwordless email authentication).
-- Users enter email → receive a login link → click to sign in
-- No passwords to remember, forget, or reset
-- Works perfectly with our Brevo email integration
-- Simple database schema (just users + magic_tokens tables)
-- Session-based auth with cookies after verification
-- Great UX: "Check your email for a sign-in link"
+### Payments Should Feel Like Stripe, Not Accounting Software
 
-### Email Template Management
+**The parent experience for payments matters enormously.**
 
-*Where to manage email content?*
+- Clear, simple invoices
+- One-click auto-pay enrollment
+- Mobile-friendly payment flow
+- Instant receipts via email
+- No jargon ("ledger" visible to admins, not parents)
 
-**Options:**
-1. **Brevo Dashboard** - Visual editor, non-developers can edit
-2. **Code templates** - Full control, version controlled
-3. **Hybrid** - Structure in Brevo, dynamic content from code
+### Communication: Transactional First, Marketing Later
 
-**Decision:** Use Brevo templates with dynamic params. Store template IDs in constants.
-This lets the store owner customize emails without code changes.
+**Phase 1 focus:**
+- Enrollment accepted notifications
+- Payment reminders
+- Application status updates
+- Contract signing requests
 
-### Drip Campaign Timing
+**Not yet:**
+- Full newsletter system
+- Complex drip campaigns
+- SMS (optional add-on later)
 
-*How aggressive should the welcome sequence be?*
+---
 
-**Timing:**
-- Day 0: Welcome email (immediate)
-- Day 3: Soap care tips
-- Day 7: Review request
+## 🎨 Design System Notes
 
-**Considerations:**
-- Don't overwhelm new customers
-- Respect inbox fatigue
-- Always include unsubscribe
+### Visual Trust System
 
-### Site Metadata Strategy
+Schools buy risk reduction, not software. Our design must signal:
+- Stability
+- Fairness
+- Professionalism
+- "We won't surprise you"
 
-*How to ensure consistent metadata?*
+### Color Palette
 
-**Approach:**
-- Create a `createMeta()` utility function
-- Enforce title format: "{Page} | Karen's Beautiful Soap"
-- Default description with override capability
-- Include og:image for all product pages
+```
+Deep Academic Navy (#1F2A44)
+├── Use: Headers, nav, anchors
+├── Signals: Authority, permanence, competence
+└── Feels "school-like" without being childish
 
-**Reminder:** Every new route MUST have proper meta tags!
+Muted Evergreen (#2F5D50)
+├── Use: Accents, CTAs, success states
+├── Signals: Growth, stewardship, responsibility
+└── Feels institutional, not "startup green"
+
+Warm Off-White (#F7F5F2)
+├── Use: Primary background
+├── Signals: Paper, trust, forms, records
+└── Not techy or cold like pure white
+
+Text Colors:
+├── Primary: #1E1E1E
+├── Secondary: #5F6368
+└── Muted: #9AA0A6
+
+Status Colors (Muted):
+├── Success: #3A7F6B
+├── Warning: #C9A227 (muted gold)
+└── Error: #9C2F2F (brick red)
+```
+
+### Typography
+
+```
+Headings: Libre Baskerville
+├── Serif, academic, timeless
+├── Signals: "This is not experimental"
+└── Use for page headers, section titles, pricing
+
+Body & UI: Inter
+├── Clean, neutral, excellent at small sizes
+├── Industry standard for serious SaaS
+└── Use for body copy, forms, tables, buttons
+
+The pairing says: "Established, but not outdated."
+```
+
+### UI Styling Rules
+
+```
+Do:
+├── Rounded corners: 6-8px max
+├── Shadows: subtle, low elevation
+├── Line icons with consistent stroke
+└── Solid primary buttons, outline secondary
+
+Don't:
+├── No glassmorphism
+├── No animated gradients
+├── No playful illustrations
+├── No emoji-style icons
+└── No neon hover states
+```
 
 ---
 
@@ -269,8 +366,8 @@ This lets the store owner customize emails without code changes.
 
 ```
 ⚠️ Schema Type vs Runtime
-   schema.products is the TABLE definition
-   db.query.products is the QUERY interface
+   schema.students is the TABLE definition
+   db.query.students is the QUERY interface
    Don't confuse them!
 
 ⚠️ Turso Token Expiry
@@ -292,69 +389,18 @@ This lets the store owner customize emails without code changes.
 ⚠️ Test vs Live Keys
    Test keys only work with test cards (4242 4242 4242 4242)
    Live keys only work with real cards.
-   Double-check which mode you're in!
 
-⚠️ Webhook Secret per Environment
-   Each environment needs its own webhook endpoint.
-   Each endpoint has its own secret. Don't mix them!
-
-⚠️ Payment Method Sync
-   When customer saves a card, sync to our payment_methods table.
-   Use Stripe webhooks to stay updated on changes.
-```
-
-### Brevo Gotchas
-
-```
-⚠️ Daily Sending Limits
-   Free tier: 300 emails/day
-   Don't trigger mass emails that exceed limits.
-   Queue if necessary.
-
-⚠️ Template ID Changes
-   If you delete and recreate a template in Brevo,
-   the ID changes! Update your constants.
-
-⚠️ Sender Verification
-   Emails from unverified senders get blocked.
-   Verify your domain or sender email first.
-
-⚠️ Variable Syntax
-   Brevo uses {{ params.VARIABLE_NAME }} syntax.
-   Must match exactly what you send in the API call.
-```
-
-### Inngest Gotchas
-
-```
-⚠️ Local Dev Server Required
-   Run: npx inngest-cli@latest dev
-   Opens http://localhost:8288 for testing.
-   Without it, events just disappear locally.
-
-⚠️ Step Durability
-   Anything outside step.run() might run multiple times.
-   Put all side effects inside step.run() calls.
-
-⚠️ Sleep Limitations
-   step.sleep() max duration varies by plan.
-   For very long waits, consider scheduled events.
-
-⚠️ Event Ordering
-   Events are processed independently.
-   Don't rely on event order - make operations idempotent.
+⚠️ Tuition Payment Amounts
+   ALWAYS calculate server-side from enrollment records.
+   NEVER trust client-submitted amounts.
 ```
 
 ### Magic Link Gotchas
 
 ```
 ⚠️ Token Expiry
-   Tokens expire in 15 minutes. Users may not check email immediately.
-   Show clear messaging about expiry and offer "resend" option.
-
-⚠️ Email Deliverability
-   Magic links depend on email arriving. If Brevo has issues,
-   users can't log in. Monitor email delivery rates.
+   Tokens expire in 15 minutes. Parents may check email later.
+   Show clear messaging and "resend" option.
 
 ⚠️ Same Response for All Emails
    Always show "Check your email" even if email doesn't exist.
@@ -362,109 +408,42 @@ This lets the store owner customize emails without code changes.
 
 ⚠️ Multiple Devices
    Magic link creates session on whatever device clicks it.
-   User might click on phone but wanted to log in on desktop.
-   Consider showing "Sign in on this device?" confirmation.
-
-⚠️ Token Cleanup
-   Old tokens accumulate. Run periodic cleanup job to delete
-   expired/used tokens (Inngest scheduled function is perfect).
+   Parent might click on phone but wanted to log in on desktop.
 ```
 
 ---
 
-## 🎨 Design Notes
+## 📊 Success Metrics
 
-### Color Palette Rationale
-
-```
-Forest Green (#2D5A4A)
-├── Represents: Nature, organic, growth
-├── Use: Primary buttons, headers, accents
-└── Accessibility: Works on light backgrounds
-
-Cream (#F5EBE0)
-├── Represents: Purity, softness, natural
-├── Use: Backgrounds, card surfaces
-└── Note: Not pure white - warmer, more organic
-
-Warm Honey (#D4A574)
-├── Represents: Handcrafted, warmth, natural ingredients
-├── Use: Accents, hover states, highlights
-└── Pairs well: With forest green for contrast
-
-Charcoal (#1A1A1A)
-├── Represents: Sophistication, elegance
-├── Use: Text, dark mode backgrounds
-└── Note: Softer than pure black
-```
-
-### Typography Choices
+### Product Metrics
 
 ```
-Playfair Display (Headings)
-├── Style: Serif, elegant, editorial
-├── Weights: 400, 600, 700
-└── Feeling: Luxurious, artisanal
+Time to Onboard:        < 30 days from contract to live
+Enrollment Completion:  > 90% of families complete without admin help
+Parent Portal Adoption: > 85% of parents actively using portal
+Autopay Enrollment:     ≥ 80% of families on autopay
+```
 
-Karla (Body Text)
-├── Style: Sans-serif, clean, readable
-├── Weights: 400, 500, 600
-└── Feeling: Modern, approachable
+### Business Metrics
+
+```
+Demo Close Rate:       > 25%
+Revenue Retention:     > 100% (via add-ons)
+Annual Churn:          < 5%
 ```
 
 ---
 
-## 📊 Metrics to Track
+## 🔮 Phase 2 Preview (Post-MVP)
 
-```
-User Journey Metrics:
-├── Installation completion rate
-├── Time from start to Stripe configured
-├── Cart abandonment rate
-└── Checkout completion rate
-
-Technical Metrics:
-├── Page load times (FCP, LCP)
-├── Database query latency
-├── Stripe API response times
-└── Error rates by type
-```
-
----
-
-## 🔮 Future Considerations
-
-### Nice to Have (Post-MVP)
-
-- [ ] Product variants (size, scent intensity)
-- [ ] Subscription boxes (monthly soap delivery) - Use Stripe Subscriptions
-- [ ] Advanced inventory management with low stock alerts
-- [ ] Reviews and ratings system
-- [ ] Gift cards and store credit
-- [ ] Discount codes and promotions
-- [ ] Abandoned cart recovery emails (via Inngest)
-- [ ] Multi-language support
-- [ ] Advanced analytics dashboard
-- [ ] Customer referral program
-- [ ] Social login (Google, Apple) - optional alongside magic links
-
-### Email Enhancement Ideas
-
-- [ ] Birthday discount emails (requires DOB in profile)
-- [ ] Re-engagement campaigns for dormant customers
-- [ ] Product restock notifications
-- [ ] Personalized recommendations based on purchase history
-- [ ] Post-review thank you emails
-
-### Technical Debt Watch
-
-- Monitor bundle size as features grow
-- Consider server-side cart if localStorage becomes limiting
-- May need image optimization pipeline (Vercel Blob or Cloudflare R2)
-- Watch for N+1 query patterns in product listings
-- Session cleanup job for expired sessions
-- Brevo rate limit handling
-- Inngest function monitoring and alerting
+- [ ] Attendance tracking
+- [ ] Gradebook basics
+- [ ] Class scheduling
+- [ ] Financial aid workflows
+- [ ] Analytics dashboards
+- [ ] Mobile app
+- [ ] Integrations (Google Workspace, LMS, accounting)
+- [ ] SMS messaging (add-on)
 
 ---
 
@@ -475,32 +454,53 @@ Technical Metrics:
 - [TanStack Start Docs](https://tanstack.com/start)
 - [Drizzle ORM Docs](https://orm.drizzle.team)
 - [Turso Docs](https://docs.turso.tech)
-- [Stripe Checkout Docs](https://stripe.com/docs/checkout)
-- [Stripe Payment Methods](https://stripe.com/docs/payments/save-and-reuse)
+- [Stripe Payments Docs](https://stripe.com/docs/payments)
+- [Stripe Invoicing](https://stripe.com/docs/invoicing)
 - [Brevo API Docs](https://developers.brevo.com)
 - [Inngest Docs](https://www.inngest.com/docs)
 - [Tailwind CSS Docs](https://tailwindcss.com/docs)
 
-### Inspiration
+### Competitive Landscape
 
-- Karen's Beautiful Soap (karensbeautifulsoap.com)
-- Lush Cosmetics (brand aesthetic)
-- Glossier (clean e-commerce UX)
+```
+┌─────────────────────────────────────────────────────────────┐
+│  WHY WE WIN VS INCUMBENTS                                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  vs FACTS / Blackbaud:                                       │
+│  • Faster to set up (weeks, not semesters)                  │
+│  • No nickel-and-diming for basics                          │
+│  • Modern UX that parents actually like                     │
+│                                                              │
+│  vs PowerSchool / RenWeb:                                   │
+│  • Cleaner interface                                         │
+│  • Admissions-first design                                   │
+│  • Better payments flow                                      │
+│                                                              │
+│  Our Differentiators:                                        │
+│  1. Admissions-first (CRM → enrollment → billing)           │
+│  2. Household-centric data model                            │
+│  3. Payments feel like Stripe, not accounting software      │
+│  4. Parents love it (this matters more than vendors admit)  │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ```
-    ╭─────────────────────────────────────────────────────────╮
-    │                                                          │
-    │   "That's where I'm a Viking!"                           │
-    │                                                          │
-    │   Future developers: Add your notes here.                │
-    │   This section is for the adventurers who come after.    │
-    │                                                          │
-    ╰─────────────────────────────────────────────────────────╯
+    ╭─────────────────────────────────────────────────────────────╮
+    │                                                              │
+    │   "That's where I'm a Viking!"                               │
+    │                                                              │
+    │   Future developers: Add your notes here.                    │
+    │   We're building the modern front door for private schools.  │
+    │   The parents of tomorrow will thank you.                    │
+    │                                                              │
+    ╰─────────────────────────────────────────────────────────────╯
 ```
 
 ---
 
 *Last updated: The eternal now*
-*Next developer to touch this: You're doing great, champ.* 🧼
+*Next developer to touch this: You're helping schools help kids. Nice.* 🎓

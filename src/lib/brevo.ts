@@ -1,6 +1,5 @@
-// 📬 Brevo Email Integration - The postal service of our soap empire
-// "The doctor said I wouldn't have so many nosebleeds if I kept my finger outta there."
-// - Ralph on email deliverability
+// 📬 Brevo Email Integration - Communication backbone for Enrollsy
+// Handles transactional emails, newsletter signups, and contact management
 
 import * as Brevo from '@getbrevo/brevo';
 
@@ -14,15 +13,18 @@ import * as Brevo from '@getbrevo/brevo';
  */
 export const BREVO_TEMPLATES = {
   // Transactional emails
-  WELCOME: 1, // Welcome email for new customers
-  ORDER_CONFIRMATION: 2, // Order placed confirmation
-  SHIPPING_NOTIFICATION: 3, // Order shipped with tracking
-  DELIVERY_FOLLOWUP: 4, // Post-delivery check-in
-  REVIEW_REQUEST: 5, // Ask for a product review
-  ORDER_CANCELLED: 7, // Order cancellation notification
+  WELCOME: 1, // Welcome email for new families
+  APPLICATION_RECEIVED: 2, // Application confirmation
+  APPLICATION_STATUS: 3, // Application status update
+  ENROLLMENT_CONFIRMED: 4, // Enrollment confirmed
+  PAYMENT_RECEIVED: 5, // Tuition payment received
+  PAYMENT_REMINDER: 6, // Tuition payment reminder
+
+  // Staff emails
+  STAFF_INVITATION: 8, // Staff invitation to join school
 
   // Educational/nurture emails
-  SOAP_TIPS: 6, // Tips for using your soap
+  ENROLLMENT_TIPS: 7, // Tips for school enrollment process
 
   // TODO: Update these IDs after creating templates in Brevo!
 } as const;
@@ -32,8 +34,8 @@ export const BREVO_TEMPLATES = {
  * Update this with your verified sender in Brevo.
  */
 export const DEFAULT_SENDER = {
-  name: "Karen's Beautiful Soap",
-  email: 'hello@karenssoap.com', // Must be verified in Brevo!
+  name: 'Enrollsy',
+  email: 'jake@dubsado.com', // Must be verified in Brevo!
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -161,9 +163,9 @@ export async function sendSimpleEmail({
  * Update these after creating lists in Brevo.
  */
 export const BREVO_LISTS = {
-  ALL_CUSTOMERS: 1, // All customers who have purchased
+  ALL_FAMILIES: 1, // All registered families
   NEWSLETTER: 2, // Newsletter subscribers
-  VIP: 3, // High-value customers
+  SCHOOL_LEADS: 3, // Schools interested in Enrollsy
 } as const;
 
 /**
@@ -262,7 +264,7 @@ export async function removeContactFromLists({
 // ═══════════════════════════════════════════════════════════
 
 /**
- * Sends a welcome email to a new customer.
+ * Sends a welcome email to a new family.
  */
 export async function sendWelcomeEmail({
   email,
@@ -275,15 +277,15 @@ export async function sendWelcomeEmail({
     to: { email, name: firstName },
     templateId: BREVO_TEMPLATES.WELCOME,
     params: {
-      FIRSTNAME: firstName || 'Soap Lover',
-      STORE_URL: process.env.APP_URL || 'https://karenssoap.com',
+      FIRSTNAME: firstName || 'there',
+      STORE_URL: process.env.APP_URL || 'https://enrollsy.com',
     },
   });
 
   // Also add to contacts list
   await addContactToList({
     email,
-    listIds: [BREVO_LISTS.ALL_CUSTOMERS],
+    listIds: [BREVO_LISTS.ALL_FAMILIES],
     attributes: {
       FIRSTNAME: firstName,
     },
@@ -291,90 +293,179 @@ export async function sendWelcomeEmail({
 }
 
 /**
- * Sends an order confirmation email.
+ * Sends an application received email.
  */
-export async function sendOrderConfirmationEmail({
+export async function sendApplicationReceivedEmail({
   email,
   firstName,
-  orderNumber,
-  orderTotal,
-  orderItems,
-  shippingAddress,
+  applicationId,
+  studentName,
+  schoolName,
 }: {
   email: string;
   firstName?: string;
-  orderNumber: string;
-  orderTotal: string;
-  orderItems: string; // HTML formatted list
-  shippingAddress: string;
+  applicationId: string;
+  studentName: string;
+  schoolName: string;
 }): Promise<void> {
   await sendTransactionalEmail({
     to: { email, name: firstName },
-    templateId: BREVO_TEMPLATES.ORDER_CONFIRMATION,
+    templateId: BREVO_TEMPLATES.APPLICATION_RECEIVED,
     params: {
-      FIRSTNAME: firstName || 'Soap Lover',
-      ORDER_NUMBER: orderNumber,
-      ORDER_TOTAL: orderTotal,
-      ORDER_ITEMS: orderItems,
-      SHIPPING_ADDRESS: shippingAddress,
+      FIRSTNAME: firstName || 'there',
+      APPLICATION_ID: applicationId,
+      STUDENT_NAME: studentName,
+      SCHOOL_NAME: schoolName,
     },
   });
 }
 
 /**
- * Sends a shipping notification email.
+ * Sends an application status update email.
  */
-export async function sendShippingNotificationEmail({
+export async function sendApplicationStatusEmail({
   email,
   firstName,
-  orderNumber,
-  trackingNumber,
-  trackingUrl,
-  estimatedDelivery,
+  applicationId,
+  studentName,
+  status,
+  message,
 }: {
   email: string;
   firstName?: string;
-  orderNumber: string;
-  trackingNumber: string;
-  trackingUrl: string;
-  estimatedDelivery?: string;
+  applicationId: string;
+  studentName: string;
+  status: string;
+  message?: string;
 }): Promise<void> {
   await sendTransactionalEmail({
     to: { email, name: firstName },
-    templateId: BREVO_TEMPLATES.SHIPPING_NOTIFICATION,
+    templateId: BREVO_TEMPLATES.APPLICATION_STATUS,
     params: {
-      FIRSTNAME: firstName || 'Soap Lover',
-      ORDER_NUMBER: orderNumber,
-      TRACKING_NUMBER: trackingNumber,
-      TRACKING_URL: trackingUrl,
-      ESTIMATED_DELIVERY: estimatedDelivery || 'in 3-5 business days',
+      FIRSTNAME: firstName || 'there',
+      APPLICATION_ID: applicationId,
+      STUDENT_NAME: studentName,
+      STATUS: status,
+      MESSAGE: message || '',
     },
   });
 }
 
 /**
- * Sends a review request email.
+ * Sends a payment reminder email.
  */
-export async function sendReviewRequestEmail({
+export async function sendPaymentReminderEmail({
   email,
   firstName,
-  productName,
-  reviewUrl,
+  amountDue,
+  dueDate,
+  paymentUrl,
 }: {
   email: string;
   firstName?: string;
-  productName: string;
-  reviewUrl: string;
+  amountDue: string;
+  dueDate: string;
+  paymentUrl: string;
 }): Promise<void> {
   await sendTransactionalEmail({
     to: { email, name: firstName },
-    templateId: BREVO_TEMPLATES.REVIEW_REQUEST,
+    templateId: BREVO_TEMPLATES.PAYMENT_REMINDER,
     params: {
-      FIRSTNAME: firstName || 'Soap Lover',
-      PRODUCT_NAME: productName,
-      REVIEW_URL: reviewUrl,
+      FIRSTNAME: firstName || 'there',
+      AMOUNT_DUE: amountDue,
+      DUE_DATE: dueDate,
+      PAYMENT_URL: paymentUrl,
     },
   });
+}
+
+/**
+ * Sends a staff invitation email to join a school.
+ */
+export async function sendStaffInvitationEmail({
+  to,
+  inviterName,
+  schoolName,
+  role,
+  inviteUrl,
+  expiresAt,
+}: {
+  to: string;
+  inviterName: string;
+  schoolName: string;
+  role: string;
+  inviteUrl: string;
+  expiresAt: Date;
+}): Promise<void> {
+  const roleLabels: Record<string, string> = {
+    owner: 'Owner',
+    admin: 'Administrator',
+    admissions: 'Admissions',
+    business_office: 'Business Office',
+    readonly: 'View Only',
+  };
+
+  // Try to use template, fall back to simple email
+  try {
+    await sendTransactionalEmail({
+      to: { email: to },
+      templateId: BREVO_TEMPLATES.STAFF_INVITATION,
+      params: {
+        INVITER_NAME: inviterName,
+        SCHOOL_NAME: schoolName,
+        ROLE: roleLabels[role] || role,
+        INVITE_URL: inviteUrl,
+        EXPIRES_DATE: expiresAt.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }),
+      },
+    });
+  } catch (error) {
+    // Fallback to simple HTML email if template fails
+    console.log('[Brevo] Template failed, sending simple email instead');
+    await sendSimpleEmail({
+      to: { email: to },
+      subject: `You've been invited to join ${schoolName} on Enrollsy`,
+      htmlContent: `
+        <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #1F2A44;">You're Invited! 🎉</h1>
+          <p>${inviterName} has invited you to join <strong>${schoolName}</strong> on Enrollsy as a <strong>${roleLabels[role] || role}</strong>.</p>
+          <p>Enrollsy is the all-in-one enrollment management platform that makes school admissions simple.</p>
+          <div style="margin: 30px 0;">
+            <a href="${inviteUrl}" style="display: inline-block; background-color: #2F5D50; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600;">
+              Accept Invitation
+            </a>
+          </div>
+          <p style="color: #6B7280; font-size: 14px;">
+            This invitation expires on ${expiresAt.toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}.
+          </p>
+          <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;" />
+          <p style="color: #9CA3AF; font-size: 12px;">
+            If you weren't expecting this invitation, you can safely ignore this email.
+          </p>
+        </div>
+      `,
+      textContent: `
+You're Invited!
+
+${inviterName} has invited you to join ${schoolName} on Enrollsy as a ${roleLabels[role] || role}.
+
+Accept your invitation: ${inviteUrl}
+
+This invitation expires on ${expiresAt.toLocaleDateString()}.
+
+If you weren't expecting this invitation, you can safely ignore this email.
+      `,
+    });
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
