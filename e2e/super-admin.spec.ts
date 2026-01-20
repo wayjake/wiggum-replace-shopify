@@ -203,7 +203,7 @@ test.describe('Super Admin Dashboard', () => {
       }
 
       // Should have sidebar, navigation, or header
-      await expect(page.locator('nav, aside, [role="navigation"], header')).toBeVisible();
+      await expect(page.locator('nav, aside, [role="navigation"], header').first()).toBeVisible();
     });
 
     test('displays user info or logout option', async ({ page }) => {
@@ -226,7 +226,7 @@ test.describe('Super Admin Dashboard', () => {
       }
 
       // Navigation items should indicate current page (nav, aside, or header)
-      await expect(page.locator('nav, aside, [role="navigation"], header')).toBeVisible();
+      await expect(page.locator('nav, aside, [role="navigation"], header').first()).toBeVisible();
     });
   });
 

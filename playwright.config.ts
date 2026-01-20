@@ -55,7 +55,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev:e2e', // Uses E2E_TEST=true to disable rate limiting
     url: 'http://localhost:3000',
-    reuseExistingServer: false, // Always start fresh with E2E_TEST env var
+    reuseExistingServer: !process.env.CI, // Reuse locally, fresh start in CI
     timeout: 120 * 1000,
   },
 });

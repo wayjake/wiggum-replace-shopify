@@ -330,7 +330,7 @@ test.describe('School Admin Dashboard', () => {
       }
 
       // Admin pages may use nav, aside, header, or role-based navigation
-      await expect(page.locator('nav, aside, [role="navigation"], header')).toBeVisible();
+      await expect(page.locator('nav, aside, [role="navigation"], header').first()).toBeVisible();
     });
 
     test('displays school name or branding', async ({ page }) => {

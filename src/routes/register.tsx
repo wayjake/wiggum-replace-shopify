@@ -13,7 +13,7 @@ import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
 import { cn } from '../utils';
 import { createUser, createSession, createSessionCookie, getUserByEmail } from '../lib/auth';
-import { getRequest } from '@tanstack/react-start/server';
+import { getRequest, setResponseHeader } from '@tanstack/react-start/server';
 import {
   checkRateLimit,
   resetRateLimit,
@@ -85,10 +85,17 @@ const registerUser = createServerFn({ method: 'POST' })
       const sessionId = await createSession(userId);
       const cookie = createSessionCookie(sessionId);
 
+      // 🍪 Set the session cookie via response header (required for HttpOnly cookies)
+      try {
+        setResponseHeader('Set-Cookie', cookie);
+      } catch (e) {
+        console.warn('Could not set session cookie via header:', e);
+      }
+
       return {
         success: true,
         userId,
-        cookie,
+        cookie, // Also return for client-side fallback
       };
     } catch (error) {
       console.error('Registration error:', error);

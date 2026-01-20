@@ -24,7 +24,7 @@ import {
   validateSession,
   parseSessionCookie,
 } from '../lib/auth';
-import { getRequest } from '@tanstack/react-start/server';
+import { getRequest, setResponseHeader } from '@tanstack/react-start/server';
 import {
   checkRateLimit,
   resetRateLimit,
@@ -87,6 +87,13 @@ const loginUser = createServerFn({ method: 'POST' }).handler(
       const sessionId = await createSession(user.id);
       const cookie = createSessionCookie(sessionId);
 
+      // 🍪 Set the session cookie via response header (required for HttpOnly cookies)
+      try {
+        setResponseHeader('Set-Cookie', cookie);
+      } catch (e) {
+        console.warn('Could not set session cookie via header:', e);
+      }
+
       return {
         success: true,
         user: {
@@ -95,7 +102,7 @@ const loginUser = createServerFn({ method: 'POST' }).handler(
           role: user.role,
           firstName: user.firstName,
         },
-        cookie,
+        cookie, // Also return for client-side fallback (non-HttpOnly version)
       };
     } catch (error) {
       console.error('Login error:', error);

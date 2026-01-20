@@ -278,7 +278,7 @@ test.describe('Family Portal', () => {
       }
 
       // Family portal uses a header for navigation
-      await expect(page.locator('nav, aside, [role="navigation"], header')).toBeVisible();
+      await expect(page.locator('nav, aside, [role="navigation"], header').first()).toBeVisible();
     });
 
     test('displays family name or user info', async ({ page }) => {
@@ -318,7 +318,7 @@ test.describe('Family Portal', () => {
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
       // Navigation should adapt (hamburger menu or compact nav)
-      await expect(page.locator('nav, aside, [role="navigation"], button[aria-label*="menu"], header')).toBeVisible();
+      await expect(page.locator('nav, aside, [role="navigation"], button[aria-label*="menu"], header').first()).toBeVisible();
     });
   });
 });
