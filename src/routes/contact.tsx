@@ -1,182 +1,290 @@
-// 📬 Contact Page - Where soap lovers reach out
-// "I bent my wookiee!" - Ralph when the form validation fails
+// 🌿 Contact Page - Get in touch with EnrollSage
+// Contact form sends to jake@dubsado.com + newsletter signup with double opt-in
 
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Mail, CheckCircle2, AlertCircle, Loader2, Menu, X } from 'lucide-react';
+import { sendSimpleEmail, addContactToList, BREVO_LISTS } from '../lib/brevo';
+import { sendEvent } from '../lib/inngest';
 import { cn } from '../utils';
 
 // ═══════════════════════════════════════════════════════════
-// SERVER FUNCTION
+// SERVER FUNCTIONS
 // ═══════════════════════════════════════════════════════════
 
+/**
+ * 📧 Contact form submission
+ * Sends email to jake@dubsado.com with the inquiry details
+ */
 const submitContactForm = createServerFn({ method: 'POST' })
-  .handler(async (data: { name: string; email: string; message: string }) => {
+  .handler(async (input: { data: {
+    name: string;
+    email: string;
+    schoolName: string;
+    studentCount: string;
+    message: string;
+    subscribeNewsletter: boolean;
+  } }) => {
+    const { name, email, schoolName, studentCount, message, subscribeNewsletter } = input.data;
+
     // Validate inputs
-    if (!data.name || data.name.trim().length < 2) {
+    if (!name || name.trim().length < 2) {
       throw new Error('Please enter your name');
     }
-    if (!data.email || !data.email.includes('@')) {
+    if (!email || !email.includes('@')) {
       throw new Error('Please enter a valid email address');
     }
-    if (!data.message || data.message.trim().length < 10) {
+    if (!message || message.trim().length < 10) {
       throw new Error('Please enter a message (at least 10 characters)');
     }
 
-    // 🎭 In a real app, this would send to Brevo or your email service
-    // For now, we'll simulate success after a brief delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      // 📧 Send contact form email to jake@dubsado.com
+      await sendSimpleEmail({
+        to: { email: 'jake@dubsado.com', name: 'Jake' },
+        subject: `[EnrollSage] New inquiry from ${name} at ${schoolName || 'Unknown School'}`,
+        htmlContent: `
+          <h2>New Contact Form Submission</h2>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>School:</strong> ${schoolName || 'Not provided'}</p>
+          <p><strong>Student Count:</strong> ${studentCount || 'Not provided'}</p>
+          <p><strong>Newsletter Signup:</strong> ${subscribeNewsletter ? 'Yes' : 'No'}</p>
+          <hr />
+          <p><strong>Message:</strong></p>
+          <p>${message.replace(/\n/g, '<br>')}</p>
+        `,
+        textContent: `
+New Contact Form Submission
 
-    console.log('Contact form submission:', {
-      name: data.name,
-      email: data.email,
-      message: data.message,
-      timestamp: new Date().toISOString(),
-    });
+Name: ${name}
+Email: ${email}
+School: ${schoolName || 'Not provided'}
+Student Count: ${studentCount || 'Not provided'}
+Newsletter Signup: ${subscribeNewsletter ? 'Yes' : 'No'}
 
-    return { success: true };
+Message:
+${message}
+        `,
+      });
+
+      // 📋 If they opted in to newsletter, add to pending list with double opt-in
+      if (subscribeNewsletter) {
+        await addContactToList({
+          email: email,
+          listIds: [BREVO_LISTS.NEWSLETTER],
+          attributes: {
+            FIRSTNAME: name.split(' ')[0],
+            SIGNUP_SOURCE: 'contact_form',
+            SCHOOL_NAME: schoolName || '',
+            CONFIRMED: 'false',
+          },
+        });
+
+        // Trigger double opt-in email via Inngest
+        try {
+          await sendEvent('school/newsletter.signup', {
+            email: email,
+            source: 'contact_form',
+            name: name,
+          });
+        } catch (inngestError) {
+          console.error('Failed to send newsletter confirmation:', inngestError);
+        }
+      }
+
+      console.log('Contact form submitted:', {
+        name: name,
+        email: email,
+        schoolName: schoolName,
+        timestamp: new Date().toISOString(),
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error('Contact form error:', error);
+      throw new Error('Failed to send message. Please try again.');
+    }
   });
-
-// ═══════════════════════════════════════════════════════════
-// ROUTE
-// ═══════════════════════════════════════════════════════════
 
 export const Route = createFileRoute('/contact')({
   head: () => ({
     meta: [
-      { title: "Contact Us | Karen's Beautiful Soap" },
+      { title: 'Contact Us | EnrollSage' },
       {
         name: 'description',
-        content:
-          "Get in touch with Karen's Beautiful Soap. Find us at the Studio City Farmers Market or reach out with questions about our handcrafted natural soaps.",
+        content: 'Get in touch with EnrollSage. Schedule a demo, ask questions, or learn how we can bring wise guidance to your school enrollment process.',
       },
-      { property: 'og:title', content: "Contact Us | Karen's Beautiful Soap" },
-      {
-        property: 'og:description',
-        content: 'Questions? We would love to hear from you!',
-      },
+      { property: 'og:title', content: 'Contact Us | EnrollSage' },
+      { property: 'og:description', content: 'Schedule a demo or get answers to your questions.' },
     ],
   }),
   component: ContactPage,
 });
 
-// ═══════════════════════════════════════════════════════════
-// COMPONENT
-// ═══════════════════════════════════════════════════════════
-
 function ContactPage() {
   return (
-    <div className="min-h-screen bg-[#FDFCFB]">
-      {/* Navigation */}
+    <div className="min-h-screen bg-[#F8F9F6]">
       <Navigation />
+      <HeroSection />
+      <ContactSection />
+      <Footer />
+    </div>
+  );
+}
 
-      {/* Hero */}
-      <section className="relative py-16 px-6 bg-gradient-to-br from-[#F5EBE0] via-white to-[#F5EBE0]">
-        <div className="max-w-4xl mx-auto text-center">
-          <span className="inline-block px-4 py-2 bg-[#2D5A4A]/10 text-[#2D5A4A] rounded-full text-sm font-medium mb-6">
-            📬 Get in Touch
-          </span>
-          <h1 className="text-4xl md:text-5xl font-bold text-[#1A1A1A] mb-4 font-display">
-            We'd Love to{' '}
-            <span className="text-[#2D5A4A]">Hear from You</span>
-          </h1>
-          <p className="text-lg text-gray-600 max-w-xl mx-auto">
-            Whether you have a question about our soaps, need a recommendation,
-            or just want to say hello - we're here to help!
-          </p>
-        </div>
-      </section>
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
 
-      {/* Main Content */}
-      <section className="py-16 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Contact Form */}
-            <div className="bg-white rounded-2xl shadow-sm border border-[#F5EBE0] p-8">
-              <h2 className="text-2xl font-bold text-[#1A1A1A] mb-6 font-display">
-                Send Us a Message
+function Navigation() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  return (
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+      <div className="max-w-6xl mx-auto px-6 py-4">
+        <nav className="flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-[#5B7F6D] rounded flex items-center justify-center">
+              <span className="text-white text-lg">🌿</span>
+            </div>
+            <span className="text-xl font-display text-[#2D4F3E]">EnrollSage</span>
+          </Link>
+
+          <div className="hidden md:flex items-center gap-8">
+            <Link to="/about" className="text-[#5F6368] hover:text-[#2D4F3E] transition-colors">About</Link>
+            <Link to="/contact" className="text-[#2D4F3E] font-medium">Contact</Link>
+          </div>
+
+          <div className="hidden md:flex items-center gap-4">
+            <Link to="/login" className="text-[#5F6368] hover:text-[#2D4F3E] transition-colors">
+              Sign In
+            </Link>
+            <Link
+              to="/contact"
+              className="bg-[#5B7F6D] text-white px-5 py-2 rounded-md hover:bg-[#4A6B5B] transition-colors font-medium"
+            >
+              Request Demo
+            </Link>
+          </div>
+
+          <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </nav>
+
+        {mobileMenuOpen && (
+          <div className="md:hidden pt-4 pb-2 border-t border-gray-100 mt-4">
+            <div className="flex flex-col gap-4">
+              <Link to="/about" className="text-[#5F6368]">About</Link>
+              <Link to="/contact" className="text-[#2D4F3E] font-medium">Contact</Link>
+              <Link to="/login" className="text-[#5F6368]">Sign In</Link>
+            </div>
+          </div>
+        )}
+      </div>
+    </header>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// HERO SECTION
+// ═══════════════════════════════════════════════════════════
+
+function HeroSection() {
+  return (
+    <section className="py-16 px-6 bg-white">
+      <div className="max-w-3xl mx-auto text-center">
+        <h1 className="text-4xl md:text-5xl font-display text-[#2D4F3E] mb-6">
+          Let's talk about your school
+        </h1>
+        <p className="text-lg text-[#5F6368]">
+          Whether you're ready for a demo or just have questions, we're here to help.
+          No pressure, no sales pitch—just a wise conversation about what you need.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONTACT SECTION
+// ═══════════════════════════════════════════════════════════
+
+function ContactSection() {
+  return (
+    <section className="py-16 px-6 bg-[#F8F9F6]">
+      <div className="max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-5 gap-12">
+          {/* Form - takes 3 columns */}
+          <div className="md:col-span-3">
+            <div className="bg-white p-8 rounded-lg border border-gray-200">
+              <h2 className="text-2xl font-display text-[#2D4F3E] mb-6">
+                Send us a message
               </h2>
               <ContactForm />
             </div>
+          </div>
 
-            {/* Contact Info */}
-            <div className="space-y-8">
-              {/* Info Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {CONTACT_INFO.map((item, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-xl border border-[#F5EBE0] p-6"
-                  >
-                    <div className="w-12 h-12 bg-[#2D5A4A]/10 rounded-xl flex items-center justify-center mb-4">
-                      <item.icon className="w-6 h-6 text-[#2D5A4A]" />
-                    </div>
-                    <h3 className="font-semibold text-[#1A1A1A] mb-1">
-                      {item.title}
-                    </h3>
-                    {item.link ? (
-                      <a
-                        href={item.link}
-                        className="text-gray-600 hover:text-[#2D5A4A] transition-colors"
-                      >
-                        {item.value}
-                      </a>
-                    ) : (
-                      <p className="text-gray-600">{item.value}</p>
-                    )}
-                    {item.note && (
-                      <p className="text-sm text-gray-400 mt-1">{item.note}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
+          {/* Sidebar - takes 2 columns */}
+          <div className="md:col-span-2 space-y-8">
+            {/* What to expect */}
+            <div className="bg-white p-6 rounded-lg border border-gray-200">
+              <h3 className="font-display text-lg text-[#2D4F3E] mb-4">What happens next?</h3>
+              <ul className="space-y-3 text-[#5F6368] text-sm">
+                <li className="flex gap-3">
+                  <span className="text-[#5B7F6D] font-bold">1.</span>
+                  We'll respond within 24 hours (usually faster)
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-[#5B7F6D] font-bold">2.</span>
+                  Schedule a 30-minute discovery call
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-[#5B7F6D] font-bold">3.</span>
+                  See EnrollSage in action with a personalized demo
+                </li>
+              </ul>
+            </div>
 
-              {/* Map / Location Visual */}
-              <div className="bg-white rounded-2xl border border-[#F5EBE0] overflow-hidden">
-                <div className="aspect-video bg-[#F5EBE0] relative">
-                  {/* 🗺️ Placeholder for map - in production, embed Google Maps */}
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#2D5A4A]/5 to-[#D4A574]/5">
-                    <div className="text-center">
-                      <MapPin className="w-12 h-12 text-[#2D5A4A] mx-auto mb-2" />
-                      <p className="font-semibold text-[#1A1A1A]">
-                        Studio City Farmers Market
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Ventura Pl, Studio City, CA
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="font-semibold text-[#1A1A1A] mb-2">
-                    Visit Us in Person
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    Come smell the soaps, chat with Karen, and get personalized
-                    recommendations. We love meeting our customers face-to-face!
-                  </p>
-                </div>
-              </div>
+            {/* Direct contact */}
+            <div className="bg-[#2D4F3E] p-6 rounded-lg text-white">
+              <h3 className="font-display text-lg mb-4">Prefer email?</h3>
+              <p className="text-white/70 text-sm mb-4">
+                Reach out directly and we'll get back to you.
+              </p>
+              <a
+                href="mailto:jake@dubsado.com"
+                className="inline-flex items-center gap-2 text-white hover:underline"
+              >
+                <Mail className="w-4 h-4" />
+                jake@dubsado.com
+              </a>
+            </div>
 
-              {/* FAQ Teaser */}
-              <div className="bg-[#2D5A4A] rounded-2xl p-6 text-white">
-                <h3 className="font-semibold mb-2">Common Questions</h3>
-                <ul className="space-y-2 text-white/80 text-sm">
-                  <li>• Free shipping on orders over $60</li>
-                  <li>• $7 flat rate shipping under $60</li>
-                  <li>• Most orders ship within 2-3 business days</li>
-                  <li>• 100% satisfaction guaranteed</li>
-                </ul>
-              </div>
+            {/* FAQ teaser */}
+            <div className="bg-white p-6 rounded-lg border border-gray-200">
+              <h3 className="font-display text-lg text-[#2D4F3E] mb-4">Common questions</h3>
+              <ul className="space-y-3 text-[#5F6368] text-sm">
+                <li>
+                  <strong className="text-[#1E1E1E]">How long does setup take?</strong>
+                  <p>Most schools are live within 30 days.</p>
+                </li>
+                <li>
+                  <strong className="text-[#1E1E1E]">What's the pricing?</strong>
+                  <p>Starting at $55/student/year. No setup fees.</p>
+                </li>
+                <li>
+                  <strong className="text-[#1E1E1E]">Can we migrate from FACTS?</strong>
+                  <p>Yes! We help with data migration.</p>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Footer */}
-      <Footer />
-    </div>
+      </div>
+    </section>
   );
 }
 
@@ -185,48 +293,57 @@ function ContactPage() {
 // ═══════════════════════════════════════════════════════════
 
 function ContactForm() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-  });
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>(
-    'idle'
-  );
+  // 🌿 Using refs + FormData to capture browser autofill values
+  // (onChange doesn't fire for autofilled inputs, so we read directly on submit)
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [subscribedToNewsletter, setSubscribedToNewsletter] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus('loading');
     setErrorMessage('');
 
+    // Read values directly from form to capture autofill
+    const form = e.currentTarget;
+    const formData = {
+      name: (form.elements.namedItem('name') as HTMLInputElement).value,
+      email: (form.elements.namedItem('email') as HTMLInputElement).value,
+      schoolName: (form.elements.namedItem('schoolName') as HTMLInputElement).value,
+      studentCount: (form.elements.namedItem('studentCount') as HTMLSelectElement).value,
+      message: (form.elements.namedItem('message') as HTMLTextAreaElement).value,
+      subscribeNewsletter: (form.elements.namedItem('subscribeNewsletter') as HTMLInputElement).checked,
+    };
+
     try {
-      await submitContactForm(formData);
+      await submitContactForm({ data: formData });
+      setSubscribedToNewsletter(formData.subscribeNewsletter);
       setStatus('success');
-      setFormData({ name: '', email: '', message: '' });
+      form.reset();
     } catch (err) {
       setStatus('error');
-      setErrorMessage(
-        err instanceof Error ? err.message : 'Something went wrong'
-      );
+      setErrorMessage(err instanceof Error ? err.message : 'Something went wrong');
     }
   };
 
   if (status === 'success') {
     return (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle2 className="w-8 h-8 text-green-600" />
+      <div className="text-center py-8">
+        <div className="w-16 h-16 bg-[#5B7F6D]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <CheckCircle2 className="w-8 h-8 text-[#5B7F6D]" />
         </div>
-        <h3 className="text-xl font-semibold text-[#1A1A1A] mb-2">
-          Message Sent!
-        </h3>
-        <p className="text-gray-600 mb-6">
-          Thank you for reaching out. We'll get back to you soon.
+        <h3 className="text-xl font-display text-[#2D4F3E] mb-2">Message sent!</h3>
+        <p className="text-[#5F6368] mb-6">
+          Thanks for reaching out. We'll get back to you within 24 hours.
         </p>
+        {subscribedToNewsletter && (
+          <p className="text-sm text-[#5F6368] mb-6">
+            Check your inbox to confirm your newsletter subscription.
+          </p>
+        )}
         <button
           onClick={() => setStatus('idle')}
-          className="text-[#2D5A4A] font-medium hover:underline"
+          className="text-[#5B7F6D] font-medium hover:underline"
         >
           Send another message
         </button>
@@ -237,186 +354,132 @@ function ContactForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {status === 'error' && (
-        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+        <div className="flex items-center gap-3 p-4 bg-red-50 border border-[#8B4444]/20 rounded-md text-[#8B4444]">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           <p>{errorMessage}</p>
         </div>
       )}
 
-      <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-[#1A1A1A] mb-2"
-        >
-          Your Name
-        </label>
-        <input
-          type="text"
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full px-4 py-3 rounded-lg border border-[#F5EBE0] bg-white focus:outline-none focus:border-[#2D5A4A] focus:ring-2 focus:ring-[#2D5A4A]/10 transition-colors"
-          placeholder="Karen"
-          required
-        />
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium text-[#1E1E1E] mb-2">
+            Your name *
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
+            placeholder="Jane Smith"
+            autoComplete="name"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-[#1E1E1E] mb-2">
+            Email address *
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
+            placeholder="jane@yourschool.edu"
+            autoComplete="email"
+            required
+          />
+        </div>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="schoolName" className="block text-sm font-medium text-[#1E1E1E] mb-2">
+            School name
+          </label>
+          <input
+            type="text"
+            id="schoolName"
+            name="schoolName"
+            className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
+            placeholder="Westlake Academy"
+            autoComplete="organization"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="studentCount" className="block text-sm font-medium text-[#1E1E1E] mb-2">
+            Number of students
+          </label>
+          <select
+            id="studentCount"
+            name="studentCount"
+            defaultValue=""
+            className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10 bg-white"
+          >
+            <option value="">Select...</option>
+            <option value="under-200">Under 200</option>
+            <option value="200-400">200-400</option>
+            <option value="400-600">400-600</option>
+            <option value="600-800">600-800</option>
+            <option value="800+">800+</option>
+          </select>
+        </div>
       </div>
 
       <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-[#1A1A1A] mb-2"
-        >
-          Email Address
-        </label>
-        <input
-          type="email"
-          id="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full px-4 py-3 rounded-lg border border-[#F5EBE0] bg-white focus:outline-none focus:border-[#2D5A4A] focus:ring-2 focus:ring-[#2D5A4A]/10 transition-colors"
-          placeholder="karen@example.com"
-          required
-        />
-      </div>
-
-      <div>
-        <label
-          htmlFor="message"
-          className="block text-sm font-medium text-[#1A1A1A] mb-2"
-        >
-          Message
+        <label htmlFor="message" className="block text-sm font-medium text-[#1E1E1E] mb-2">
+          How can we help? *
         </label>
         <textarea
           id="message"
-          value={formData.message}
-          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+          name="message"
           rows={5}
-          className="w-full px-4 py-3 rounded-lg border border-[#F5EBE0] bg-white focus:outline-none focus:border-[#2D5A4A] focus:ring-2 focus:ring-[#2D5A4A]/10 transition-colors resize-none"
-          placeholder="Tell us what's on your mind..."
+          className="w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10 resize-none"
+          placeholder="Tell us about your school and what you're looking for..."
           required
         />
+      </div>
+
+      {/* Newsletter opt-in */}
+      <div className="flex items-start gap-3">
+        <input
+          type="checkbox"
+          id="subscribeNewsletter"
+          name="subscribeNewsletter"
+          className="mt-1 w-4 h-4 text-[#5B7F6D] border-gray-300 rounded focus:ring-[#5B7F6D]"
+        />
+        <label htmlFor="subscribeNewsletter" className="text-sm text-[#5F6368]">
+          Subscribe to our newsletter for practical insights on school enrollment and EdTech.
+          (We'll send a confirmation email first.)
+        </label>
       </div>
 
       <button
         type="submit"
         disabled={status === 'loading'}
         className={cn(
-          'w-full flex items-center justify-center gap-2 px-6 py-4 rounded-lg font-medium transition-all',
+          'w-full flex items-center justify-center gap-2 px-6 py-4 rounded-md font-medium transition-colors',
           status === 'loading'
-            ? 'bg-gray-300 cursor-not-allowed'
-            : 'bg-[#2D5A4A] text-white hover:bg-[#1A1A1A]'
+            ? 'bg-gray-400 cursor-not-allowed'
+            : 'bg-[#5B7F6D] text-white hover:bg-[#4A6B5B]'
         )}
       >
         {status === 'loading' ? (
           <>
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <Loader2 className="w-5 h-5 animate-spin" />
             Sending...
           </>
         ) : (
-          <>
-            <Send className="w-5 h-5" />
-            Send Message
-          </>
+          'Send Message'
         )}
       </button>
+
+      <p className="text-xs text-[#9AA0A6] text-center">
+        By submitting, you agree to our{' '}
+        <Link to="/privacy" className="underline hover:text-[#5F6368]">Privacy Policy</Link>.
+      </p>
     </form>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════════════════════
-
-const CONTACT_INFO = [
-  {
-    icon: Phone,
-    title: 'Phone',
-    value: '(310) 804-4824',
-    link: 'tel:310-804-4824',
-    note: 'Call or text',
-  },
-  {
-    icon: Mail,
-    title: 'Email',
-    value: 'hello@karenssoap.com',
-    link: 'mailto:hello@karenssoap.com',
-    note: null,
-  },
-  {
-    icon: MapPin,
-    title: 'Location',
-    value: 'Studio City Farmers Market',
-    link: null,
-    note: 'Ventura Pl, Studio City',
-  },
-  {
-    icon: Clock,
-    title: 'Market Hours',
-    value: 'Sundays 8am - 2pm',
-    link: null,
-    note: 'Rain or shine!',
-  },
-];
-
-// ═══════════════════════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════════════════════
-
-function Navigation() {
-  return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#F5EBE0]">
-      <div className="max-w-7xl mx-auto px-6 py-4">
-        <nav className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#2D5A4A] rounded-full flex items-center justify-center">
-              <span className="text-xl">🧼</span>
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-[#1A1A1A] font-display">
-                Karen's Beautiful Soap
-              </h1>
-              <p className="text-xs text-gray-500">Handcrafted with love</p>
-            </div>
-          </Link>
-
-          <div className="hidden md:flex items-center gap-8">
-            <Link
-              to="/shop"
-              className="text-gray-600 hover:text-[#2D5A4A] transition-colors"
-            >
-              Shop
-            </Link>
-            <Link
-              to="/about"
-              className="text-gray-600 hover:text-[#2D5A4A] transition-colors"
-            >
-              About
-            </Link>
-            <Link
-              to="/contact"
-              className="text-[#2D5A4A] font-medium transition-colors"
-            >
-              Contact
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Link
-              to="/login"
-              className="text-gray-600 hover:text-[#2D5A4A] transition-colors hidden sm:block"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/cart"
-              className="flex items-center gap-2 bg-[#2D5A4A] text-white px-4 py-2 rounded-lg hover:bg-[#1A1A1A] transition-colors"
-            >
-              <span className="hidden sm:inline">Cart</span>
-            </Link>
-          </div>
-        </nav>
-      </div>
-    </header>
   );
 }
 
@@ -426,75 +489,53 @@ function Navigation() {
 
 function Footer() {
   return (
-    <footer className="bg-[#1A1A1A] text-white py-16 px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-[#2D5A4A] rounded-full flex items-center justify-center">
-                <span className="text-xl">🧼</span>
+    <footer className="bg-[#2D4F3E] text-white py-12 px-6">
+      <div className="max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+          <div className="col-span-2 md:col-span-1">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+                <span className="text-lg">🌿</span>
               </div>
-              <h3 className="text-xl font-bold font-display">
-                Karen's Beautiful Soap
-              </h3>
+              <span className="text-lg font-display">EnrollSage</span>
             </div>
-            <p className="text-gray-400 max-w-sm">
-              Handcrafted luxury soaps made with natural ingredients and love.
-              Gentle on your skin, kind to the Earth.
+            <p className="text-white/60 text-sm">
+              Wise guidance for enrollment journeys.
             </p>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li>
-                <Link to="/shop" className="hover:text-white transition-colors">
-                  Shop
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="hover:text-white transition-colors">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/account/orders"
-                  className="hover:text-white transition-colors"
-                >
-                  Track Order
-                </Link>
-              </li>
-              <li>
-                <Link to="/login" className="hover:text-white transition-colors">
-                  Sign In
-                </Link>
-              </li>
+            <h4 className="font-medium mb-4">Product</h4>
+            <ul className="space-y-2 text-white/60 text-sm">
+              <li><Link to="/about" className="hover:text-white transition-colors">Features</Link></li>
+              <li><Link to="/contact" className="hover:text-white transition-colors">Pricing</Link></li>
+              <li><Link to="/contact" className="hover:text-white transition-colors">Request Demo</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Contact</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li>
-                <a
-                  href="tel:310-804-4824"
-                  className="hover:text-white transition-colors"
-                >
-                  (310) 804-4824
-                </a>
-              </li>
-              <li>Studio City Farmers Market</li>
-              <li>Open Sundays</li>
-              <li className="pt-2 text-sm">Free shipping over $60</li>
+            <h4 className="font-medium mb-4">Company</h4>
+            <ul className="space-y-2 text-white/60 text-sm">
+              <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
+              <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-medium mb-4">Legal</h4>
+            <ul className="space-y-2 text-white/60 text-sm">
+              <li><Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500 text-sm">
-          <p>
-            &copy; {new Date().getFullYear()} Karen's Beautiful Soap. All rights
-            reserved.
+        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-white/40 text-sm">
+            &copy; {new Date().getFullYear()} EnrollSage. All rights reserved.
+          </p>
+          <p className="text-white/40 text-sm">
+            Made with wisdom for schools that care.
           </p>
         </div>
       </div>

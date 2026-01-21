@@ -1,5 +1,5 @@
-// 🚦 Rate Limiting - Keeping the soap empire safe from abuse
-// "Me fail English? That's unpossible!" - Ralph, on being rate limited
+// 🚦 Rate Limiting - Keeping EnrollSage safe from abuse
+// Sliding window rate limiter for auth protection
 //
 // ╭────────────────────────────────────────────────────────────╮
 // │  🛡️  SLIDING WINDOW RATE LIMITER                           │
@@ -50,6 +50,18 @@ export type RateLimitConfig = {
 };
 
 /**
+ * Check if running in E2E test mode.
+ * Skip rate limiting during tests to allow comprehensive testing.
+ */
+function isE2ETestMode(): boolean {
+  const isE2E = process.env.PLAYWRIGHT_TEST === 'true' || process.env.E2E_TEST === 'true';
+  if (isE2E) {
+    console.log('[RATE-LIMIT] E2E mode detected, skipping rate limit');
+  }
+  return isE2E;
+}
+
+/**
  * Check if a request should be rate limited.
  *
  * @param identifier - Usually the client IP address
@@ -73,6 +85,15 @@ export function checkRateLimit(
   identifier: string,
   config: RateLimitConfig
 ): RateLimitResult {
+  // 🧪 Skip rate limiting during E2E tests
+  if (isE2ETestMode()) {
+    return {
+      success: true,
+      remaining: config.maxAttempts,
+      resetIn: 0,
+      blocked: false,
+    };
+  }
   const { windowMs, maxAttempts, blockDurationMs } = config;
   const now = Date.now();
 

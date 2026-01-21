@@ -1,12 +1,12 @@
 // ⚡ Inngest Event System - The nervous system of our async operations
-// "Me fail English? That's unpossible!" - Ralph on event-driven architecture
+// Handles email workflows for applications, enrollments, and payments
 
 import { Inngest } from 'inngest';
 import {
-  sendOrderConfirmationEmail,
   sendWelcomeEmail,
-  sendShippingNotificationEmail,
-  sendReviewRequestEmail,
+  sendApplicationReceivedEmail,
+  sendApplicationStatusEmail,
+  sendPaymentReminderEmail,
   sendTransactionalEmail,
   BREVO_TEMPLATES,
 } from './brevo';
@@ -20,7 +20,7 @@ import {
  * ╰─────────────────────────────────────────────────────────╯
  */
 export const inngest = new Inngest({
-  id: 'karens-beautiful-soap',
+  id: 'enrollsy',
   // Event keys are optional for local dev
 });
 
@@ -28,70 +28,66 @@ export const inngest = new Inngest({
 // EVENT TYPE DEFINITIONS
 // ═══════════════════════════════════════════════════════════
 
-export type ShopEvents = {
-  // Order lifecycle events
-  'shop/order.completed': {
+export type SchoolEvents = {
+  // Application lifecycle events
+  'school/application.submitted': {
     data: {
-      orderId: string;
-      orderNumber: string;
-      customerId?: string;
+      applicationId: string;
+      studentName: string;
       email: string;
       firstName?: string;
-      totalAmount: number;
-      items: Array<{
-        productId: string;
-        productName: string;
-        quantity: number;
-        unitPrice: number;
-      }>;
-      shippingAddress: {
-        name: string;
-        line1: string;
-        line2?: string;
-        city: string;
-        state: string;
-        postalCode: string;
-        country: string;
-      };
+      schoolName: string;
+      schoolId: string;
     };
   };
 
-  'shop/order.shipped': {
+  'school/application.status-changed': {
     data: {
-      orderId: string;
-      orderNumber: string;
+      applicationId: string;
+      studentName: string;
       email: string;
       firstName?: string;
-      trackingNumber: string;
-      trackingUrl: string;
-      estimatedDelivery?: string;
+      status: 'under_review' | 'approved' | 'waitlisted' | 'denied';
+      message?: string;
     };
   };
 
-  'shop/order.delivered': {
+  'school/enrollment.confirmed': {
     data: {
-      orderId: string;
-      orderNumber: string;
+      enrollmentId: string;
+      studentName: string;
       email: string;
       firstName?: string;
-      productNames?: string[]; // For review request
+      schoolName: string;
+      gradeLevel: string;
     };
   };
 
-  'shop/order.cancelled': {
+  // Payment events
+  'school/payment.received': {
     data: {
-      orderId: string;
-      orderNumber: string;
+      paymentId: string;
       email: string;
       firstName?: string;
-      reason?: string;
+      amount: number;
+      studentName: string;
     };
   };
 
-  // Customer lifecycle events
-  'shop/customer.created': {
+  'school/payment.reminder': {
     data: {
-      customerId: string;
+      householdId: string;
+      email: string;
+      firstName?: string;
+      amountDue: number;
+      dueDate: string;
+    };
+  };
+
+  // Family lifecycle events
+  'school/family.created': {
+    data: {
+      householdId: string;
       email: string;
       firstName?: string;
       lastName?: string;
@@ -99,94 +95,94 @@ export type ShopEvents = {
   };
 
   // Newsletter events
-  'shop/newsletter.subscribed': {
+  'school/newsletter.signup': {
     data: {
       email: string;
       source: string;
-    };
-  };
-
-  // Cart events
-  'shop/cart.abandoned': {
-    data: {
-      email: string;
-      firstName?: string;
-      items: Array<{
-        productName: string;
-        quantity: number;
-        price: number;
-        imageUrl?: string;
-      }>;
-      cartTotal: number;
-      cartUrl: string;
+      name?: string;
     };
   };
 
   // Admin events
-  'shop/admin.low-stock-alert': {
+  'school/admin.new-application-alert': {
     data: {
-      productId: string;
-      productName: string;
-      currentStock: number;
-      threshold: number;
+      applicationId: string;
+      studentName: string;
+      schoolId: string;
+      schoolName: string;
     };
   };
 };
 
 // ═══════════════════════════════════════════════════════════
-// ORDER COMPLETED WORKFLOW
+// APPLICATION SUBMITTED WORKFLOW
 // ═══════════════════════════════════════════════════════════
 
 /**
- * Triggered after successful Stripe payment.
- * Handles order confirmation email, inventory update, and admin notification.
+ * Triggered when a family submits an application.
+ * Sends confirmation email and notifies school admin.
  */
-export const orderCompletedWorkflow = inngest.createFunction(
-  { id: 'order-completed-workflow', name: 'Order Completed Workflow' },
-  { event: 'shop/order.completed' },
+export const applicationSubmittedWorkflow = inngest.createFunction(
+  { id: 'application-submitted-workflow', name: 'Application Submitted Workflow' },
+  { event: 'school/application.submitted' },
   async ({ event, step }) => {
-    const { orderId, orderNumber, email, firstName, items, totalAmount, shippingAddress } = event.data;
+    const { applicationId, email, firstName, studentName, schoolName } = event.data;
 
-    // Step 1: Send order confirmation email
+    // Step 1: Send application confirmation email
     await step.run('send-confirmation-email', async () => {
-      // Format items for email
-      const orderItemsHtml = items
-        .map(
-          (item) =>
-            `<li>${item.productName} x${item.quantity} - $${(item.unitPrice * item.quantity).toFixed(2)}</li>`
-        )
-        .join('');
-
-      const addressText = `${shippingAddress.name}<br>
-        ${shippingAddress.line1}<br>
-        ${shippingAddress.line2 ? shippingAddress.line2 + '<br>' : ''}
-        ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.postalCode}<br>
-        ${shippingAddress.country}`;
-
-      await sendOrderConfirmationEmail({
+      await sendApplicationReceivedEmail({
         email,
         firstName,
-        orderNumber,
-        orderTotal: `$${totalAmount.toFixed(2)}`,
-        orderItems: `<ul>${orderItemsHtml}</ul>`,
-        shippingAddress: addressText,
+        applicationId,
+        studentName,
+        schoolName,
       });
+      console.log(`[Inngest] Application confirmation sent to ${email}`);
     });
 
-    // Step 2: Log the order completion (placeholder for inventory update)
-    await step.run('log-order', async () => {
-      console.log(`[Inngest] Order ${orderNumber} completed for ${email}`);
-      console.log(`[Inngest] Items: ${items.length}, Total: $${totalAmount}`);
-      // TODO: Update inventory in database
+    // Step 2: Log the application submission
+    await step.run('log-application', async () => {
+      console.log(`[Inngest] Application ${applicationId} submitted for ${studentName}`);
     });
 
-    // Step 3: Notify admin (optional, could be Slack/Discord notification)
-    await step.run('notify-admin', async () => {
-      console.log(`[Inngest] New order notification would be sent to admin`);
-      // TODO: Implement admin notification (email, Slack, etc.)
+    return { success: true, applicationId };
+  }
+);
+
+// ═══════════════════════════════════════════════════════════
+// APPLICATION STATUS CHANGED WORKFLOW
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Triggered when application status changes.
+ * Sends status update email to the family.
+ */
+export const applicationStatusWorkflow = inngest.createFunction(
+  { id: 'application-status-workflow', name: 'Application Status Workflow' },
+  { event: 'school/application.status-changed' },
+  async ({ event, step }) => {
+    const { applicationId, email, firstName, studentName, status, message } = event.data;
+
+    await step.run('send-status-email', async () => {
+      const statusMessages: Record<string, string> = {
+        under_review: 'is now under review',
+        approved: 'has been approved! 🎉',
+        waitlisted: 'has been placed on our waitlist',
+        denied: 'was not accepted at this time',
+      };
+
+      await sendApplicationStatusEmail({
+        email,
+        firstName,
+        applicationId,
+        studentName,
+        status: statusMessages[status] || status,
+        message,
+      });
+      console.log(`[Inngest] Status update sent for application ${applicationId}`);
     });
 
-    return { success: true, orderId, orderNumber };
+    return { success: true, applicationId, status };
   }
 );
 
@@ -195,14 +191,14 @@ export const orderCompletedWorkflow = inngest.createFunction(
 // ═══════════════════════════════════════════════════════════
 
 /**
- * Triggered when a new customer makes their first purchase.
- * Runs a multi-day email sequence to nurture the relationship.
+ * Triggered when a new family creates an account.
+ * Runs a multi-day email sequence with helpful information.
  */
 export const welcomeDripCampaign = inngest.createFunction(
   { id: 'welcome-drip-campaign', name: 'Welcome Drip Campaign' },
-  { event: 'shop/customer.created' },
+  { event: 'school/family.created' },
   async ({ event, step }) => {
-    const { email, firstName, customerId } = event.data;
+    const { email, firstName, householdId } = event.data;
 
     // Day 0: Welcome email (immediate)
     await step.run('welcome-email', async () => {
@@ -210,176 +206,105 @@ export const welcomeDripCampaign = inngest.createFunction(
       console.log(`[Inngest] Welcome email sent to ${email}`);
     });
 
-    // Day 3: Soap care tips
+    // Day 3: Enrollment tips
     await step.sleep('wait-3-days', '3 days');
     await step.run('tips-email', async () => {
       await sendTransactionalEmail({
         to: { email, name: firstName },
-        templateId: BREVO_TEMPLATES.SOAP_TIPS,
+        templateId: BREVO_TEMPLATES.ENROLLMENT_TIPS,
         params: {
-          FIRSTNAME: firstName || 'Soap Lover',
+          FIRSTNAME: firstName || 'there',
         },
       });
-      console.log(`[Inngest] Soap tips email sent to ${email}`);
+      console.log(`[Inngest] Enrollment tips email sent to ${email}`);
     });
 
-    // Day 7: Invite to leave a review (if they've received their order)
-    await step.sleep('wait-4-more-days', '4 days');
-    await step.run('review-request', async () => {
-      // Note: In production, you'd check if order was delivered first
-      console.log(`[Inngest] Review request would be sent to ${email}`);
-      // await sendReviewRequestEmail({ ... });
-    });
-
-    return { success: true, customerId, emailsSent: 3 };
+    return { success: true, householdId, emailsSent: 2 };
   }
 );
 
 // ═══════════════════════════════════════════════════════════
-// ORDER SHIPPED WORKFLOW
+// ENROLLMENT CONFIRMED WORKFLOW
 // ═══════════════════════════════════════════════════════════
 
 /**
- * Triggered when an admin marks an order as shipped.
- * Sends shipping notification and schedules delivery follow-up.
+ * Triggered when enrollment is confirmed.
+ * Sends welcome packet and next steps.
  */
-export const orderShippedWorkflow = inngest.createFunction(
-  { id: 'order-shipped-workflow', name: 'Order Shipped Workflow' },
-  { event: 'shop/order.shipped' },
+export const enrollmentConfirmedWorkflow = inngest.createFunction(
+  { id: 'enrollment-confirmed-workflow', name: 'Enrollment Confirmed Workflow' },
+  { event: 'school/enrollment.confirmed' },
   async ({ event, step }) => {
-    const { orderId, orderNumber, email, firstName, trackingNumber, trackingUrl, estimatedDelivery } = event.data;
+    const { enrollmentId, email, firstName, studentName, schoolName, gradeLevel } = event.data;
 
-    // Send shipping notification
-    await step.run('shipping-notification', async () => {
-      await sendShippingNotificationEmail({
-        email,
-        firstName,
-        orderNumber,
-        trackingNumber,
-        trackingUrl,
-        estimatedDelivery,
-      });
-      console.log(`[Inngest] Shipping notification sent for order ${orderNumber}`);
-    });
-
-    return { success: true, orderId, orderNumber };
-  }
-);
-
-// ═══════════════════════════════════════════════════════════
-// ORDER DELIVERED WORKFLOW
-// ═══════════════════════════════════════════════════════════
-
-/**
- * Triggered when an order is marked as delivered.
- * Waits a few days then sends a review request.
- */
-export const orderDeliveredWorkflow = inngest.createFunction(
-  { id: 'order-delivered-workflow', name: 'Order Delivered Workflow' },
-  { event: 'shop/order.delivered' },
-  async ({ event, step }) => {
-    const { orderId, orderNumber, email, firstName, productNames } = event.data;
-
-    // Wait 2 days after delivery before asking for review
-    await step.sleep('wait-for-product-use', '2 days');
-
-    // Send review request for the first product
-    await step.run('review-request', async () => {
-      const productName = productNames[0] || 'your soap';
-      await sendReviewRequestEmail({
-        email,
-        firstName,
-        productName,
-        reviewUrl: `${process.env.APP_URL || ''}/shop?review=${orderId}`,
-      });
-      console.log(`[Inngest] Review request sent for order ${orderNumber}`);
-    });
-
-    return { success: true, orderId };
-  }
-);
-
-// ═══════════════════════════════════════════════════════════
-// ORDER CANCELLED WORKFLOW
-// "I bent my Wookiee!" - Ralph on order cancellations
-// ═══════════════════════════════════════════════════════════
-
-/**
- * Triggered when an order is cancelled.
- * Sends cancellation notification to customer.
- */
-export const orderCancelledWorkflow = inngest.createFunction(
-  { id: 'order-cancelled-workflow', name: 'Order Cancelled Workflow' },
-  { event: 'shop/order.cancelled' },
-  async ({ event, step }) => {
-    const { orderId, orderNumber, email, firstName, reason } = event.data;
-
-    // Send cancellation email
-    await step.run('cancellation-notification', async () => {
+    await step.run('send-enrollment-confirmation', async () => {
       await sendTransactionalEmail({
         to: { email, name: firstName },
-        templateId: BREVO_TEMPLATES.ORDER_CANCELLED,
+        templateId: BREVO_TEMPLATES.ENROLLMENT_CONFIRMED,
         params: {
-          FIRSTNAME: firstName || 'Valued Customer',
-          ORDER_NUMBER: orderNumber,
-          CANCELLATION_REASON: reason || 'Order was cancelled',
+          FIRSTNAME: firstName || 'there',
+          STUDENT_NAME: studentName,
+          SCHOOL_NAME: schoolName,
+          GRADE_LEVEL: gradeLevel,
         },
       });
-      console.log(`[Inngest] Cancellation notification sent for order ${orderNumber}`);
+      console.log(`[Inngest] Enrollment confirmation sent for ${studentName}`);
     });
 
-    return { success: true, orderId, orderNumber };
+    return { success: true, enrollmentId };
   }
 );
 
 // ═══════════════════════════════════════════════════════════
-// LOW STOCK ALERT
+// PAYMENT REMINDER WORKFLOW
 // ═══════════════════════════════════════════════════════════
 
 /**
- * Triggered when product stock falls below threshold.
- * Notifies admin to restock.
+ * Triggered to send payment reminders.
+ * Sends reminder email with payment link.
  */
-export const lowStockAlert = inngest.createFunction(
-  { id: 'low-stock-alert', name: 'Low Stock Alert' },
-  { event: 'shop/admin.low-stock-alert' },
+export const paymentReminderWorkflow = inngest.createFunction(
+  { id: 'payment-reminder-workflow', name: 'Payment Reminder Workflow' },
+  { event: 'school/payment.reminder' },
   async ({ event, step }) => {
-    const { productId, productName, currentStock, threshold } = event.data;
+    const { householdId, email, firstName, amountDue, dueDate } = event.data;
 
-    await step.run('notify-low-stock', async () => {
-      // In production, this would send an email or Slack notification
-      console.log(
-        `[Inngest] LOW STOCK ALERT: ${productName} (${productId}) has ${currentStock} units, below threshold of ${threshold}`
-      );
+    await step.run('send-payment-reminder', async () => {
+      await sendPaymentReminderEmail({
+        email,
+        firstName,
+        amountDue: `$${amountDue.toFixed(2)}`,
+        dueDate,
+        paymentUrl: `${process.env.APP_URL || ''}/portal/billing`,
+      });
+      console.log(`[Inngest] Payment reminder sent to ${email}`);
     });
 
-    return { success: true, productId };
+    return { success: true, householdId };
   }
 );
 
 // ═══════════════════════════════════════════════════════════
 // NEWSLETTER WELCOME WORKFLOW
-// "I'm a unitard!" - Ralph, subscribing to newsletters
 // ═══════════════════════════════════════════════════════════
 
 /**
  * Triggered when someone subscribes to the newsletter.
- * Sends a welcome email to the new subscriber.
+ * Sends a welcome/confirmation email.
  */
 export const newsletterWelcomeWorkflow = inngest.createFunction(
   { id: 'newsletter-welcome', name: 'Newsletter Welcome Email' },
-  { event: 'shop/newsletter.subscribed' },
+  { event: 'school/newsletter.signup' },
   async ({ event, step }) => {
-    const { email, source } = event.data;
+    const { email, source, name } = event.data;
 
     await step.run('send-welcome-email', async () => {
-      // Send a simple welcome email for newsletter subscribers
       await sendTransactionalEmail({
-        to: { email },
+        to: { email, name },
         templateId: BREVO_TEMPLATES.WELCOME,
         params: {
-          FIRSTNAME: 'Soap Lover',
-          STORE_URL: process.env.APP_URL || 'https://karenssoap.com',
+          FIRSTNAME: name || 'there',
+          STORE_URL: process.env.APP_URL || 'https://enrollsy.com',
           SIGNUP_SOURCE: source,
         },
       });
@@ -391,79 +316,16 @@ export const newsletterWelcomeWorkflow = inngest.createFunction(
 );
 
 // ═══════════════════════════════════════════════════════════
-// ABANDONED CART WORKFLOW
-// "I bent my Wookiee!" - Ralph, when customers forget to checkout
-// ═══════════════════════════════════════════════════════════
-
-/**
- * Triggered when a cart is detected as abandoned.
- * Waits 1 hour then sends a reminder email.
- *
- * Note: This is triggered from the client when:
- * - User has items in cart and is about to leave (beforeunload)
- * - User is logged in (we have their email)
- *
- * Rate limit: Max 1 abandoned cart email per user per 24 hours
- * (handled by Inngest's idempotency key)
- */
-export const abandonedCartWorkflow = inngest.createFunction(
-  {
-    id: 'abandoned-cart-reminder',
-    name: 'Abandoned Cart Reminder',
-    // Use email + date as idempotency key to limit to 1 per day per user
-    idempotency: 'event.data.email + "-" + event.data.cartUrl.split("?")[0]',
-    // Cancel if an order is placed for this email
-    cancelOn: [
-      { event: 'shop/order.completed', match: 'data.email' },
-    ],
-  },
-  { event: 'shop/cart.abandoned' },
-  async ({ event, step }) => {
-    const { email, firstName, items, cartTotal, cartUrl } = event.data;
-
-    // Wait 1 hour before sending reminder
-    await step.sleep('wait-before-reminder', '1 hour');
-
-    // Format items for the email
-    const itemsList = items
-      .map((item) => `${item.productName} (x${item.quantity}) - $${item.price.toFixed(2)}`)
-      .join('<br>');
-
-    await step.run('send-abandoned-cart-email', async () => {
-      // 📧 Send abandoned cart reminder
-      // Note: You'd create a ABANDONED_CART template in Brevo for this
-      await sendTransactionalEmail({
-        to: { email, name: firstName },
-        templateId: BREVO_TEMPLATES.ORDER_CONFIRMATION, // Reusing template for now
-        subject: '🧼 You left some soap behind!',
-        params: {
-          FIRSTNAME: firstName || 'Soap Lover',
-          ORDER_NUMBER: 'Your Cart',
-          ORDER_TOTAL: `$${cartTotal.toFixed(2)}`,
-          ORDER_ITEMS: itemsList,
-          SHIPPING_ADDRESS: `<a href="${cartUrl}" style="color: #2D5A4A;">Complete your order →</a>`,
-        },
-      });
-      console.log(`[Inngest] Abandoned cart email sent to ${email}`);
-    });
-
-    return { success: true, email };
-  }
-);
-
-// ═══════════════════════════════════════════════════════════
 // EXPORT ALL FUNCTIONS FOR REGISTRATION
 // ═══════════════════════════════════════════════════════════
 
 export const inngestFunctions = [
-  orderCompletedWorkflow,
+  applicationSubmittedWorkflow,
+  applicationStatusWorkflow,
   welcomeDripCampaign,
-  orderShippedWorkflow,
-  orderDeliveredWorkflow,
-  orderCancelledWorkflow,
-  lowStockAlert,
+  enrollmentConfirmedWorkflow,
+  paymentReminderWorkflow,
   newsletterWelcomeWorkflow,
-  abandonedCartWorkflow,
 ];
 
 // ═══════════════════════════════════════════════════════════
@@ -474,9 +336,9 @@ export const inngestFunctions = [
  * Type-safe helper to send events to Inngest.
  * Use this instead of inngest.send() directly for type safety.
  */
-export async function sendEvent<T extends keyof ShopEvents>(
+export async function sendEvent<T extends keyof SchoolEvents>(
   name: T,
-  data: ShopEvents[T]['data']
+  data: SchoolEvents[T]['data']
 ): Promise<void> {
   await inngest.send({
     name,

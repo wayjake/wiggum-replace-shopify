@@ -9,37 +9,54 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as CheckoutRouteImport } from './routes/checkout'
-import { Route as CartRouteImport } from './routes/cart'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ShopIndexRouteImport } from './routes/shop/index'
+import { Route as SuperAdminIndexRouteImport } from './routes/super-admin/index'
+import { Route as PortalIndexRouteImport } from './routes/portal/index'
 import { Route as InstallIndexRouteImport } from './routes/install/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as AccountIndexRouteImport } from './routes/account/index'
-import { Route as ShopProductSlugRouteImport } from './routes/shop/$productSlug'
-import { Route as CheckoutSuccessRouteImport } from './routes/checkout/success'
-import { Route as AdminGiftcardsRouteImport } from './routes/admin/giftcards'
-import { Route as AdminDiscountsRouteImport } from './routes/admin/discounts'
-import { Route as AccountSettingsRouteImport } from './routes/account/settings'
-import { Route as AccountPaymentRouteImport } from './routes/account/payment'
-import { Route as AccountAddressesRouteImport } from './routes/account/addresses'
-import { Route as AdminReviewsIndexRouteImport } from './routes/admin/reviews/index'
-import { Route as AdminProductsIndexRouteImport } from './routes/admin/products/index'
-import { Route as AdminOrdersIndexRouteImport } from './routes/admin/orders/index'
-import { Route as AdminCustomersIndexRouteImport } from './routes/admin/customers/index'
-import { Route as AccountOrdersIndexRouteImport } from './routes/account/orders/index'
-import { Route as AdminProductsNewRouteImport } from './routes/admin/products/new'
-import { Route as AdminProductsProductIdRouteImport } from './routes/admin/products/$productId'
-import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin/orders/$orderId'
-import { Route as AccountOrdersOrderIdRouteImport } from './routes/account/orders/$orderId'
+import { Route as SuperAdminUsersRouteImport } from './routes/super-admin/users'
+import { Route as SuperAdminSettingsRouteImport } from './routes/super-admin/settings'
+import { Route as SuperAdminSchoolsRouteImport } from './routes/super-admin/schools'
+import { Route as PortalSettingsRouteImport } from './routes/portal/settings'
+import { Route as PortalBillingRouteImport } from './routes/portal/billing'
+import { Route as PortalApplyRouteImport } from './routes/portal/apply'
+import { Route as PortalApplicationsRouteImport } from './routes/portal/applications'
+import { Route as InviteAcceptRouteImport } from './routes/invite/accept'
+import { Route as DemoFamilyRouteImport } from './routes/demo/family'
+import { Route as DemoAdminRouteImport } from './routes/demo/admin'
+import { Route as AdminTeamRouteImport } from './routes/admin/team'
+import { Route as AdminStudentsRouteImport } from './routes/admin/students'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
+import { Route as AdminFamiliesRouteImport } from './routes/admin/families'
+import { Route as AdminApplicationsRouteImport } from './routes/admin/applications'
+import { Route as SuperAdminSchoolsNewRouteImport } from './routes/super-admin/schools/new'
+import { Route as SuperAdminSchoolsIdRouteImport } from './routes/super-admin/schools/$id'
+import { Route as PortalApplicationsIdRouteImport } from './routes/portal/applications/$id'
+import { Route as AdminLeadsNewRouteImport } from './routes/admin/leads/new'
+import { Route as AdminLeadsIdRouteImport } from './routes/admin/leads/$id'
+import { Route as AdminFamiliesNewRouteImport } from './routes/admin/families/new'
+import { Route as AdminApplicationsIdRouteImport } from './routes/admin/applications/$id'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -52,16 +69,6 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CheckoutRoute = CheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CartRoute = CartRouteImport.update({
-  id: '/cart',
-  path: '/cart',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -72,9 +79,14 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ShopIndexRoute = ShopIndexRouteImport.update({
-  id: '/shop/',
-  path: '/shop/',
+const SuperAdminIndexRoute = SuperAdminIndexRouteImport.update({
+  id: '/super-admin/',
+  path: '/super-admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalIndexRoute = PortalIndexRouteImport.update({
+  id: '/portal/',
+  path: '/portal/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InstallIndexRoute = InstallIndexRouteImport.update({
@@ -87,306 +99,393 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AccountIndexRoute = AccountIndexRouteImport.update({
-  id: '/account/',
-  path: '/account/',
+const SuperAdminUsersRoute = SuperAdminUsersRouteImport.update({
+  id: '/super-admin/users',
+  path: '/super-admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ShopProductSlugRoute = ShopProductSlugRouteImport.update({
-  id: '/shop/$productSlug',
-  path: '/shop/$productSlug',
+const SuperAdminSettingsRoute = SuperAdminSettingsRouteImport.update({
+  id: '/super-admin/settings',
+  path: '/super-admin/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
-  id: '/success',
-  path: '/success',
-  getParentRoute: () => CheckoutRoute,
-} as any)
-const AdminGiftcardsRoute = AdminGiftcardsRouteImport.update({
-  id: '/admin/giftcards',
-  path: '/admin/giftcards',
+const SuperAdminSchoolsRoute = SuperAdminSchoolsRouteImport.update({
+  id: '/super-admin/schools',
+  path: '/super-admin/schools',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminDiscountsRoute = AdminDiscountsRouteImport.update({
-  id: '/admin/discounts',
-  path: '/admin/discounts',
+const PortalSettingsRoute = PortalSettingsRouteImport.update({
+  id: '/portal/settings',
+  path: '/portal/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AccountSettingsRoute = AccountSettingsRouteImport.update({
-  id: '/account/settings',
-  path: '/account/settings',
+const PortalBillingRoute = PortalBillingRouteImport.update({
+  id: '/portal/billing',
+  path: '/portal/billing',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AccountPaymentRoute = AccountPaymentRouteImport.update({
-  id: '/account/payment',
-  path: '/account/payment',
+const PortalApplyRoute = PortalApplyRouteImport.update({
+  id: '/portal/apply',
+  path: '/portal/apply',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AccountAddressesRoute = AccountAddressesRouteImport.update({
-  id: '/account/addresses',
-  path: '/account/addresses',
+const PortalApplicationsRoute = PortalApplicationsRouteImport.update({
+  id: '/portal/applications',
+  path: '/portal/applications',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminReviewsIndexRoute = AdminReviewsIndexRouteImport.update({
-  id: '/admin/reviews/',
-  path: '/admin/reviews/',
+const InviteAcceptRoute = InviteAcceptRouteImport.update({
+  id: '/invite/accept',
+  path: '/invite/accept',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminProductsIndexRoute = AdminProductsIndexRouteImport.update({
-  id: '/admin/products/',
-  path: '/admin/products/',
+const DemoFamilyRoute = DemoFamilyRouteImport.update({
+  id: '/demo/family',
+  path: '/demo/family',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminOrdersIndexRoute = AdminOrdersIndexRouteImport.update({
-  id: '/admin/orders/',
-  path: '/admin/orders/',
+const DemoAdminRoute = DemoAdminRouteImport.update({
+  id: '/demo/admin',
+  path: '/demo/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminCustomersIndexRoute = AdminCustomersIndexRouteImport.update({
-  id: '/admin/customers/',
-  path: '/admin/customers/',
+const AdminTeamRoute = AdminTeamRouteImport.update({
+  id: '/admin/team',
+  path: '/admin/team',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AccountOrdersIndexRoute = AccountOrdersIndexRouteImport.update({
-  id: '/account/orders/',
-  path: '/account/orders/',
+const AdminStudentsRoute = AdminStudentsRouteImport.update({
+  id: '/admin/students',
+  path: '/admin/students',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminProductsNewRoute = AdminProductsNewRouteImport.update({
-  id: '/admin/products/new',
-  path: '/admin/products/new',
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminProductsProductIdRoute = AdminProductsProductIdRouteImport.update({
-  id: '/admin/products/$productId',
-  path: '/admin/products/$productId',
+const AdminLeadsRoute = AdminLeadsRouteImport.update({
+  id: '/admin/leads',
+  path: '/admin/leads',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
-  id: '/admin/orders/$orderId',
-  path: '/admin/orders/$orderId',
+const AdminFamiliesRoute = AdminFamiliesRouteImport.update({
+  id: '/admin/families',
+  path: '/admin/families',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AccountOrdersOrderIdRoute = AccountOrdersOrderIdRouteImport.update({
-  id: '/account/orders/$orderId',
-  path: '/account/orders/$orderId',
+const AdminApplicationsRoute = AdminApplicationsRouteImport.update({
+  id: '/admin/applications',
+  path: '/admin/applications',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SuperAdminSchoolsNewRoute = SuperAdminSchoolsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => SuperAdminSchoolsRoute,
+} as any)
+const SuperAdminSchoolsIdRoute = SuperAdminSchoolsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => SuperAdminSchoolsRoute,
+} as any)
+const PortalApplicationsIdRoute = PortalApplicationsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => PortalApplicationsRoute,
+} as any)
+const AdminLeadsNewRoute = AdminLeadsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminLeadsRoute,
+} as any)
+const AdminLeadsIdRoute = AdminLeadsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminLeadsRoute,
+} as any)
+const AdminFamiliesNewRoute = AdminFamiliesNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminFamiliesRoute,
+} as any)
+const AdminApplicationsIdRoute = AdminApplicationsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminApplicationsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/cart': typeof CartRoute
-  '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
-  '/account/addresses': typeof AccountAddressesRoute
-  '/account/payment': typeof AccountPaymentRoute
-  '/account/settings': typeof AccountSettingsRoute
-  '/admin/discounts': typeof AdminDiscountsRoute
-  '/admin/giftcards': typeof AdminGiftcardsRoute
-  '/checkout/success': typeof CheckoutSuccessRoute
-  '/shop/$productSlug': typeof ShopProductSlugRoute
-  '/account/': typeof AccountIndexRoute
+  '/terms': typeof TermsRoute
+  '/admin/applications': typeof AdminApplicationsRouteWithChildren
+  '/admin/families': typeof AdminFamiliesRouteWithChildren
+  '/admin/leads': typeof AdminLeadsRouteWithChildren
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/students': typeof AdminStudentsRoute
+  '/admin/team': typeof AdminTeamRoute
+  '/demo/admin': typeof DemoAdminRoute
+  '/demo/family': typeof DemoFamilyRoute
+  '/invite/accept': typeof InviteAcceptRoute
+  '/portal/applications': typeof PortalApplicationsRouteWithChildren
+  '/portal/apply': typeof PortalApplyRoute
+  '/portal/billing': typeof PortalBillingRoute
+  '/portal/settings': typeof PortalSettingsRoute
+  '/super-admin/schools': typeof SuperAdminSchoolsRouteWithChildren
+  '/super-admin/settings': typeof SuperAdminSettingsRoute
+  '/super-admin/users': typeof SuperAdminUsersRoute
   '/admin/': typeof AdminIndexRoute
   '/install/': typeof InstallIndexRoute
-  '/shop/': typeof ShopIndexRoute
-  '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
-  '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
-  '/admin/products/$productId': typeof AdminProductsProductIdRoute
-  '/admin/products/new': typeof AdminProductsNewRoute
-  '/account/orders/': typeof AccountOrdersIndexRoute
-  '/admin/customers/': typeof AdminCustomersIndexRoute
-  '/admin/orders/': typeof AdminOrdersIndexRoute
-  '/admin/products/': typeof AdminProductsIndexRoute
-  '/admin/reviews/': typeof AdminReviewsIndexRoute
+  '/portal/': typeof PortalIndexRoute
+  '/super-admin/': typeof SuperAdminIndexRoute
+  '/admin/applications/$id': typeof AdminApplicationsIdRoute
+  '/admin/families/new': typeof AdminFamiliesNewRoute
+  '/admin/leads/$id': typeof AdminLeadsIdRoute
+  '/admin/leads/new': typeof AdminLeadsNewRoute
+  '/portal/applications/$id': typeof PortalApplicationsIdRoute
+  '/super-admin/schools/$id': typeof SuperAdminSchoolsIdRoute
+  '/super-admin/schools/new': typeof SuperAdminSchoolsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/cart': typeof CartRoute
-  '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
-  '/account/addresses': typeof AccountAddressesRoute
-  '/account/payment': typeof AccountPaymentRoute
-  '/account/settings': typeof AccountSettingsRoute
-  '/admin/discounts': typeof AdminDiscountsRoute
-  '/admin/giftcards': typeof AdminGiftcardsRoute
-  '/checkout/success': typeof CheckoutSuccessRoute
-  '/shop/$productSlug': typeof ShopProductSlugRoute
-  '/account': typeof AccountIndexRoute
+  '/terms': typeof TermsRoute
+  '/admin/applications': typeof AdminApplicationsRouteWithChildren
+  '/admin/families': typeof AdminFamiliesRouteWithChildren
+  '/admin/leads': typeof AdminLeadsRouteWithChildren
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/students': typeof AdminStudentsRoute
+  '/admin/team': typeof AdminTeamRoute
+  '/demo/admin': typeof DemoAdminRoute
+  '/demo/family': typeof DemoFamilyRoute
+  '/invite/accept': typeof InviteAcceptRoute
+  '/portal/applications': typeof PortalApplicationsRouteWithChildren
+  '/portal/apply': typeof PortalApplyRoute
+  '/portal/billing': typeof PortalBillingRoute
+  '/portal/settings': typeof PortalSettingsRoute
+  '/super-admin/schools': typeof SuperAdminSchoolsRouteWithChildren
+  '/super-admin/settings': typeof SuperAdminSettingsRoute
+  '/super-admin/users': typeof SuperAdminUsersRoute
   '/admin': typeof AdminIndexRoute
   '/install': typeof InstallIndexRoute
-  '/shop': typeof ShopIndexRoute
-  '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
-  '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
-  '/admin/products/$productId': typeof AdminProductsProductIdRoute
-  '/admin/products/new': typeof AdminProductsNewRoute
-  '/account/orders': typeof AccountOrdersIndexRoute
-  '/admin/customers': typeof AdminCustomersIndexRoute
-  '/admin/orders': typeof AdminOrdersIndexRoute
-  '/admin/products': typeof AdminProductsIndexRoute
-  '/admin/reviews': typeof AdminReviewsIndexRoute
+  '/portal': typeof PortalIndexRoute
+  '/super-admin': typeof SuperAdminIndexRoute
+  '/admin/applications/$id': typeof AdminApplicationsIdRoute
+  '/admin/families/new': typeof AdminFamiliesNewRoute
+  '/admin/leads/$id': typeof AdminLeadsIdRoute
+  '/admin/leads/new': typeof AdminLeadsNewRoute
+  '/portal/applications/$id': typeof PortalApplicationsIdRoute
+  '/super-admin/schools/$id': typeof SuperAdminSchoolsIdRoute
+  '/super-admin/schools/new': typeof SuperAdminSchoolsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/cart': typeof CartRoute
-  '/checkout': typeof CheckoutRouteWithChildren
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
-  '/account/addresses': typeof AccountAddressesRoute
-  '/account/payment': typeof AccountPaymentRoute
-  '/account/settings': typeof AccountSettingsRoute
-  '/admin/discounts': typeof AdminDiscountsRoute
-  '/admin/giftcards': typeof AdminGiftcardsRoute
-  '/checkout/success': typeof CheckoutSuccessRoute
-  '/shop/$productSlug': typeof ShopProductSlugRoute
-  '/account/': typeof AccountIndexRoute
+  '/terms': typeof TermsRoute
+  '/admin/applications': typeof AdminApplicationsRouteWithChildren
+  '/admin/families': typeof AdminFamiliesRouteWithChildren
+  '/admin/leads': typeof AdminLeadsRouteWithChildren
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/students': typeof AdminStudentsRoute
+  '/admin/team': typeof AdminTeamRoute
+  '/demo/admin': typeof DemoAdminRoute
+  '/demo/family': typeof DemoFamilyRoute
+  '/invite/accept': typeof InviteAcceptRoute
+  '/portal/applications': typeof PortalApplicationsRouteWithChildren
+  '/portal/apply': typeof PortalApplyRoute
+  '/portal/billing': typeof PortalBillingRoute
+  '/portal/settings': typeof PortalSettingsRoute
+  '/super-admin/schools': typeof SuperAdminSchoolsRouteWithChildren
+  '/super-admin/settings': typeof SuperAdminSettingsRoute
+  '/super-admin/users': typeof SuperAdminUsersRoute
   '/admin/': typeof AdminIndexRoute
   '/install/': typeof InstallIndexRoute
-  '/shop/': typeof ShopIndexRoute
-  '/account/orders/$orderId': typeof AccountOrdersOrderIdRoute
-  '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
-  '/admin/products/$productId': typeof AdminProductsProductIdRoute
-  '/admin/products/new': typeof AdminProductsNewRoute
-  '/account/orders/': typeof AccountOrdersIndexRoute
-  '/admin/customers/': typeof AdminCustomersIndexRoute
-  '/admin/orders/': typeof AdminOrdersIndexRoute
-  '/admin/products/': typeof AdminProductsIndexRoute
-  '/admin/reviews/': typeof AdminReviewsIndexRoute
+  '/portal/': typeof PortalIndexRoute
+  '/super-admin/': typeof SuperAdminIndexRoute
+  '/admin/applications/$id': typeof AdminApplicationsIdRoute
+  '/admin/families/new': typeof AdminFamiliesNewRoute
+  '/admin/leads/$id': typeof AdminLeadsIdRoute
+  '/admin/leads/new': typeof AdminLeadsNewRoute
+  '/portal/applications/$id': typeof PortalApplicationsIdRoute
+  '/super-admin/schools/$id': typeof SuperAdminSchoolsIdRoute
+  '/super-admin/schools/new': typeof SuperAdminSchoolsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
-    | '/cart'
-    | '/checkout'
     | '/contact'
     | '/login'
+    | '/privacy'
     | '/register'
-    | '/account/addresses'
-    | '/account/payment'
-    | '/account/settings'
-    | '/admin/discounts'
-    | '/admin/giftcards'
-    | '/checkout/success'
-    | '/shop/$productSlug'
-    | '/account/'
+    | '/terms'
+    | '/admin/applications'
+    | '/admin/families'
+    | '/admin/leads'
+    | '/admin/settings'
+    | '/admin/students'
+    | '/admin/team'
+    | '/demo/admin'
+    | '/demo/family'
+    | '/invite/accept'
+    | '/portal/applications'
+    | '/portal/apply'
+    | '/portal/billing'
+    | '/portal/settings'
+    | '/super-admin/schools'
+    | '/super-admin/settings'
+    | '/super-admin/users'
     | '/admin/'
     | '/install/'
-    | '/shop/'
-    | '/account/orders/$orderId'
-    | '/admin/orders/$orderId'
-    | '/admin/products/$productId'
-    | '/admin/products/new'
-    | '/account/orders/'
-    | '/admin/customers/'
-    | '/admin/orders/'
-    | '/admin/products/'
-    | '/admin/reviews/'
+    | '/portal/'
+    | '/super-admin/'
+    | '/admin/applications/$id'
+    | '/admin/families/new'
+    | '/admin/leads/$id'
+    | '/admin/leads/new'
+    | '/portal/applications/$id'
+    | '/super-admin/schools/$id'
+    | '/super-admin/schools/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/cart'
-    | '/checkout'
     | '/contact'
     | '/login'
+    | '/privacy'
     | '/register'
-    | '/account/addresses'
-    | '/account/payment'
-    | '/account/settings'
-    | '/admin/discounts'
-    | '/admin/giftcards'
-    | '/checkout/success'
-    | '/shop/$productSlug'
-    | '/account'
+    | '/terms'
+    | '/admin/applications'
+    | '/admin/families'
+    | '/admin/leads'
+    | '/admin/settings'
+    | '/admin/students'
+    | '/admin/team'
+    | '/demo/admin'
+    | '/demo/family'
+    | '/invite/accept'
+    | '/portal/applications'
+    | '/portal/apply'
+    | '/portal/billing'
+    | '/portal/settings'
+    | '/super-admin/schools'
+    | '/super-admin/settings'
+    | '/super-admin/users'
     | '/admin'
     | '/install'
-    | '/shop'
-    | '/account/orders/$orderId'
-    | '/admin/orders/$orderId'
-    | '/admin/products/$productId'
-    | '/admin/products/new'
-    | '/account/orders'
-    | '/admin/customers'
-    | '/admin/orders'
-    | '/admin/products'
-    | '/admin/reviews'
+    | '/portal'
+    | '/super-admin'
+    | '/admin/applications/$id'
+    | '/admin/families/new'
+    | '/admin/leads/$id'
+    | '/admin/leads/new'
+    | '/portal/applications/$id'
+    | '/super-admin/schools/$id'
+    | '/super-admin/schools/new'
   id:
     | '__root__'
     | '/'
     | '/about'
-    | '/cart'
-    | '/checkout'
     | '/contact'
     | '/login'
+    | '/privacy'
     | '/register'
-    | '/account/addresses'
-    | '/account/payment'
-    | '/account/settings'
-    | '/admin/discounts'
-    | '/admin/giftcards'
-    | '/checkout/success'
-    | '/shop/$productSlug'
-    | '/account/'
+    | '/terms'
+    | '/admin/applications'
+    | '/admin/families'
+    | '/admin/leads'
+    | '/admin/settings'
+    | '/admin/students'
+    | '/admin/team'
+    | '/demo/admin'
+    | '/demo/family'
+    | '/invite/accept'
+    | '/portal/applications'
+    | '/portal/apply'
+    | '/portal/billing'
+    | '/portal/settings'
+    | '/super-admin/schools'
+    | '/super-admin/settings'
+    | '/super-admin/users'
     | '/admin/'
     | '/install/'
-    | '/shop/'
-    | '/account/orders/$orderId'
-    | '/admin/orders/$orderId'
-    | '/admin/products/$productId'
-    | '/admin/products/new'
-    | '/account/orders/'
-    | '/admin/customers/'
-    | '/admin/orders/'
-    | '/admin/products/'
-    | '/admin/reviews/'
+    | '/portal/'
+    | '/super-admin/'
+    | '/admin/applications/$id'
+    | '/admin/families/new'
+    | '/admin/leads/$id'
+    | '/admin/leads/new'
+    | '/portal/applications/$id'
+    | '/super-admin/schools/$id'
+    | '/super-admin/schools/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  CartRoute: typeof CartRoute
-  CheckoutRoute: typeof CheckoutRouteWithChildren
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
+  PrivacyRoute: typeof PrivacyRoute
   RegisterRoute: typeof RegisterRoute
-  AccountAddressesRoute: typeof AccountAddressesRoute
-  AccountPaymentRoute: typeof AccountPaymentRoute
-  AccountSettingsRoute: typeof AccountSettingsRoute
-  AdminDiscountsRoute: typeof AdminDiscountsRoute
-  AdminGiftcardsRoute: typeof AdminGiftcardsRoute
-  ShopProductSlugRoute: typeof ShopProductSlugRoute
-  AccountIndexRoute: typeof AccountIndexRoute
+  TermsRoute: typeof TermsRoute
+  AdminApplicationsRoute: typeof AdminApplicationsRouteWithChildren
+  AdminFamiliesRoute: typeof AdminFamiliesRouteWithChildren
+  AdminLeadsRoute: typeof AdminLeadsRouteWithChildren
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminStudentsRoute: typeof AdminStudentsRoute
+  AdminTeamRoute: typeof AdminTeamRoute
+  DemoAdminRoute: typeof DemoAdminRoute
+  DemoFamilyRoute: typeof DemoFamilyRoute
+  InviteAcceptRoute: typeof InviteAcceptRoute
+  PortalApplicationsRoute: typeof PortalApplicationsRouteWithChildren
+  PortalApplyRoute: typeof PortalApplyRoute
+  PortalBillingRoute: typeof PortalBillingRoute
+  PortalSettingsRoute: typeof PortalSettingsRoute
+  SuperAdminSchoolsRoute: typeof SuperAdminSchoolsRouteWithChildren
+  SuperAdminSettingsRoute: typeof SuperAdminSettingsRoute
+  SuperAdminUsersRoute: typeof SuperAdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
   InstallIndexRoute: typeof InstallIndexRoute
-  ShopIndexRoute: typeof ShopIndexRoute
-  AccountOrdersOrderIdRoute: typeof AccountOrdersOrderIdRoute
-  AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
-  AdminProductsProductIdRoute: typeof AdminProductsProductIdRoute
-  AdminProductsNewRoute: typeof AdminProductsNewRoute
-  AccountOrdersIndexRoute: typeof AccountOrdersIndexRoute
-  AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
-  AdminOrdersIndexRoute: typeof AdminOrdersIndexRoute
-  AdminProductsIndexRoute: typeof AdminProductsIndexRoute
-  AdminReviewsIndexRoute: typeof AdminReviewsIndexRoute
+  PortalIndexRoute: typeof PortalIndexRoute
+  SuperAdminIndexRoute: typeof SuperAdminIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -403,20 +502,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/checkout': {
-      id: '/checkout'
-      path: '/checkout'
-      fullPath: '/checkout'
-      preLoaderRoute: typeof CheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cart': {
-      id: '/cart'
-      path: '/cart'
-      fullPath: '/cart'
-      preLoaderRoute: typeof CartRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -431,11 +516,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/shop/': {
-      id: '/shop/'
-      path: '/shop'
-      fullPath: '/shop/'
-      preLoaderRoute: typeof ShopIndexRouteImport
+    '/super-admin/': {
+      id: '/super-admin/'
+      path: '/super-admin'
+      fullPath: '/super-admin/'
+      preLoaderRoute: typeof SuperAdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal/': {
+      id: '/portal/'
+      path: '/portal'
+      fullPath: '/portal/'
+      preLoaderRoute: typeof PortalIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/install/': {
@@ -452,167 +544,259 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/account/': {
-      id: '/account/'
-      path: '/account'
-      fullPath: '/account/'
-      preLoaderRoute: typeof AccountIndexRouteImport
+    '/super-admin/users': {
+      id: '/super-admin/users'
+      path: '/super-admin/users'
+      fullPath: '/super-admin/users'
+      preLoaderRoute: typeof SuperAdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/shop/$productSlug': {
-      id: '/shop/$productSlug'
-      path: '/shop/$productSlug'
-      fullPath: '/shop/$productSlug'
-      preLoaderRoute: typeof ShopProductSlugRouteImport
+    '/super-admin/settings': {
+      id: '/super-admin/settings'
+      path: '/super-admin/settings'
+      fullPath: '/super-admin/settings'
+      preLoaderRoute: typeof SuperAdminSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/checkout/success': {
-      id: '/checkout/success'
-      path: '/success'
-      fullPath: '/checkout/success'
-      preLoaderRoute: typeof CheckoutSuccessRouteImport
-      parentRoute: typeof CheckoutRoute
-    }
-    '/admin/giftcards': {
-      id: '/admin/giftcards'
-      path: '/admin/giftcards'
-      fullPath: '/admin/giftcards'
-      preLoaderRoute: typeof AdminGiftcardsRouteImport
+    '/super-admin/schools': {
+      id: '/super-admin/schools'
+      path: '/super-admin/schools'
+      fullPath: '/super-admin/schools'
+      preLoaderRoute: typeof SuperAdminSchoolsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/discounts': {
-      id: '/admin/discounts'
-      path: '/admin/discounts'
-      fullPath: '/admin/discounts'
-      preLoaderRoute: typeof AdminDiscountsRouteImport
+    '/portal/settings': {
+      id: '/portal/settings'
+      path: '/portal/settings'
+      fullPath: '/portal/settings'
+      preLoaderRoute: typeof PortalSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/account/settings': {
-      id: '/account/settings'
-      path: '/account/settings'
-      fullPath: '/account/settings'
-      preLoaderRoute: typeof AccountSettingsRouteImport
+    '/portal/billing': {
+      id: '/portal/billing'
+      path: '/portal/billing'
+      fullPath: '/portal/billing'
+      preLoaderRoute: typeof PortalBillingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/account/payment': {
-      id: '/account/payment'
-      path: '/account/payment'
-      fullPath: '/account/payment'
-      preLoaderRoute: typeof AccountPaymentRouteImport
+    '/portal/apply': {
+      id: '/portal/apply'
+      path: '/portal/apply'
+      fullPath: '/portal/apply'
+      preLoaderRoute: typeof PortalApplyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/account/addresses': {
-      id: '/account/addresses'
-      path: '/account/addresses'
-      fullPath: '/account/addresses'
-      preLoaderRoute: typeof AccountAddressesRouteImport
+    '/portal/applications': {
+      id: '/portal/applications'
+      path: '/portal/applications'
+      fullPath: '/portal/applications'
+      preLoaderRoute: typeof PortalApplicationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/reviews/': {
-      id: '/admin/reviews/'
-      path: '/admin/reviews'
-      fullPath: '/admin/reviews/'
-      preLoaderRoute: typeof AdminReviewsIndexRouteImport
+    '/invite/accept': {
+      id: '/invite/accept'
+      path: '/invite/accept'
+      fullPath: '/invite/accept'
+      preLoaderRoute: typeof InviteAcceptRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/products/': {
-      id: '/admin/products/'
-      path: '/admin/products'
-      fullPath: '/admin/products/'
-      preLoaderRoute: typeof AdminProductsIndexRouteImport
+    '/demo/family': {
+      id: '/demo/family'
+      path: '/demo/family'
+      fullPath: '/demo/family'
+      preLoaderRoute: typeof DemoFamilyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/orders/': {
-      id: '/admin/orders/'
-      path: '/admin/orders'
-      fullPath: '/admin/orders/'
-      preLoaderRoute: typeof AdminOrdersIndexRouteImport
+    '/demo/admin': {
+      id: '/demo/admin'
+      path: '/demo/admin'
+      fullPath: '/demo/admin'
+      preLoaderRoute: typeof DemoAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/customers/': {
-      id: '/admin/customers/'
-      path: '/admin/customers'
-      fullPath: '/admin/customers/'
-      preLoaderRoute: typeof AdminCustomersIndexRouteImport
+    '/admin/team': {
+      id: '/admin/team'
+      path: '/admin/team'
+      fullPath: '/admin/team'
+      preLoaderRoute: typeof AdminTeamRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/account/orders/': {
-      id: '/account/orders/'
-      path: '/account/orders'
-      fullPath: '/account/orders/'
-      preLoaderRoute: typeof AccountOrdersIndexRouteImport
+    '/admin/students': {
+      id: '/admin/students'
+      path: '/admin/students'
+      fullPath: '/admin/students'
+      preLoaderRoute: typeof AdminStudentsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/products/new': {
-      id: '/admin/products/new'
-      path: '/admin/products/new'
-      fullPath: '/admin/products/new'
-      preLoaderRoute: typeof AdminProductsNewRouteImport
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/products/$productId': {
-      id: '/admin/products/$productId'
-      path: '/admin/products/$productId'
-      fullPath: '/admin/products/$productId'
-      preLoaderRoute: typeof AdminProductsProductIdRouteImport
+    '/admin/leads': {
+      id: '/admin/leads'
+      path: '/admin/leads'
+      fullPath: '/admin/leads'
+      preLoaderRoute: typeof AdminLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/orders/$orderId': {
-      id: '/admin/orders/$orderId'
-      path: '/admin/orders/$orderId'
-      fullPath: '/admin/orders/$orderId'
-      preLoaderRoute: typeof AdminOrdersOrderIdRouteImport
+    '/admin/families': {
+      id: '/admin/families'
+      path: '/admin/families'
+      fullPath: '/admin/families'
+      preLoaderRoute: typeof AdminFamiliesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/account/orders/$orderId': {
-      id: '/account/orders/$orderId'
-      path: '/account/orders/$orderId'
-      fullPath: '/account/orders/$orderId'
-      preLoaderRoute: typeof AccountOrdersOrderIdRouteImport
+    '/admin/applications': {
+      id: '/admin/applications'
+      path: '/admin/applications'
+      fullPath: '/admin/applications'
+      preLoaderRoute: typeof AdminApplicationsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/super-admin/schools/new': {
+      id: '/super-admin/schools/new'
+      path: '/new'
+      fullPath: '/super-admin/schools/new'
+      preLoaderRoute: typeof SuperAdminSchoolsNewRouteImport
+      parentRoute: typeof SuperAdminSchoolsRoute
+    }
+    '/super-admin/schools/$id': {
+      id: '/super-admin/schools/$id'
+      path: '/$id'
+      fullPath: '/super-admin/schools/$id'
+      preLoaderRoute: typeof SuperAdminSchoolsIdRouteImport
+      parentRoute: typeof SuperAdminSchoolsRoute
+    }
+    '/portal/applications/$id': {
+      id: '/portal/applications/$id'
+      path: '/$id'
+      fullPath: '/portal/applications/$id'
+      preLoaderRoute: typeof PortalApplicationsIdRouteImport
+      parentRoute: typeof PortalApplicationsRoute
+    }
+    '/admin/leads/new': {
+      id: '/admin/leads/new'
+      path: '/new'
+      fullPath: '/admin/leads/new'
+      preLoaderRoute: typeof AdminLeadsNewRouteImport
+      parentRoute: typeof AdminLeadsRoute
+    }
+    '/admin/leads/$id': {
+      id: '/admin/leads/$id'
+      path: '/$id'
+      fullPath: '/admin/leads/$id'
+      preLoaderRoute: typeof AdminLeadsIdRouteImport
+      parentRoute: typeof AdminLeadsRoute
+    }
+    '/admin/families/new': {
+      id: '/admin/families/new'
+      path: '/new'
+      fullPath: '/admin/families/new'
+      preLoaderRoute: typeof AdminFamiliesNewRouteImport
+      parentRoute: typeof AdminFamiliesRoute
+    }
+    '/admin/applications/$id': {
+      id: '/admin/applications/$id'
+      path: '/$id'
+      fullPath: '/admin/applications/$id'
+      preLoaderRoute: typeof AdminApplicationsIdRouteImport
+      parentRoute: typeof AdminApplicationsRoute
     }
   }
 }
 
-interface CheckoutRouteChildren {
-  CheckoutSuccessRoute: typeof CheckoutSuccessRoute
+interface AdminApplicationsRouteChildren {
+  AdminApplicationsIdRoute: typeof AdminApplicationsIdRoute
 }
 
-const CheckoutRouteChildren: CheckoutRouteChildren = {
-  CheckoutSuccessRoute: CheckoutSuccessRoute,
+const AdminApplicationsRouteChildren: AdminApplicationsRouteChildren = {
+  AdminApplicationsIdRoute: AdminApplicationsIdRoute,
 }
 
-const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
-  CheckoutRouteChildren,
+const AdminApplicationsRouteWithChildren =
+  AdminApplicationsRoute._addFileChildren(AdminApplicationsRouteChildren)
+
+interface AdminFamiliesRouteChildren {
+  AdminFamiliesNewRoute: typeof AdminFamiliesNewRoute
+}
+
+const AdminFamiliesRouteChildren: AdminFamiliesRouteChildren = {
+  AdminFamiliesNewRoute: AdminFamiliesNewRoute,
+}
+
+const AdminFamiliesRouteWithChildren = AdminFamiliesRoute._addFileChildren(
+  AdminFamiliesRouteChildren,
 )
+
+interface AdminLeadsRouteChildren {
+  AdminLeadsIdRoute: typeof AdminLeadsIdRoute
+  AdminLeadsNewRoute: typeof AdminLeadsNewRoute
+}
+
+const AdminLeadsRouteChildren: AdminLeadsRouteChildren = {
+  AdminLeadsIdRoute: AdminLeadsIdRoute,
+  AdminLeadsNewRoute: AdminLeadsNewRoute,
+}
+
+const AdminLeadsRouteWithChildren = AdminLeadsRoute._addFileChildren(
+  AdminLeadsRouteChildren,
+)
+
+interface PortalApplicationsRouteChildren {
+  PortalApplicationsIdRoute: typeof PortalApplicationsIdRoute
+}
+
+const PortalApplicationsRouteChildren: PortalApplicationsRouteChildren = {
+  PortalApplicationsIdRoute: PortalApplicationsIdRoute,
+}
+
+const PortalApplicationsRouteWithChildren =
+  PortalApplicationsRoute._addFileChildren(PortalApplicationsRouteChildren)
+
+interface SuperAdminSchoolsRouteChildren {
+  SuperAdminSchoolsIdRoute: typeof SuperAdminSchoolsIdRoute
+  SuperAdminSchoolsNewRoute: typeof SuperAdminSchoolsNewRoute
+}
+
+const SuperAdminSchoolsRouteChildren: SuperAdminSchoolsRouteChildren = {
+  SuperAdminSchoolsIdRoute: SuperAdminSchoolsIdRoute,
+  SuperAdminSchoolsNewRoute: SuperAdminSchoolsNewRoute,
+}
+
+const SuperAdminSchoolsRouteWithChildren =
+  SuperAdminSchoolsRoute._addFileChildren(SuperAdminSchoolsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  CartRoute: CartRoute,
-  CheckoutRoute: CheckoutRouteWithChildren,
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
   RegisterRoute: RegisterRoute,
-  AccountAddressesRoute: AccountAddressesRoute,
-  AccountPaymentRoute: AccountPaymentRoute,
-  AccountSettingsRoute: AccountSettingsRoute,
-  AdminDiscountsRoute: AdminDiscountsRoute,
-  AdminGiftcardsRoute: AdminGiftcardsRoute,
-  ShopProductSlugRoute: ShopProductSlugRoute,
-  AccountIndexRoute: AccountIndexRoute,
+  TermsRoute: TermsRoute,
+  AdminApplicationsRoute: AdminApplicationsRouteWithChildren,
+  AdminFamiliesRoute: AdminFamiliesRouteWithChildren,
+  AdminLeadsRoute: AdminLeadsRouteWithChildren,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminStudentsRoute: AdminStudentsRoute,
+  AdminTeamRoute: AdminTeamRoute,
+  DemoAdminRoute: DemoAdminRoute,
+  DemoFamilyRoute: DemoFamilyRoute,
+  InviteAcceptRoute: InviteAcceptRoute,
+  PortalApplicationsRoute: PortalApplicationsRouteWithChildren,
+  PortalApplyRoute: PortalApplyRoute,
+  PortalBillingRoute: PortalBillingRoute,
+  PortalSettingsRoute: PortalSettingsRoute,
+  SuperAdminSchoolsRoute: SuperAdminSchoolsRouteWithChildren,
+  SuperAdminSettingsRoute: SuperAdminSettingsRoute,
+  SuperAdminUsersRoute: SuperAdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
   InstallIndexRoute: InstallIndexRoute,
-  ShopIndexRoute: ShopIndexRoute,
-  AccountOrdersOrderIdRoute: AccountOrdersOrderIdRoute,
-  AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
-  AdminProductsProductIdRoute: AdminProductsProductIdRoute,
-  AdminProductsNewRoute: AdminProductsNewRoute,
-  AccountOrdersIndexRoute: AccountOrdersIndexRoute,
-  AdminCustomersIndexRoute: AdminCustomersIndexRoute,
-  AdminOrdersIndexRoute: AdminOrdersIndexRoute,
-  AdminProductsIndexRoute: AdminProductsIndexRoute,
-  AdminReviewsIndexRoute: AdminReviewsIndexRoute,
+  PortalIndexRoute: PortalIndexRoute,
+  SuperAdminIndexRoute: SuperAdminIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

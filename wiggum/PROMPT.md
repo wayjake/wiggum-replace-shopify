@@ -1,64 +1,51 @@
-> TanStack Start e-commerce platform for **Karen's Beautiful Soap**
+> **EnrollSage** - Wise guidance for enrollment journeys
+> "From first inquiry to tuition paid—with wisdom, not chaos."
 
 ## Where to Find Things
 
 | What | Where |
 |------|-------|
+| Product Requirements | [./school-cms-prd.md](./school-cms-prd.md) |
+| Pricing Strategy | [./school-cms-pricing.md](./school-cms-pricing.md) |
+| Design System | [./school-design-document.md](./school-design-document.md) |
 | Architecture & Setup Guides | [./context/architecture.md](./context/architecture.md) |
 | Security & Access Rules | [./context/constraints.md](./context/constraints.md) |
 | Tech Stack Glossary | [./context/glossary.md](./context/glossary.md) |
 | Dev Journal & Decisions | [./notes.md](./notes.md) |
-| Brand Source | https://karensbeautifulsoap.com/ |
-| Product Assets | Fetch from source site's `/shop` and `/gallery` |
+| Competitive Analysis | [./context/competitive-teardown.md](./context/competitive-teardown.md) |
 
 
 ## Status
 
-### Next
-
-
-### Future Ideas
-
 ### Completed
-- [x] Google OAuth integration with GCP (setup instructions in install wizard, optional env vars)
-- [x] Database seeding with products, categories, and test users (npx tsx src/db/seed.ts)
-- [x] Database initialization step in install wizard (run migrations + seed with one click)
-- [x] Product management in admin dashboard (create, edit, delete, image gallery, stock management)
-- [x] Database schema & migrations
-- [x] Product catalog with loaders
-- [x] Stripe checkout integration (Embedded Checkout - customers stay on site!)
-- [x] Auth (login/register/sessions)
-- [x] Auth guards (requireAuth, requireAdmin)
-- [x] Admin dashboard (products, orders, customers, reviews)
-- [x] Customer portal (orders, addresses, payment)
-- [x] Cart state (Context + localStorage)
-- [x] Inngest email workflows
-- [x] Brevo transactional emails
-- [x] Order fulfillment actions
-- [x] Setup wizard (`/install`) with env var management
-- [x] About & Contact pages
-- [x] 404 page & error boundaries
-- [x] Newsletter signup with welcome email
-- [x] Redirect to /install if env vars missing
-- [x] Dev mode: Update .env from install wizard UI
-- [x] Post-purchase email via Inngest
-- [x] Abandoned cart email (with rate limiting)
-- [x] Product reviews system with moderation (pending/approved/rejected)
-- [x] Database seed with Unsplash product images
-- [x] Customer order history (real orders from DB)
-- [x] Product image upload in admin (drag & drop, URL input, gallery images)
-- [x] Inventory management (low stock alerts, real-time dashboard stats)
-- [x] Email order confirmations with tracking links (+ auto USPS tracking URL, resend confirmation)
-- [x] Multiple product images in gallery carousel (swipe, arrows, thumbnails, drag-to-reorder in admin)
-- [x] Discount codes / coupons (percentage, fixed, free shipping; usage limits, date ranges)
-- [x] Admin page for managing discount codes (create, toggle, delete, usage tracking)
-- [x] Gift cards (create, validate, redeem at checkout, admin management, balance adjustments)
-- [x] Rate limiting on auth routes (sliding window, IP-based, configurable blocks)
-- [x] CSRF protection (double-submit cookie, React hooks, form integration)
-- [x] Production Stripe webhooks (order creation, Inngest events, stock updates)
-- [x] Inngest dev server detection (auto-complete installation step when localhost:8288 is running)
 
+#### Super Admin Dashboard (`/super-admin`)
+- [x] Create `/super-admin/schools/new` - School creation form
+- [x] Create `/super-admin/schools/$id` - Individual school management page
+- [x] Create `/super-admin/settings` - Platform settings page
 
+#### School Admin Dashboard (`/admin`)
+- [x] Create `/admin/leads/new` - Add new lead form
+- [x] Create `/admin/families/new` - Register new family form
+- [x] Create `/admin/leads/$id` - Lead detail page with full CRM functionality
+- [x] Create `/admin/applications/$id` - Application detail page with status workflow
+- [x] Implement lead stage progression (convert lead to applicant)
+- [x] Implement application status workflow (review, accept, deny, waitlist)
+- [x] Add student enrollment actions (enroll accepted students)
+
+#### Family Portal (`/portal`)
+- [x] Create `/portal/apply` - Start new application flow
+- [x] Create `/portal/settings` - Family account settings
+- [x] Create `/portal/applications/$id` - Application detail view
+- [x] Implement "Pay Now" button (Stripe integration)
+- [x] Implement "Add Card" payment method (Stripe Elements)
+
+#### Misc UI Fixes
+- [x] Fix emoji in `/portal/billing` header (was 🎓, now 🌿)
+
+### Todo
+
+(All items complete! 🎉)
 ---
 
 ## Quick Commands
@@ -73,10 +60,10 @@ npx inngest-cli@latest dev     # Inngest dev server :8288
 ### Verify Routes
 
 ```bash
-for route in "/" "/shop" "/about" "/contact" "/cart" "/login" "/register" "/install"; do \
-  code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3000$route"); \
-  [ "$code" = "200" ] && echo "✓ $route" || echo "✗ $route ($code)"; \
-done
+for route in "/" "/login" "/about" "/contact"
+   "/admin" "/portal"; do code=$(curl -s -o /dev/null
+    -w "%{http_code}" "http://localhost:3000$route");
+    echo "$route: $code"; done
 ```
 
 ---

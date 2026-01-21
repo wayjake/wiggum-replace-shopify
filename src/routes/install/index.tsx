@@ -1,5 +1,5 @@
 // 🔧 Installation Wizard - The magical onboarding journey
-// "I'm helping!" - What you'll say when this actually works
+// Configure your EnrollSage instance with the required environment variables
 
 import { createFileRoute } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
@@ -29,12 +29,11 @@ import { checkAllEnvVars, ENV_CONFIG } from '../../lib/env';
 /**
  * 🔍 Check if the Inngest dev server is running locally
  * When running `npx inngest-cli@latest dev`, it starts on port 8288
- * If detected, we can skip requiring Inngest keys for local dev!
  */
 async function checkInngestDevServer(): Promise<boolean> {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1000); // 1 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 1000);
 
     const response = await fetch('http://localhost:8288/', {
       method: 'GET',
@@ -42,11 +41,8 @@ async function checkInngestDevServer(): Promise<boolean> {
     });
 
     clearTimeout(timeoutId);
-
-    // The Inngest dev server returns HTML for its dashboard
     return response.ok;
   } catch {
-    // Connection refused or timeout = no Inngest dev server
     return false;
   }
 }
@@ -55,18 +51,14 @@ const getEnvStatus = createServerFn({ method: 'GET' }).handler(async () => {
   const status = checkAllEnvVars();
   const isDev = process.env.NODE_ENV !== 'production';
 
-  // 🎯 Check if Inngest dev server is running (only in dev mode)
   let inngestDevRunning = false;
   if (isDev) {
     inngestDevRunning = await checkInngestDevServer();
   }
 
-  // Map results, marking Inngest keys as "virtual complete" if dev server is detected
   const results = status.results.map((r) => {
     const isInngestKey = r.key === 'INNGEST_SIGNING_KEY' || r.key === 'INNGEST_EVENT_KEY';
 
-    // If Inngest dev server is running and this is an Inngest key that's missing,
-    // mark it as present/valid (since the dev server doesn't need them)
     if (isDev && inngestDevRunning && isInngestKey && !r.present) {
       return {
         key: r.key,
@@ -77,7 +69,7 @@ const getEnvStatus = createServerFn({ method: 'GET' }).handler(async () => {
         description: ENV_CONFIG[r.key].description,
         helpUrl: ENV_CONFIG[r.key].helpUrl,
         required: ENV_CONFIG[r.key].required,
-        inngestDevDetected: true, // Flag to show special UI
+        inngestDevDetected: true,
       };
     }
 
@@ -94,7 +86,6 @@ const getEnvStatus = createServerFn({ method: 'GET' }).handler(async () => {
     };
   });
 
-  // Recalculate configured status with Inngest dev server detection
   const allConfigured = results.every((r) => !ENV_CONFIG[r.key as keyof typeof ENV_CONFIG].required || (r.present && r.valid));
 
   return {
@@ -108,7 +99,6 @@ const getEnvStatus = createServerFn({ method: 'GET' }).handler(async () => {
 /**
  * 🔧 Update local .env file with provided keys
  * Only available in development mode for security!
- * "I'm helping!" - Ralph, updating your env vars
  */
 const updateEnvFile = createServerFn({ method: 'POST' })
   .handler(async (data: { key: string; value: string }) => {
@@ -120,13 +110,11 @@ const updateEnvFile = createServerFn({ method: 'POST' })
 
     const { key, value } = data;
 
-    // Validate the key is one we know about
     const validKeys = Object.values(ENV_CONFIG).map((c) => c.key);
     if (!validKeys.includes(key)) {
       throw new Error(`Unknown environment variable: ${key}`);
     }
 
-    // Read existing .env file or create new content
     const fs = await import('fs/promises');
     const path = await import('path');
     const envPath = path.join(process.cwd(), '.env');
@@ -138,9 +126,8 @@ const updateEnvFile = createServerFn({ method: 'POST' })
       // File doesn't exist, we'll create it
     }
 
-    // Parse existing env vars
     const lines = envContent.split('\n');
-    const envVars = new Map<string, number>(); // key -> line index
+    const envVars = new Map<string, number>();
 
     lines.forEach((line, index) => {
       const match = line.match(/^([A-Z_]+)=/);
@@ -149,12 +136,10 @@ const updateEnvFile = createServerFn({ method: 'POST' })
       }
     });
 
-    // Update or add the key
     const newLine = `${key}=${value}`;
     if (envVars.has(key)) {
       lines[envVars.get(key)!] = newLine;
     } else {
-      // Add to end (after last non-empty line)
       const lastNonEmptyIndex = lines.findLastIndex((l) => l.trim() !== '');
       if (lastNonEmptyIndex === -1) {
         lines.push(newLine);
@@ -163,10 +148,8 @@ const updateEnvFile = createServerFn({ method: 'POST' })
       }
     }
 
-    // Write back
     await fs.writeFile(envPath, lines.join('\n'));
 
-    // Note: The env var won't take effect until server restart
     return {
       success: true,
       message: `Updated ${key}. Restart the dev server for changes to take effect.`,
@@ -175,42 +158,36 @@ const updateEnvFile = createServerFn({ method: 'POST' })
 
 /**
  * 🔍 Check if the database has been seeded
- * Looks for products in the database to determine if seed has run
  */
 const checkDatabaseStatus = createServerFn({ method: 'GET' }).handler(async () => {
   try {
-    const { getDb, products, categories, users } = await import('../../db');
+    const { getDb, schools, users } = await import('../../db');
     const { count } = await import('drizzle-orm');
     const db = getDb();
 
-    // Count records in key tables
-    const [productCount] = await db.select({ count: count() }).from(products);
-    const [categoryCount] = await db.select({ count: count() }).from(categories);
+    const [schoolCount] = await db.select({ count: count() }).from(schools);
     const [userCount] = await db.select({ count: count() }).from(users);
 
     return {
       success: true,
-      hasData: (productCount?.count ?? 0) > 0,
+      hasData: (userCount?.count ?? 0) > 0,
       counts: {
-        products: productCount?.count ?? 0,
-        categories: categoryCount?.count ?? 0,
+        schools: schoolCount?.count ?? 0,
         users: userCount?.count ?? 0,
       },
     };
   } catch (error) {
-    // Database might not exist yet - that's ok!
     return {
       success: false,
       hasData: false,
       error: error instanceof Error ? error.message : 'Database check failed',
-      counts: { products: 0, categories: 0, users: 0 },
+      counts: { schools: 0, users: 0 },
     };
   }
 });
 
 /**
  * 🌱 Run database migrations and seed
- * Creates tables and populates with initial data
  */
 const runDatabaseSetup = createServerFn({ method: 'POST' }).handler(async () => {
   const isDev = process.env.NODE_ENV !== 'production';
@@ -220,7 +197,6 @@ const runDatabaseSetup = createServerFn({ method: 'POST' }).handler(async () => 
   }
 
   try {
-    // Run drizzle-kit push to apply migrations
     const { execSync } = await import('child_process');
 
     console.log('📦 Running database migrations...');
@@ -229,7 +205,6 @@ const runDatabaseSetup = createServerFn({ method: 'POST' }).handler(async () => 
       cwd: process.cwd(),
     });
 
-    // Run the seed script
     console.log('🌱 Running database seed...');
     execSync('npx tsx src/db/seed.ts', {
       stdio: 'pipe',
@@ -256,12 +231,10 @@ const runDatabaseSetup = createServerFn({ method: 'POST' }).handler(async () => 
 export const Route = createFileRoute('/install/')({
   head: () => ({
     meta: [
-      {
-        title: "Setup Wizard | Karen's Beautiful Soap",
-      },
+      { title: 'Setup Wizard | EnrollSage' },
       {
         name: 'description',
-        content: "Configure your store's environment variables to get started with Karen's Beautiful Soap e-commerce platform.",
+        content: 'Configure your EnrollSage instance environment variables to get started.',
       },
     ],
   }),
@@ -289,7 +262,7 @@ const SETUP_STEPS = [
     instructions: `
 ## Turso Database Setup
 
-Turso is SQLite at the edge - fast, cheap, and perfect for our soap store.
+Turso is SQLite at the edge - fast, cheap, and perfect for multi-tenant SaaS.
 
 ### Step 1: Install Turso CLI
 
@@ -311,16 +284,16 @@ turso auth login    # Returning user
 ### Step 3: Create Your Database
 
 \`\`\`bash
-turso db create soap-store
+turso db create enrollsage
 \`\`\`
 
 ### Step 4: Get Your Credentials
 
 \`\`\`bash
-turso db show soap-store --url
+turso db show enrollsage --url
 # Copy this as TURSO_DATABASE_URL
 
-turso db tokens create soap-store
+turso db tokens create enrollsage
 # Copy this as TURSO_AUTH_TOKEN
 \`\`\`
 
@@ -338,8 +311,8 @@ No auth token needed for local files!
     title: 'Initialize Database',
     icon: Database,
     description: 'Create tables and seed sample data',
-    envKeys: [], // No env keys - this is a special step
-    isDbInit: true, // Special flag for database initialization
+    envKeys: [],
+    isDbInit: true,
     instructions: `
 ## Database Initialization
 
@@ -348,9 +321,8 @@ After connecting to Turso (or local SQLite), you need to create the tables and a
 ### What This Does
 
 1. **Creates Tables** - Runs Drizzle migrations to create all database tables
-2. **Seeds Products** - Adds 8 handcrafted soap products
-3. **Creates Categories** - Sets up 6 product categories
-4. **Creates Test Users** - Adds admin and customer accounts for testing
+2. **Creates Test School** - Adds a sample school for testing
+3. **Creates Test Users** - Adds admin and family accounts for testing
 
 ### Manual Setup (Alternative)
 
@@ -368,8 +340,9 @@ npx tsx src/db/seed.ts
 
 After seeding, you can log in with:
 
-- **Admin**: admin@karenssoap.com / admin123
-- **Customer**: customer@example.com / customer123
+- **Superadmin**: superadmin@enrollsage.com / admin123
+- **School Admin**: admin@demo-school.edu / admin123
+- **Parent**: parent@example.com / customer123
 
 ### Note
 
@@ -385,7 +358,7 @@ This step is only available in development mode. For production, run the migrati
     instructions: `
 ## Stripe Payment Setup
 
-Stripe handles all payment processing securely.
+Stripe handles all tuition payment processing securely.
 
 ### Step 1: Create a Stripe Account
 
@@ -429,7 +402,7 @@ Create a webhook endpoint in the Stripe Dashboard pointing to:
     instructions: `
 ## Brevo Email Setup
 
-Brevo (formerly Sendinblue) handles all customer emails.
+Brevo (formerly Sendinblue) handles all notification emails.
 
 ### Step 1: Create Brevo Account
 
@@ -439,22 +412,23 @@ Go to [brevo.com](https://www.brevo.com) and sign up (300 emails/day free).
 
 1. Go to Settings → API Keys (or SMTP & API)
 2. Click "Generate a new API key"
-3. Name it (e.g., "Soap Store Production")
+3. Name it (e.g., "EnrollSage Production")
 4. Copy the key immediately (shown only once!)
 
 ### Step 3: Verify Your Sender
 
 1. Go to Settings → Senders & IP
-2. Add your sender email (e.g., hello@karenssoap.com)
+2. Add your sender email (e.g., notifications@yourschool.edu)
 3. Verify the domain or email address
 
 ### Email Templates
 
 Set up these transactional templates in Brevo:
-- Welcome Email (new customer)
-- Order Confirmation
-- Shipping Notification
-- Review Request (post-delivery)
+- Welcome Email (new family registration)
+- Application Received
+- Application Status Update
+- Payment Confirmation
+- Payment Reminder
 `,
   },
   {
@@ -466,7 +440,7 @@ Set up these transactional templates in Brevo:
     instructions: `
 ## Inngest Event System Setup
 
-Inngest handles all async operations like email sequences and fulfillment workflows.
+Inngest handles all async operations like email sequences and notification workflows.
 
 ### Step 1: Create Inngest Account
 
@@ -532,12 +506,12 @@ python3 -c "import secrets; print(secrets.token_hex(32))"
     id: 'google',
     title: 'Google Sign-In (Optional)',
     icon: Chrome,
-    description: 'Let customers sign in with their Google account',
+    description: 'Let users sign in with their Google account',
     envKeys: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
     instructions: `
 ## Google OAuth Setup
 
-Enable "Sign in with Google" to make registration and login easier for your customers.
+Enable "Sign in with Google" to make registration and login easier.
 
 ### Step 1: Go to Google Cloud Console
 
@@ -547,7 +521,7 @@ Visit [Google Cloud Console](https://console.cloud.google.com/) and sign in.
 
 1. Click the project dropdown in the top bar
 2. Click "New Project" or select an existing one
-3. Give it a name like "Karen's Soap Store"
+3. Give it a name like "EnrollSage"
 
 ### Step 3: Enable the Google+ API
 
@@ -560,7 +534,7 @@ Visit [Google Cloud Console](https://console.cloud.google.com/) and sign in.
 1. Go to "APIs & Services" → "OAuth consent screen"
 2. Choose "External" (for any Google user)
 3. Fill in required fields:
-   - App name: "Karen's Beautiful Soap"
+   - App name: "EnrollSage"
    - User support email: your email
    - Developer contact: your email
 4. Add scopes: \`email\`, \`profile\`, \`openid\`
@@ -571,7 +545,7 @@ Visit [Google Cloud Console](https://console.cloud.google.com/) and sign in.
 1. Go to "APIs & Services" → "Credentials"
 2. Click "Create Credentials" → "OAuth client ID"
 3. Application type: "Web application"
-4. Name: "Soap Store Web Client"
+4. Name: "EnrollSage Web Client"
 5. Authorized JavaScript origins:
    - \`http://localhost:3000\` (development)
    - \`https://yourdomain.com\` (production)
@@ -590,7 +564,7 @@ Add these to your environment variables.
 
 ### Note
 
-Google OAuth is completely optional. Customers can always register with email/password.
+Google OAuth is completely optional. Users can always register with email/password.
 The "Sign in with Google" button only appears if these credentials are configured.
 `,
   },
@@ -610,9 +584,7 @@ function InstallWizard() {
   const [isRunningDbSetup, setIsRunningDbSetup] = useState(false);
   const [dbSetupMessage, setDbSetupMessage] = useState<{ success: boolean; message: string } | null>(null);
 
-  // Group results by step
   const getStepStatus = (step: (typeof SETUP_STEPS)[number]) => {
-    // Special handling for database-init step
     if (step.id === 'database-init') {
       return {
         complete: dbStatus.hasData,
@@ -632,7 +604,6 @@ function InstallWizard() {
     };
   };
 
-  // Handle database setup
   const handleDbSetup = async () => {
     setIsRunningDbSetup(true);
     setDbSetupMessage(null);
@@ -645,7 +616,6 @@ function InstallWizard() {
           ? result.message
           : result.error || 'Database setup failed',
       });
-      // Refresh page after successful setup
       if (result.success) {
         setTimeout(() => window.location.reload(), 1500);
       }
@@ -688,22 +658,22 @@ function InstallWizard() {
 
   if (configured) {
     return (
-      <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center p-6">
         <div className="max-w-md text-center">
-          <div className="w-20 h-20 mx-auto mb-6 bg-[#2D5A4A] rounded-full flex items-center justify-center">
+          <div className="w-20 h-20 mx-auto mb-6 bg-[#5B7F6D] rounded-full flex items-center justify-center">
             <CheckCircle2 className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-[#1A1A1A] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h1 className="text-3xl font-bold text-[#2D4F3E] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
             All Set!
           </h1>
           <p className="text-gray-600 mb-8">
-            Your environment is configured. You're ready to start selling beautiful soap!
+            Your environment is configured. You're ready to start using EnrollSage!
           </p>
           <a
             href="/"
-            className="inline-flex items-center gap-2 bg-[#2D5A4A] text-white px-6 py-3 rounded-lg hover:bg-[#1A1A1A] transition-colors"
+            className="inline-flex items-center gap-2 bg-[#5B7F6D] text-white px-6 py-3 rounded-lg hover:bg-[#2D4F3E] transition-colors"
           >
-            Go to Store
+            Go to Dashboard
             <ChevronRight className="w-4 h-4" />
           </a>
         </div>
@@ -715,18 +685,18 @@ function InstallWizard() {
   const stepStatus = getStepStatus(currentStep);
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Header */}
-      <header className="bg-white border-b border-[#F5EBE0] px-6 py-4">
+      <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center gap-4">
-          <div className="w-10 h-10 bg-[#2D5A4A] rounded-lg flex items-center justify-center">
-            <span className="text-white text-xl">🧼</span>
+          <div className="w-10 h-10 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
+            <span className="text-white text-xl">🎓</span>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
-              Karen's Beautiful Soap
+            <h1 className="text-xl font-bold text-[#2D4F3E]" style={{ fontFamily: "'Playfair Display', serif" }}>
+              EnrollSage
             </h1>
-            <p className="text-sm text-gray-500">Store Setup Wizard</p>
+            <p className="text-sm text-gray-500">Setup Wizard</p>
           </div>
         </div>
       </header>
@@ -750,8 +720,8 @@ function InstallWizard() {
                     className={cn(
                       'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all',
                       isActive
-                        ? 'bg-[#2D5A4A] text-white shadow-md'
-                        : 'bg-white hover:bg-[#F5EBE0] text-[#1A1A1A] border border-[#F5EBE0]'
+                        ? 'bg-[#5B7F6D] text-white shadow-md'
+                        : 'bg-white hover:bg-gray-100 text-[#2D4F3E] border border-gray-200'
                     )}
                   >
                     <div
@@ -761,7 +731,7 @@ function InstallWizard() {
                           ? 'bg-green-500 text-white'
                           : isActive
                             ? 'bg-white/20 text-white'
-                            : 'bg-[#F5EBE0] text-[#2D5A4A]'
+                            : 'bg-gray-100 text-[#5B7F6D]'
                       )}
                     >
                       {status.complete ? (
@@ -773,7 +743,6 @@ function InstallWizard() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <p className="font-medium truncate">{step.title}</p>
-                        {/* Status badge */}
                         {step.id === 'database-init' ? (
                           <span
                             className={cn(
@@ -827,13 +796,13 @@ function InstallWizard() {
             </nav>
 
             {/* Overall Progress */}
-            <div className="mt-6 bg-white rounded-lg border border-[#F5EBE0] p-4">
-              <p className="text-sm font-medium text-[#1A1A1A] mb-2">
+            <div className="mt-6 bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-sm font-medium text-[#2D4F3E] mb-2">
                 Setup Progress
               </p>
-              <div className="h-2 bg-[#F5EBE0] rounded-full overflow-hidden">
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#2D5A4A] transition-all duration-500"
+                  className="h-full bg-[#5B7F6D] transition-all duration-500"
                   style={{
                     width: `${(results.filter((r) => r.present && r.valid).length / results.length) * 100}%`,
                   }}
@@ -848,14 +817,14 @@ function InstallWizard() {
           {/* Main Content */}
           <div className="lg:col-span-3">
             {/* Step Header */}
-            <div className="bg-white rounded-xl border border-[#F5EBE0] p-6 mb-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
               <div className="flex items-center gap-4 mb-4">
                 <div
                   className={cn(
                     'w-12 h-12 rounded-xl flex items-center justify-center',
                     stepStatus.complete
                       ? 'bg-green-100 text-green-600'
-                      : 'bg-[#F5EBE0] text-[#2D5A4A]'
+                      : 'bg-gray-100 text-[#5B7F6D]'
                   )}
                 >
                   {stepStatus.complete ? (
@@ -865,7 +834,7 @@ function InstallWizard() {
                   )}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-[#1A1A1A]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  <h2 className="text-2xl font-bold text-[#2D4F3E]" style={{ fontFamily: "'Playfair Display', serif" }}>
                     {currentStep.title}
                   </h2>
                   <p className="text-gray-500">{currentStep.description}</p>
@@ -936,7 +905,7 @@ function InstallWizard() {
                           href={result.helpUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-[#2D5A4A] hover:underline flex items-center gap-1"
+                          className="text-xs text-[#5B7F6D] hover:underline flex items-center gap-1"
                         >
                           Get key
                           <ExternalLink className="w-3 h-3" />
@@ -944,7 +913,7 @@ function InstallWizard() {
                       )}
                     </div>
 
-                    {/* Dev mode: Show input to set this env var (skip if inngest dev detected) */}
+                    {/* Dev mode: Show input to set this env var */}
                     {isDev && !(result.present && result.valid) && !result.inngestDevDetected && (
                       <div className="mt-3 pt-3 border-t border-red-200">
                         <div className="flex gap-2">
@@ -958,12 +927,12 @@ function InstallWizard() {
                                 [result.label]: e.target.value,
                               }))
                             }
-                            className="flex-1 px-3 py-2 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D5A4A]/20 focus:border-[#2D5A4A]"
+                            className="flex-1 px-3 py-2 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5B7F6D]/20 focus:border-[#5B7F6D]"
                           />
                           <button
                             onClick={() => saveEnvVar(result.label)}
                             disabled={!envInputs[result.label] || savingKey === result.label}
-                            className="px-4 py-2 bg-[#2D5A4A] text-white text-sm rounded-lg hover:bg-[#1A1A1A] disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="px-4 py-2 bg-[#5B7F6D] text-white text-sm rounded-lg hover:bg-[#2D4F3E] disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
                           >
                             {savingKey === result.label ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
@@ -973,7 +942,7 @@ function InstallWizard() {
                           </button>
                         </div>
                         {saveMessage?.key === result.label && (
-                          <p className="mt-2 text-xs text-[#2D5A4A]">
+                          <p className="mt-2 text-xs text-[#5B7F6D]">
                             {saveMessage.message}
                           </p>
                         )}
@@ -986,7 +955,6 @@ function InstallWizard() {
               {/* Database Init Step - Special UI */}
               {currentStep.id === 'database-init' && (
                 <div className="mt-4 space-y-4">
-                  {/* Database Status */}
                   <div
                     className={cn(
                       'p-4 rounded-lg border',
@@ -1002,20 +970,19 @@ function InstallWizard() {
                         <Database className="w-6 h-6 text-amber-600" />
                       )}
                       <div>
-                        <p className="font-medium text-[#1A1A1A]">
+                        <p className="font-medium text-[#2D4F3E]">
                           {dbStatus.hasData
                             ? 'Database is seeded and ready!'
                             : 'Database needs initialization'}
                         </p>
                         <p className="text-sm text-gray-600">
                           {dbStatus.hasData
-                            ? `${dbStatus.counts.products} products, ${dbStatus.counts.categories} categories, ${dbStatus.counts.users} users`
+                            ? `${dbStatus.counts.schools} schools, ${dbStatus.counts.users} users`
                             : 'Run setup to create tables and add sample data'}
                         </p>
                       </div>
                     </div>
 
-                    {/* Run Setup Button */}
                     {isDev && !dbStatus.hasData && (
                       <div className="mt-4 pt-4 border-t border-amber-200">
                         <button
@@ -1025,7 +992,7 @@ function InstallWizard() {
                             'w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors',
                             isRunningDbSetup
                               ? 'bg-gray-200 text-gray-500 cursor-wait'
-                              : 'bg-[#2D5A4A] text-white hover:bg-[#1A1A1A]'
+                              : 'bg-[#5B7F6D] text-white hover:bg-[#2D4F3E]'
                           )}
                         >
                           {isRunningDbSetup ? (
@@ -1043,7 +1010,6 @@ function InstallWizard() {
                       </div>
                     )}
 
-                    {/* Setup Message */}
                     {dbSetupMessage && (
                       <div
                         className={cn(
@@ -1063,7 +1029,6 @@ function InstallWizard() {
                     )}
                   </div>
 
-                  {/* Already seeded notice */}
                   {dbStatus.hasData && (
                     <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                       <p className="text-sm text-blue-800">
@@ -1085,8 +1050,8 @@ function InstallWizard() {
             </div>
 
             {/* Instructions */}
-            <div className="bg-white rounded-xl border border-[#F5EBE0] p-6">
-              <h3 className="text-lg font-semibold text-[#1A1A1A] mb-4">
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-[#2D4F3E] mb-4">
                 Setup Instructions
               </h3>
               <div className="prose prose-sm max-w-none">
@@ -1099,14 +1064,14 @@ function InstallWizard() {
               <button
                 onClick={() => setActiveStep((prev) => Math.max(0, prev - 1))}
                 disabled={activeStep === 0}
-                className="px-4 py-2 text-[#2D5A4A] hover:bg-[#F5EBE0] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-[#5B7F6D] hover:bg-gray-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 ← Previous
               </button>
               <div className="flex gap-3">
                 <a
                   href="/install"
-                  className="px-4 py-2 text-[#2D5A4A] hover:bg-[#F5EBE0] rounded-lg flex items-center gap-2"
+                  className="px-4 py-2 text-[#5B7F6D] hover:bg-gray-100 rounded-lg flex items-center gap-2"
                 >
                   <Loader2 className="w-4 h-4" />
                   Refresh Status
@@ -1114,7 +1079,7 @@ function InstallWizard() {
                 {activeStep < SETUP_STEPS.length - 1 ? (
                   <button
                     onClick={() => setActiveStep((prev) => prev + 1)}
-                    className="px-4 py-2 bg-[#2D5A4A] text-white rounded-lg hover:bg-[#1A1A1A] flex items-center gap-2"
+                    className="px-4 py-2 bg-[#5B7F6D] text-white rounded-lg hover:bg-[#2D4F3E] flex items-center gap-2"
                   >
                     Next Step
                     <ChevronRight className="w-4 h-4" />
@@ -1122,7 +1087,7 @@ function InstallWizard() {
                 ) : (
                   <a
                     href="/"
-                    className="px-4 py-2 bg-[#2D5A4A] text-white rounded-lg hover:bg-[#1A1A1A] flex items-center gap-2"
+                    className="px-4 py-2 bg-[#5B7F6D] text-white rounded-lg hover:bg-[#2D4F3E] flex items-center gap-2"
                   >
                     Complete Setup
                     <ChevronRight className="w-4 h-4" />
@@ -1138,7 +1103,7 @@ function InstallWizard() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// INSTRUCTIONS RENDERER (simple markdown-ish parser)
+// INSTRUCTIONS RENDERER
 // ═══════════════════════════════════════════════════════════
 
 function InstructionsRenderer({
@@ -1159,14 +1124,13 @@ function InstructionsRenderer({
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    // Code block handling
     if (line.startsWith('```')) {
       if (inCodeBlock) {
         const code = codeBlock.join('\n');
         const blockKey = `code-${codeBlockIndex++}`;
         elements.push(
           <div key={blockKey} className="relative group my-4">
-            <pre className="bg-[#1A1A1A] text-green-400 p-4 rounded-lg overflow-x-auto text-sm font-mono">
+            <pre className="bg-[#1F2A44] text-green-400 p-4 rounded-lg overflow-x-auto text-sm font-mono">
               <code>{code}</code>
             </pre>
             <button
@@ -1195,10 +1159,9 @@ function InstructionsRenderer({
       continue;
     }
 
-    // Headings
     if (line.startsWith('## ')) {
       elements.push(
-        <h2 key={i} className="text-xl font-bold text-[#1A1A1A] mt-6 mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h2 key={i} className="text-xl font-bold text-[#2D4F3E] mt-6 mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
           {line.slice(3)}
         </h2>
       );
@@ -1207,14 +1170,13 @@ function InstructionsRenderer({
 
     if (line.startsWith('### ')) {
       elements.push(
-        <h3 key={i} className="text-lg font-semibold text-[#1A1A1A] mt-4 mb-2">
+        <h3 key={i} className="text-lg font-semibold text-[#2D4F3E] mt-4 mb-2">
           {line.slice(4)}
         </h3>
       );
       continue;
     }
 
-    // Links
     const linkMatch = line.match(/\[([^\]]+)\]\(([^)]+)\)/);
     if (linkMatch) {
       const [, text, url] = linkMatch;
@@ -1227,7 +1189,7 @@ function InstructionsRenderer({
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#2D5A4A] hover:underline"
+            className="text-[#5B7F6D] hover:underline"
           >
             {text}
           </a>
@@ -1237,7 +1199,6 @@ function InstructionsRenderer({
       continue;
     }
 
-    // Inline code
     if (line.includes('`')) {
       const parts = line.split(/(`[^`]+`)/g);
       elements.push(
@@ -1246,7 +1207,7 @@ function InstructionsRenderer({
             part.startsWith('`') && part.endsWith('`') ? (
               <code
                 key={j}
-                className="bg-[#F5EBE0] px-1.5 py-0.5 rounded text-sm font-mono text-[#2D5A4A]"
+                className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-[#5B7F6D]"
               >
                 {part.slice(1, -1)}
               </code>
@@ -1259,7 +1220,6 @@ function InstructionsRenderer({
       continue;
     }
 
-    // List items
     if (line.startsWith('- ')) {
       elements.push(
         <li key={i} className="ml-4 text-gray-700">
@@ -1269,7 +1229,6 @@ function InstructionsRenderer({
       continue;
     }
 
-    // Regular paragraphs
     if (line.trim()) {
       elements.push(
         <p key={i} className="my-2 text-gray-700">

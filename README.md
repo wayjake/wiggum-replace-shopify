@@ -1,42 +1,49 @@
-# Wiggum: Replace Shopify
+# EnrollSage: School Enrollment Made Simple
 
 ```
     ╭─────────────────────────────────────────────────────────╮
     │                                                          │
-    │   "I'm gonna make it so dry for you..."                  │
+    │   🎓 "Shopify for school enrollment"                     │
     │                                                          │
-    │   An educational series where we build a full-stack      │
-    │   e-commerce platform from scratch. No Shopify needed.   │
+    │   A multi-tenant SaaS platform for schools to manage     │
+    │   admissions, enrollment, and billing in one place.      │
     │                                                          │
     ╰─────────────────────────────────────────────────────────╯
 ```
 
-## What is This?
+## What is EnrollSage?
 
-This is a **live-coded educational project** created for social media, demonstrating how to build your own Shopify alternative using modern web technologies. Follow along as we construct a complete e-commerce storefront with payment processing, database management, and a beautiful UI.
+EnrollSage is a **modern school enrollment management platform** built as an educational project. Schools subscribe to manage their admissions pipeline, student enrollment, and tuition billing, while families use a self-service portal to apply and manage their children's enrollment.
 
 ## The Stack
 
 - **[TanStack Start](https://tanstack.com/start)** - Full-stack React framework with SSR, server functions, and type-safe routing
-- **[Drizzle ORM](https://orm.drizzle.team)** + **[Turso](https://turso.tech)** - SQLite at the edge with a delightful developer experience
-- **[Stripe](https://stripe.com)** - Payment processing that just works
+- **[Drizzle ORM](https://orm.drizzle.team)** + **[Turso](https://turso.tech)** - SQLite at the edge with multi-tenant isolation
+- **[Stripe](https://stripe.com)** - Payment processing for tuition and fees
+- **[Brevo](https://brevo.com)** - Transactional emails and notification workflows
+- **[Inngest](https://inngest.com)** - Event-driven async workflows
 - **[Tailwind CSS](https://tailwindcss.com)** - Utility-first styling for rapid UI development
 
-## How It Works
+## Key Features
 
-1. **Watch the content** - Follow along with the videos/streams where we build this step by step
-2. **Clone and experiment** - Fork this repo and make it your own
-3. **Deploy your store** - Host it on Vercel, Netlify, or wherever JavaScript runs
+### For Schools (Admin Dashboard)
+- 📋 Lead tracking and CRM
+- 📝 Application management
+- 👨‍👩‍👧‍👦 Family and student records
+- 💰 Tuition billing and payment plans
+- 📊 Analytics and reporting
 
-## What We're Building
+### For Families (Portal)
+- 🎯 Online application submission
+- 📄 Document upload and management
+- 💳 Tuition payment processing
+- 📱 Application status tracking
+- 📬 Communication with school
 
-A complete e-commerce platform featuring:
-
-- 🛒 Product catalog with cart functionality
-- 💳 Stripe checkout integration
-- 📊 Dashboard for managing products and orders
-- 🎨 Customizable storefront theming
-- 🚀 Edge-deployed database for global performance
+### For Platform (Super Admin)
+- 🏫 School onboarding and management
+- 👥 User administration
+- 📈 Platform-wide analytics
 
 ## Getting Started
 
@@ -45,15 +52,31 @@ npm install
 npm run dev
 ```
 
+Visit [http://localhost:3000/install](http://localhost:3000/install) to configure your environment.
+
 ## Project Structure
 
 ```
-├── src/routes/       # File-based routing (TanStack Start)
-├── wiggum/           # Development notes, prompts, and context
-├── public/           # Static assets and theme files
-└── ...               # Standard React/Vite project files
+├── src/routes/           # File-based routing (TanStack Start)
+│   ├── admin/            # School admin dashboard
+│   ├── super-admin/      # Platform super-admin
+│   └── portal/           # Family portal
+├── src/db/schema/        # Database schema (Drizzle ORM)
+├── wiggum/               # Development notes, prompts, and context
+├── public/               # Static assets and theme files
+└── ...                   # Standard React/Vite project files
 ```
+
+## Test Credentials
+
+After seeding the database (`npx tsx src/db/seed.ts`):
+
+| Role | Email | Password |
+|------|-------|----------|
+| Superadmin | superadmin@enrollsage.com | superadmin123 |
+| School Staff | admissions@example.com | admissions123 |
+| Parent | student@example.com | student123 |
 
 ---
 
-*Built live on social media. Mistakes included. Learning encouraged.* 🧼
+*Built as an educational project demonstrating multi-tenant SaaS architecture.* 🎓

@@ -1,12 +1,19 @@
-// 🛡️ Authentication Guards - Protecting the soap kingdom
+// 🛡️ Authentication Guards - Protecting the EnrollSage kingdom
 // "Hi, Super Nintendo Chalmers!" - Ralph, greeting authorized users
 //
 // These server functions provide authentication and authorization checks
-// for protected routes like /admin and /account.
+// for protected routes like /admin, /super-admin, and /portal.
+//
+// ╭────────────────────────────────────────────────────────────╮
+// │  ROLE HIERARCHY                                            │
+// │  ─────────────────────────────────────────────────────────  │
+// │  superadmin → Platform-level admin (can access everything) │
+// │  admin      → School staff (admissions, business office)   │
+// │  customer   → Family/parent (portal access only)           │
+// ╰────────────────────────────────────────────────────────────╯
 
 import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
-import { redirect } from '@tanstack/react-router';
 import { parseSessionCookie, validateSession } from './auth';
 
 /**
@@ -60,8 +67,9 @@ export const requireAuth = createServerFn({ method: 'GET' }).handler(async () =>
  * ╭─────────────────────────────────────────────────────────╮
  * │  REQUIRE ADMIN                                           │
  * │  ─────────────────────────────────────────────────────── │
- * │  Ensures user is logged in AND has admin role.           │
- * │  Redirects to login if not auth, /account if not admin.  │
+ * │  Ensures user is logged in AND has admin or superadmin   │
+ * │  role. School staff and platform admins can access.      │
+ * │  Redirects to login if not auth, /portal if customer.    │
  * ╰─────────────────────────────────────────────────────────╯
  */
 export const requireAdmin = createServerFn({ method: 'GET' }).handler(async () => {
@@ -71,8 +79,9 @@ export const requireAdmin = createServerFn({ method: 'GET' }).handler(async () =
     return { authenticated: false, isAdmin: false, redirect: '/login' };
   }
 
-  if (session.user.role !== 'admin') {
-    return { authenticated: true, isAdmin: false, redirect: '/account' };
+  // Both admin and superadmin can access school admin
+  if (session.user.role !== 'admin' && session.user.role !== 'superadmin') {
+    return { authenticated: true, isAdmin: false, redirect: '/portal' };
   }
 
   return {
@@ -83,7 +92,68 @@ export const requireAdmin = createServerFn({ method: 'GET' }).handler(async () =
 });
 
 /**
+ * ╭─────────────────────────────────────────────────────────╮
+ * │  REQUIRE SUPERADMIN                                      │
+ * │  ─────────────────────────────────────────────────────── │
+ * │  Ensures user is logged in AND has superadmin role.      │
+ * │  Only platform administrators can access.                │
+ * ╰─────────────────────────────────────────────────────────╯
+ */
+export const requireSuperAdmin = createServerFn({ method: 'GET' }).handler(async () => {
+  const session = await getSession();
+
+  if (!session) {
+    return { authenticated: false, isSuperAdmin: false, redirect: '/login' };
+  }
+
+  if (session.user.role !== 'superadmin') {
+    // Redirect based on role
+    if (session.user.role === 'admin') {
+      return { authenticated: true, isSuperAdmin: false, redirect: '/admin' };
+    }
+    return { authenticated: true, isSuperAdmin: false, redirect: '/portal' };
+  }
+
+  return {
+    authenticated: true,
+    isSuperAdmin: true,
+    user: session.user,
+  };
+});
+
+/**
+ * ╭─────────────────────────────────────────────────────────╮
+ * │  REQUIRE CUSTOMER (Family/Parent)                        │
+ * │  ─────────────────────────────────────────────────────── │
+ * │  Ensures user is logged in. Admins and superadmins are   │
+ * │  redirected to their respective dashboards.              │
+ * ╰─────────────────────────────────────────────────────────╯
+ */
+export const requireCustomer = createServerFn({ method: 'GET' }).handler(async () => {
+  const session = await getSession();
+
+  if (!session) {
+    return { authenticated: false, redirect: '/login' };
+  }
+
+  // Redirect admins to their dashboards
+  if (session.user.role === 'superadmin') {
+    return { authenticated: true, redirect: '/super-admin' };
+  }
+  if (session.user.role === 'admin') {
+    return { authenticated: true, redirect: '/admin' };
+  }
+
+  return {
+    authenticated: true,
+    user: session.user,
+  };
+});
+
+/**
  * Helper types for use in route loaders
  */
 export type AuthResult = Awaited<ReturnType<typeof requireAuth>>;
 export type AdminAuthResult = Awaited<ReturnType<typeof requireAdmin>>;
+export type SuperAdminAuthResult = Awaited<ReturnType<typeof requireSuperAdmin>>;
+export type CustomerAuthResult = Awaited<ReturnType<typeof requireCustomer>>;

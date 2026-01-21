@@ -1,29 +1,55 @@
-/* 🎨 Global Styles - The beauty routine of our soap empire
-   "Mmm, this tastes like Grandma!" - Ralph on CSS variables */
+/* 🌿 EnrollSage Global Styles - Wise guidance for enrollment journeys
+   "This company understands schools." - First impression in 3 seconds
+
+   ╭─────────────────────────────────────────────────────────────╮
+   │  DESIGN PRINCIPLES                                          │
+   │  ─────────────────────────────────────────────────────────  │
+   │  Calm & Wise • Grounded & Natural • Established • Modern    │
+   │  NOT: Playful • Trendy • Loud • "Edtech blue gradients"     │
+   │                                                              │
+   │  🌿 Sage evokes: wisdom, growth, natural calm, guidance     │
+   ╰─────────────────────────────────────────────────────────────╯
+*/
 
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════════
-   DESIGN TOKENS - Karen's Beautiful Soap Brand
+   DESIGN TOKENS - Sage-Inspired Trust Palette
+   Target: Heads of school, Business managers, Parents 35-60
+   Brand: EnrollSage — "Wise guidance for enrollment journeys"
    ═══════════════════════════════════════════════════════════ */
 
 :root {
-  /* Primary Colors - Nature-inspired palette */
-  --soap-forest: #2D5A4A;      /* Forest green - Nature, organic, growth */
-  --soap-cream: #F5EBE0;       /* Warm cream - Softness, purity */
-  --soap-honey: #D4A574;       /* Warm honey - Handcrafted warmth */
-  --soap-charcoal: #1A1A1A;    /* Charcoal - Sophistication, text */
-  --soap-pearl: #FDFCFB;       /* Off-white - Clean, fresh backgrounds */
+  /* Primary Colors - Sage Trust Palette 🌿 */
+  --sage: #5B7F6D;             /* Sage Green - wisdom, growth, natural calm */
+  --forest: #2D4F3E;           /* Deep Forest - depth, stability, expertise */
+  --sage-light: #8AA896;       /* Warm Sage - approachability, openness */
+  --sage-cream: #F8F9F6;       /* Sage Cream - subtle sage undertone background */
+  --white: #FFFFFF;            /* Pure white - secondary panels */
 
-  /* Secondary Colors */
-  --soap-forest-light: #3D7A64;
-  --soap-forest-dark: #1D3A32;
-  --soap-honey-light: #E4B584;
-  --soap-honey-dark: #B48554;
+  /* Legacy aliases for backward compatibility */
+  --navy: #2D4F3E;             /* Maps to forest for any old references */
+  --evergreen: #5B7F6D;        /* Maps to sage for any old references */
+  --offwhite: #F8F9F6;         /* Maps to sage-cream */
 
-  /* Typography */
-  --font-display: 'Playfair Display', serif;
-  --font-body: 'Karla', sans-serif;
+  /* Text Colors - High contrast = accessibility = trust */
+  --text-primary: #1E1E1E;     /* Primary text */
+  --text-secondary: #5F6368;   /* Secondary text */
+  --text-muted: #9AA0A6;       /* Disabled/muted */
+
+  /* Status Colors (Muted, Sage-Harmonious) */
+  --success: #5B7F6D;          /* Matches primary sage */
+  --warning: #B8A044;          /* Muted gold-sage */
+  --error: #8B4444;            /* Muted terracotta, not alarm red */
+
+  /* Accent - For CTAs and key actions */
+  --accent: #5B7F6D;           /* Primary sage for CTAs */
+  --accent-hover: #4A6B5B;     /* Darker sage on hover */
+  --accent-light: #8AA896;     /* Light sage for secondary actions */
+
+  /* Typography - Trust + Readability combo */
+  --font-display: 'Libre Baskerville', serif;  /* Academic, timeless, not experimental */
+  --font-body: 'Inter', sans-serif;            /* Clean, neutral, industry standard */
 
   /* Spacing scale */
   --space-1: 0.25rem;
@@ -35,18 +61,15 @@
   --space-12: 3rem;
   --space-16: 4rem;
 
-  /* Border radius */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
+  /* Border radius - 6-8px max, no playful roundness */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
 
-  /* Shadows */
+  /* Shadows - subtle, low elevation, no glassmorphism */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 2px 4px -1px rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  --shadow-lg: 0 4px 6px -2px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.03);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -58,14 +81,14 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--soap-pearl);
-  color: var(--soap-charcoal);
+  background-color: var(--offwhite);
+  color: var(--text-primary);
 }
 
-/* Headings use display font */
+/* Headings use display font - Libre Baskerville signals "not experimental" */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;  /* Baskerville looks better at normal weight */
 }
 
 /* Code blocks */
@@ -74,7 +97,7 @@ code {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   CUSTOM UTILITY CLASSES
+   CUSTOM UTILITY CLASSES - EnrollSage Trust System 🌿
    ═══════════════════════════════════════════════════════════ */
 
 /* Font families */
@@ -86,96 +109,109 @@ code {
   font-family: var(--font-body);
 }
 
-/* Brand colors */
-.bg-soap-forest { background-color: var(--soap-forest); }
-.bg-soap-cream { background-color: var(--soap-cream); }
-.bg-soap-honey { background-color: var(--soap-honey); }
-.bg-soap-charcoal { background-color: var(--soap-charcoal); }
-.bg-soap-pearl { background-color: var(--soap-pearl); }
+/* Brand colors - Sage Trust Palette 🌿 */
+.bg-sage { background-color: var(--sage); }
+.bg-forest { background-color: var(--forest); }
+.bg-sage-light { background-color: var(--sage-light); }
+.bg-sage-cream { background-color: var(--sage-cream); }
 
-.text-soap-forest { color: var(--soap-forest); }
-.text-soap-cream { color: var(--soap-cream); }
-.text-soap-honey { color: var(--soap-honey); }
-.text-soap-charcoal { color: var(--soap-charcoal); }
-.text-soap-pearl { color: var(--soap-pearl); }
+.text-sage { color: var(--sage); }
+.text-forest { color: var(--forest); }
+.text-sage-light { color: var(--sage-light); }
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
 
-.border-soap-forest { border-color: var(--soap-forest); }
-.border-soap-cream { border-color: var(--soap-cream); }
-.border-soap-honey { border-color: var(--soap-honey); }
+.border-sage { border-color: var(--sage); }
+.border-forest { border-color: var(--forest); }
+.border-sage-light { border-color: var(--sage-light); }
+
+/* Legacy aliases - backward compatibility */
+.bg-navy { background-color: var(--navy); }
+.bg-evergreen { background-color: var(--evergreen); }
+.bg-offwhite { background-color: var(--offwhite); }
+.text-navy { color: var(--navy); }
+.text-evergreen { color: var(--evergreen); }
+.border-navy { border-color: var(--navy); }
+.border-evergreen { border-color: var(--evergreen); }
 
 /* ═══════════════════════════════════════════════════════════
-   COMPONENT STYLES
+   COMPONENT STYLES - Professional, not playful
+   No neon hover states, no animated gradients
    ═══════════════════════════════════════════════════════════ */
 
-/* Primary button - Forest green with cream text */
+/* Primary button - Evergreen solid, feels institutional */
 .btn-primary {
-  @apply px-6 py-3 rounded-lg font-medium transition-all duration-200;
-  background-color: var(--soap-forest);
-  color: var(--soap-cream);
+  @apply px-6 py-3 font-medium transition-colors duration-200;
+  border-radius: var(--radius-md);
+  background-color: var(--evergreen);
+  color: white;
 }
 
 .btn-primary:hover {
-  background-color: var(--soap-forest-dark);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+  background-color: var(--accent-hover);
 }
 
-.btn-primary:active {
-  transform: translateY(0);
+.btn-primary:disabled {
+  background-color: var(--text-muted);
+  cursor: not-allowed;
 }
 
-/* Secondary button - Outlined with honey border */
+/* Secondary button - Outlined, professional */
 .btn-secondary {
-  @apply px-6 py-3 rounded-lg font-medium transition-all duration-200 border-2;
-  border-color: var(--soap-honey);
-  color: var(--soap-charcoal);
+  @apply px-6 py-3 font-medium transition-colors duration-200 border;
+  border-radius: var(--radius-md);
+  border-color: var(--navy);
+  color: var(--navy);
   background-color: transparent;
 }
 
 .btn-secondary:hover {
-  background-color: var(--soap-honey);
+  background-color: var(--navy);
   color: white;
 }
 
 /* Ghost button - Minimal, text only */
 .btn-ghost {
-  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
-  color: var(--soap-forest);
+  @apply px-4 py-2 font-medium transition-colors duration-200;
+  border-radius: var(--radius-md);
+  color: var(--evergreen);
   background-color: transparent;
 }
 
 .btn-ghost:hover {
-  background-color: var(--soap-cream);
+  background-color: var(--offwhite);
 }
 
-/* Card component */
+/* Card component - Subtle, no dramatic transforms */
 .card {
-  @apply rounded-2xl overflow-hidden transition-all duration-300;
+  @apply overflow-hidden transition-shadow duration-200;
+  border-radius: var(--radius-lg);
   background-color: white;
-  border: 1px solid var(--soap-cream);
+  border: 1px solid #E5E7EB;
   box-shadow: var(--shadow-sm);
 }
 
 .card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
-/* Input fields */
+/* Input fields - Clean, professional */
 .input {
-  @apply w-full px-4 py-3 rounded-lg border transition-all duration-200;
-  border-color: var(--soap-cream);
+  @apply w-full px-4 py-3 border transition-colors duration-200;
+  border-radius: var(--radius-md);
+  border-color: #E5E7EB;
   background-color: white;
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--soap-forest);
-  box-shadow: 0 0 0 3px rgba(45, 90, 74, 0.1);
+  border-color: var(--evergreen);
+  box-shadow: 0 0 0 2px rgba(47, 93, 80, 0.1);
 }
 
 .input::placeholder {
-  color: #9CA3AF;
+  color: var(--text-muted);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -192,6 +228,11 @@ code {
   to { opacity: 1; transform: translateX(0); }
 }
 
+@keyframes slideUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
@@ -203,6 +244,10 @@ code {
 
 .animate-slideIn {
   animation: slideIn 0.5s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out forwards;
 }
 
 .animate-pulse {
@@ -225,16 +270,16 @@ code {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--soap-cream);
+  background: var(--offwhite);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--soap-honey);
+  background: var(--text-muted);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--soap-forest);
+  background: var(--text-secondary);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -242,6 +287,6 @@ code {
    ═══════════════════════════════════════════════════════════ */
 
 ::selection {
-  background-color: var(--soap-honey);
-  color: var(--soap-charcoal);
+  background-color: var(--evergreen);
+  color: white;
 }

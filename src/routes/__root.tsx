@@ -1,16 +1,15 @@
-// 🌳 Root Layout - The foundation of our soap empire
-// "Hi, Super Nintendo Chalmers!" - Ralph greeting every page render
+// 🏫 Root Layout - The foundation of a modern school platform
+// "From first inquiry to tuition paid—without spreadsheets, PDFs, or duct tape."
 
 import { HeadContent, Scripts, createRootRoute, Outlet, Link, ErrorComponent, redirect } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { TanStackDevtools } from '@tanstack/react-devtools';
 import { createServerFn } from '@tanstack/react-start';
-import { getRequest } from '@tanstack/react-start/server';
-import { CartProvider } from '../lib/cart';
+import { getRequest, setResponseHeader } from '@tanstack/react-start/server';
 import { CsrfProvider } from '../lib/csrf-react';
-import { Home, ShoppingBag, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Home, RefreshCw, AlertTriangle } from 'lucide-react';
 import { isEnvConfigured } from '../lib/env';
-import { generateCsrfToken, createCsrfCookie, parseCsrfCookie } from '../lib/csrf.server';
+import { generateCsrfToken, createCsrfCookie, parseCsrfCookie, validateCsrfToken } from '../lib/csrf.server';
 
 import appCss from '../styles.css?url';
 
@@ -36,13 +35,23 @@ const getCsrfToken = createServerFn({ method: 'GET' })
 
     // Check if we already have a valid CSRF token in cookies
     const existingToken = parseCsrfCookie(cookieHeader);
-    if (existingToken) {
+    if (existingToken && validateCsrfToken(existingToken)) {
+      // 🔒 Only reuse the token if it's still valid (signature checks out)
       return { token: existingToken, cookie: null };
     }
 
-    // Generate a new token
+    // Generate a new token (either no existing token or it's invalid)
     const token = generateCsrfToken();
     const cookie = createCsrfCookie(token);
+
+    // 🍪 Try to set the cookie via response header
+    // Also return the cookie for client-side fallback
+    try {
+      setResponseHeader('Set-Cookie', cookie);
+    } catch (e) {
+      // Response headers might already be sent in some cases
+      console.warn('Could not set CSRF cookie via header:', e);
+    }
 
     return { token, cookie };
   });
@@ -52,6 +61,7 @@ export const Route = createRootRoute({
   errorComponent: ErrorPage,
   loader: async () => {
     // 🛡️ Get or generate CSRF token for the session
+    // The cookie is set via response header, with client-side fallback
     const csrfResult = await getCsrfToken();
     return { csrfToken: csrfResult.token, csrfCookie: csrfResult.cookie };
   },
@@ -66,46 +76,48 @@ export const Route = createRootRoute({
       return;
     }
 
+    // 🔧 TEMPORARILY DISABLED - env check causes "serverFn is not a function" on client navigation
+    // TODO: Fix this properly - the env check should only run server-side
     // Check env configuration - do this outside try/catch so redirect propagates
-    let envResult: { configured: boolean } | null = null;
-    try {
-      envResult = await checkEnvConfiguration();
-    } catch (error) {
-      // If env check fails, log and continue (don't block the app)
-      console.warn('Env check failed:', error);
-      return;
-    }
+    // let envResult: { configured: boolean } | null = null;
+    // try {
+    //   envResult = await checkEnvConfiguration();
+    // } catch (error) {
+    //   // If env check fails, log and continue (don't block the app)
+    //   console.warn('Env check failed:', error);
+    //   return;
+    // }
 
-    // 🚨 Redirect to install page if env vars are missing
-    if (envResult && !envResult.configured) {
-      throw redirect({ to: '/install' });
-    }
+    // // 🚨 Redirect to install page if env vars are missing
+    // if (envResult && !envResult.configured) {
+    //   throw redirect({ to: '/install' });
+    // }
   },
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: "Karen's Beautiful Soap | Handcrafted Luxury" },
+      { title: 'EnrollSage | Modern School Enrollment & Payments' },
       {
         name: 'description',
-        content: 'Discover artisanal handcrafted soaps made with natural ingredients. Lavender, honey oat, rose petal, and more luxurious varieties for gentle, nourishing skincare.',
+        content: 'The modern front door for private schools. From first inquiry to tuition paid—admissions, enrollment, and billing in one clean system.',
       },
       // Open Graph
       { property: 'og:type', content: 'website' },
-      { property: 'og:title', content: "Karen's Beautiful Soap" },
-      { property: 'og:description', content: 'Handcrafted luxury soaps made with natural ingredients' },
-      // Theme color for browsers
-      { name: 'theme-color', content: '#2D5A4A' },
+      { property: 'og:title', content: 'EnrollSage | Modern School Enrollment' },
+      { property: 'og:description', content: 'From first inquiry to tuition paid—without spreadsheets, PDFs, or duct tape.' },
+      // Theme color for browsers - Academic Navy
+      { name: 'theme-color', content: '#2D4F3E' },
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
       { rel: 'icon', href: '/favicon.ico' },
-      // Google Fonts - Playfair Display for headings, Karla for body
+      // Google Fonts - Libre Baskerville (academic) + Inter (modern UI)
       { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
       { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
       {
         rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap',
+        href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Baskerville:wght@400;700&display=swap',
       },
     ],
   }),
@@ -120,7 +132,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-[#FDFCFB] text-[#1A1A1A] font-sans antialiased">
+      <body className="bg-[#F8F9F6] text-[#1E1E1E] font-sans antialiased">
         {children}
         <TanStackDevtools
           config={{ position: 'bottom-right' }}
@@ -140,93 +152,83 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 function RootLayout() {
   const { csrfToken, csrfCookie } = Route.useLoaderData();
 
-  // 🍪 Set the CSRF cookie if we generated a new token
-  // This runs client-side on initial render
+  // 🍪 Set the CSRF cookie client-side as fallback
+  // The cookie should also be set server-side via setResponseHeader
+  // This double approach ensures the cookie is always available
   if (typeof document !== 'undefined' && csrfCookie) {
     document.cookie = csrfCookie;
   }
 
   return (
     <CsrfProvider initialToken={csrfToken}>
-      <CartProvider>
-        <Outlet />
-      </CartProvider>
+      <Outlet />
     </CsrfProvider>
   );
 }
 
 // ═══════════════════════════════════════════════════════════
-// 404 PAGE - When soap seekers lose their way
-// "I'm Idaho!" - Ralph, when asked where he is
+// 404 PAGE - Page not found
+// Professional, calm, institutional
 // ═══════════════════════════════════════════════════════════
 
 function NotFoundPage() {
   return (
-    <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center px-6">
+    <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center px-6">
       <div className="max-w-md text-center">
-        {/* Sad soap illustration */}
+        {/* Simple, professional illustration */}
         <div className="mb-8">
-          <div className="w-32 h-32 mx-auto relative">
-            {/* Soap bubble that popped */}
-            <div className="absolute inset-0 rounded-full border-4 border-dashed border-[#D4A574]/50 animate-pulse" />
-            <div className="absolute inset-4 bg-[#F5EBE0] rounded-full flex items-center justify-center">
-              <span className="text-6xl">🧼</span>
-            </div>
-            {/* Floating question mark */}
-            <div className="absolute -top-2 -right-2 w-8 h-8 bg-[#2D5A4A] rounded-full flex items-center justify-center text-white font-bold">
-              ?
-            </div>
+          <div className="w-24 h-24 mx-auto bg-white rounded-lg shadow-sm border border-gray-200 flex items-center justify-center">
+            <span className="text-4xl">🌿</span>
           </div>
         </div>
 
         {/* Error number with style */}
         <div className="mb-4">
-          <span className="text-8xl font-bold text-[#2D5A4A]/20 font-display">
+          <span className="text-7xl font-bold text-[#2D4F3E]/10 font-display">
             404
           </span>
         </div>
 
-        <h1 className="text-2xl font-bold text-[#1A1A1A] mb-4 font-display">
+        <h1 className="text-2xl font-bold text-[#1E1E1E] mb-4 font-display">
           Page Not Found
         </h1>
 
-        <p className="text-gray-600 mb-8">
-          Looks like this page slipped away like a bar of soap!
-          Don't worry, we'll help you find your way back.
+        <p className="text-[#5F6368] mb-8">
+          The page you're looking for doesn't exist or has been moved.
+          Let's get you back on track.
         </p>
 
         {/* Action buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             to="/"
-            className="inline-flex items-center justify-center gap-2 bg-[#2D5A4A] text-white px-6 py-3 rounded-lg hover:bg-[#1A1A1A] transition-colors font-medium"
+            className="inline-flex items-center justify-center gap-2 bg-[#5B7F6D] text-white px-6 py-3 rounded-md hover:bg-[#234840] transition-colors font-medium"
           >
             <Home className="w-4 h-4" />
             Go Home
           </Link>
           <Link
-            to="/shop"
-            className="inline-flex items-center justify-center gap-2 border-2 border-[#D4A574] text-[#1A1A1A] px-6 py-3 rounded-lg hover:bg-[#D4A574] hover:text-white transition-colors font-medium"
+            to="/contact"
+            className="inline-flex items-center justify-center gap-2 border border-[#2D4F3E] text-[#2D4F3E] px-6 py-3 rounded-md hover:bg-[#2D4F3E] hover:text-white transition-colors font-medium"
           >
-            <ShoppingBag className="w-4 h-4" />
-            Browse Shop
+            Contact Support
           </Link>
         </div>
 
         {/* Helpful links */}
-        <div className="mt-12 pt-8 border-t border-[#F5EBE0]">
-          <p className="text-sm text-gray-500 mb-4">Looking for something specific?</p>
+        <div className="mt-12 pt-8 border-t border-gray-200">
+          <p className="text-sm text-[#5F6368] mb-4">Looking for something specific?</p>
           <div className="flex flex-wrap justify-center gap-4 text-sm">
-            <Link to="/about" className="text-[#2D5A4A] hover:underline">
-              Our Story
+            <Link to="/about" className="text-[#5B7F6D] hover:underline">
+              About Us
             </Link>
             <span className="text-gray-300">•</span>
-            <Link to="/contact" className="text-[#2D5A4A] hover:underline">
-              Contact Us
+            <Link to="/contact" className="text-[#5B7F6D] hover:underline">
+              Contact
             </Link>
             <span className="text-gray-300">•</span>
-            <Link to="/account" className="text-[#2D5A4A] hover:underline">
-              My Account
+            <Link to="/login" className="text-[#5B7F6D] hover:underline">
+              Sign In
             </Link>
           </div>
         </div>
@@ -236,44 +238,40 @@ function NotFoundPage() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// ERROR PAGE - When things go sideways
-// "The pointy kitty took it!" - Ralph, blaming errors
+// ERROR PAGE - Something went wrong
+// Professional error handling, not cutesy
 // ═══════════════════════════════════════════════════════════
 
 function ErrorPage({ error, reset }: { error: Error; reset?: () => void }) {
-  // Check if we're in development
   const isDev = import.meta.env.DEV;
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center px-6">
+    <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center px-6">
       <div className="max-w-md text-center">
-        {/* Error illustration */}
+        {/* Error illustration - muted, not alarming */}
         <div className="mb-8">
-          <div className="w-32 h-32 mx-auto relative">
-            <div className="absolute inset-0 bg-red-100 rounded-full animate-pulse" />
-            <div className="absolute inset-4 bg-white rounded-full flex items-center justify-center shadow-lg">
-              <AlertTriangle className="w-12 h-12 text-red-500" />
-            </div>
+          <div className="w-24 h-24 mx-auto bg-white rounded-lg shadow-sm border border-gray-200 flex items-center justify-center">
+            <AlertTriangle className="w-10 h-10 text-[#9C2F2F]" />
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-[#1A1A1A] mb-4 font-display">
-          Oops! Something Went Wrong
+        <h1 className="text-2xl font-bold text-[#1E1E1E] mb-4 font-display">
+          Something Went Wrong
         </h1>
 
-        <p className="text-gray-600 mb-6">
-          Don't worry, it's not you - it's us. Our soap-making elves are working
-          on fixing this issue.
+        <p className="text-[#5F6368] mb-6">
+          We encountered an unexpected error. Our team has been notified
+          and is working to resolve the issue.
         </p>
 
         {/* Show error details in development */}
         {isDev && error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-left">
-            <p className="text-sm font-mono text-red-700 break-words">
+          <div className="mb-6 p-4 bg-red-50 border border-[#9C2F2F]/20 rounded-md text-left">
+            <p className="text-sm font-mono text-[#9C2F2F] break-words">
               {error.message}
             </p>
             {error.stack && (
-              <pre className="mt-2 text-xs font-mono text-red-600 overflow-auto max-h-32">
+              <pre className="mt-2 text-xs font-mono text-[#9C2F2F]/70 overflow-auto max-h-32">
                 {error.stack}
               </pre>
             )}
@@ -285,7 +283,7 @@ function ErrorPage({ error, reset }: { error: Error; reset?: () => void }) {
           {reset && (
             <button
               onClick={reset}
-              className="inline-flex items-center justify-center gap-2 bg-[#2D5A4A] text-white px-6 py-3 rounded-lg hover:bg-[#1A1A1A] transition-colors font-medium"
+              className="inline-flex items-center justify-center gap-2 bg-[#5B7F6D] text-white px-6 py-3 rounded-md hover:bg-[#234840] transition-colors font-medium"
             >
               <RefreshCw className="w-4 h-4" />
               Try Again
@@ -293,7 +291,7 @@ function ErrorPage({ error, reset }: { error: Error; reset?: () => void }) {
           )}
           <Link
             to="/"
-            className="inline-flex items-center justify-center gap-2 border-2 border-[#D4A574] text-[#1A1A1A] px-6 py-3 rounded-lg hover:bg-[#D4A574] hover:text-white transition-colors font-medium"
+            className="inline-flex items-center justify-center gap-2 border border-[#2D4F3E] text-[#2D4F3E] px-6 py-3 rounded-md hover:bg-[#2D4F3E] hover:text-white transition-colors font-medium"
           >
             <Home className="w-4 h-4" />
             Go Home
@@ -301,9 +299,9 @@ function ErrorPage({ error, reset }: { error: Error; reset?: () => void }) {
         </div>
 
         {/* Contact support */}
-        <div className="mt-12 pt-8 border-t border-[#F5EBE0]">
-          <p className="text-sm text-gray-500 mb-2">Need help?</p>
-          <Link to="/contact" className="text-[#2D5A4A] hover:underline text-sm">
+        <div className="mt-12 pt-8 border-t border-gray-200">
+          <p className="text-sm text-[#5F6368] mb-2">Need assistance?</p>
+          <Link to="/contact" className="text-[#5B7F6D] hover:underline text-sm">
             Contact Support
           </Link>
         </div>

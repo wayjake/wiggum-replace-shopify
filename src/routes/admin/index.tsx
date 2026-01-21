@@ -1,114 +1,139 @@
-// 🎛️ Admin Dashboard - Mission control for the soap empire
-// "Me fail English? That's unpossible!" - Ralph on dashboard analytics
+// 🎛️ School Admin Dashboard - Mission control for enrollment operations
+// "Education is the most powerful weapon which you can use to change the world" - Nelson Mandela
 //
 // ╭────────────────────────────────────────────────────────────╮
-// │  🚀 Now with REAL database data!                           │
-// │  No more sample data - this dashboard tells the truth.     │
+// │  🏫 SCHOOL STAFF DASHBOARD                                  │
+// │  Admissions directors, business office staff, and school   │
+// │  administrators manage their school from here.             │
 // ╰────────────────────────────────────────────────────────────╯
 
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { useEffect } from 'react';
 import {
-  Package,
-  ShoppingCart,
   Users,
-  DollarSign,
-  TrendingUp,
+  GraduationCap,
+  Home,
   ArrowRight,
-  AlertCircle,
-  Clock,
+  FileText,
+  UserPlus,
+  Calendar,
+  LogOut,
 } from 'lucide-react';
 import { requireAdmin } from '../../lib/auth-guards';
-import { getDb, products, orders, users } from '../../db';
-import { eq, lt, and, gte, desc, count, sum, sql } from 'drizzle-orm';
+import { getDb, households, students, applications, leads } from '../../db';
+import { eq, desc, count, and, sql } from 'drizzle-orm';
+import { cn } from '../../utils';
+import { createLogoutCookie } from '../../lib/auth';
 
 // ═══════════════════════════════════════════════════════════
-// SERVER FUNCTIONS - Real data from the database!
+// SERVER FUNCTIONS - Real data from the school database!
 // ═══════════════════════════════════════════════════════════
 
 const getDashboardStats = createServerFn({ method: 'GET' }).handler(async () => {
   const db = getDb();
-  const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
   try {
-    // Get low stock products (stock < threshold)
-    const lowStockProducts = await db
-      .select({
-        id: products.id,
-        name: products.name,
-        slug: products.slug,
-        stock: products.stockQuantity,
-        threshold: products.lowStockThreshold,
-      })
-      .from(products)
+    // Get total households (families)
+    const [householdCount] = await db.select({ count: count() }).from(households);
+
+    // Get total students
+    const [studentCount] = await db.select({ count: count() }).from(students);
+
+    // Get enrolled students
+    const [enrolledCount] = await db
+      .select({ count: count() })
+      .from(students)
+      .where(eq(students.enrollmentStatus, 'enrolled'));
+
+    // Get pending applications
+    const [pendingApps] = await db
+      .select({ count: count() })
+      .from(applications)
+      .where(eq(applications.status, 'submitted'));
+
+    // Get active leads
+    const [activeLeads] = await db
+      .select({ count: count() })
+      .from(leads)
       .where(
-        sql`${products.stockQuantity} < ${products.lowStockThreshold}`
+        and(
+          sql`${leads.stage} != 'converted'`,
+          sql`${leads.stage} != 'lost'`
+        )
       );
 
-    // Get pending orders count
-    const pendingOrdersResult = await db
-      .select({ count: count() })
-      .from(orders)
-      .where(eq(orders.status, 'pending'));
-
-    // Get today's orders
-    const todayOrdersResult = await db
+    // Get recent applications
+    const recentApplications = await db
       .select({
-        count: count(),
-        total: sum(orders.totalAmount),
+        id: applications.id,
+        studentId: applications.studentId,
+        status: applications.status,
+        gradeApplyingFor: applications.gradeApplyingFor,
+        schoolYear: applications.schoolYear,
+        submittedAt: applications.submittedAt,
       })
-      .from(orders)
-      .where(gte(orders.createdAt, startOfToday));
+      .from(applications)
+      .orderBy(desc(applications.submittedAt))
+      .limit(5);
 
-    // Get monthly revenue
-    const monthlyRevenueResult = await db
-      .select({ total: sum(orders.totalAmount) })
-      .from(orders)
-      .where(gte(orders.createdAt, startOfMonth));
+    // Get student info for each application
+    const applicationsWithStudents = await Promise.all(
+      recentApplications.map(async (app) => {
+        const [student] = await db
+          .select({
+            firstName: students.firstName,
+            lastName: students.lastName,
+          })
+          .from(students)
+          .where(eq(students.id, app.studentId));
 
-    // Get total customers
-    const totalCustomersResult = await db
-      .select({ count: count() })
-      .from(users)
-      .where(eq(users.role, 'customer'));
+        return {
+          ...app,
+          studentName: student ? `${student.firstName} ${student.lastName}` : 'Unknown',
+        };
+      })
+    );
 
-    // Get recent orders
-    const recentOrders = await db.query.orders.findMany({
-      limit: 5,
-      orderBy: desc(orders.createdAt),
-      with: {
-        user: true,
-      },
-    });
+    // Get recent leads
+    const recentLeads = await db
+      .select({
+        id: leads.id,
+        firstName: leads.firstName,
+        lastName: leads.lastName,
+        email: leads.email,
+        stage: leads.stage,
+        numberOfStudents: leads.numberOfStudents,
+        createdAt: leads.createdAt,
+      })
+      .from(leads)
+      .orderBy(desc(leads.createdAt))
+      .limit(5);
 
     return {
       success: true,
       stats: {
-        todaySales: Number(todayOrdersResult[0]?.total || 0),
-        todayOrders: Number(todayOrdersResult[0]?.count || 0),
-        pendingOrders: Number(pendingOrdersResult[0]?.count || 0),
-        lowStockItems: lowStockProducts.length,
-        totalCustomers: Number(totalCustomersResult[0]?.count || 0),
-        monthlyRevenue: Number(monthlyRevenueResult[0]?.total || 0),
+        totalHouseholds: Number(householdCount?.count || 0),
+        totalStudents: Number(studentCount?.count || 0),
+        enrolledStudents: Number(enrolledCount?.count || 0),
+        pendingApplications: Number(pendingApps?.count || 0),
+        activeLeads: Number(activeLeads?.count || 0),
       },
-      lowStockProducts: lowStockProducts.map(p => ({
-        id: p.id,
-        name: p.name,
-        slug: p.slug,
-        stock: p.stock ?? 0,
-        threshold: p.threshold ?? 10,
+      recentApplications: applicationsWithStudents.map((app) => ({
+        id: app.id,
+        studentName: app.studentName,
+        grade: app.gradeApplyingFor,
+        schoolYear: app.schoolYear,
+        status: app.status || 'draft',
+        date: formatRelativeTime(app.submittedAt),
       })),
-      recentOrders: recentOrders.map(o => ({
-        id: o.orderNumber,
-        customer: o.user?.firstName
-          ? `${o.user.firstName} ${o.user.lastName?.charAt(0) || ''}.`
-          : o.email.split('@')[0],
-        total: o.totalAmount,
-        status: o.status,
-        date: formatRelativeTime(o.createdAt),
+      recentLeads: recentLeads.map((lead) => ({
+        id: lead.id,
+        name: `${lead.firstName} ${lead.lastName}`,
+        email: lead.email || '',
+        stage: lead.stage || 'inquiry',
+        students: lead.numberOfStudents || 1,
+        date: formatRelativeTime(lead.createdAt),
       })),
     };
   } catch (error) {
@@ -116,17 +141,20 @@ const getDashboardStats = createServerFn({ method: 'GET' }).handler(async () => 
     return {
       success: false,
       stats: {
-        todaySales: 0,
-        todayOrders: 0,
-        pendingOrders: 0,
-        lowStockItems: 0,
-        totalCustomers: 0,
-        monthlyRevenue: 0,
+        totalHouseholds: 0,
+        totalStudents: 0,
+        enrolledStudents: 0,
+        pendingApplications: 0,
+        activeLeads: 0,
       },
-      lowStockProducts: [],
-      recentOrders: [],
+      recentApplications: [],
+      recentLeads: [],
     };
   }
+});
+
+const logoutUser = createServerFn({ method: 'POST' }).handler(async () => {
+  return { cookie: createLogoutCookie() };
 });
 
 // Helper for relative time formatting
@@ -152,8 +180,8 @@ function formatRelativeTime(date: Date | null | undefined): string {
 export const Route = createFileRoute('/admin/')({
   head: () => ({
     meta: [
-      { title: "Dashboard | Admin | Karen's Beautiful Soap" },
-      { name: 'description', content: 'Admin dashboard for managing your soap store.' },
+      { title: 'School Dashboard | EnrollSage' },
+      { name: 'description', content: 'Manage your school enrollments, applications, and families.' },
     ],
   }),
   loader: async () => {
@@ -172,7 +200,7 @@ export const Route = createFileRoute('/admin/')({
 
 function AdminDashboard() {
   const navigate = useNavigate();
-  const { authResult, stats, lowStockProducts, recentOrders } = Route.useLoaderData();
+  const { authResult, stats, recentApplications, recentLeads } = Route.useLoaderData();
 
   // Handle auth redirects
   useEffect(() => {
@@ -184,38 +212,53 @@ function AdminDashboard() {
   // Don't render if not authenticated/admin
   if (!authResult.authenticated || !authResult.isAdmin) {
     return (
-      <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#2D5A4A] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#F8F9F6] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#5B7F6D] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
+  const handleLogout = async () => {
+    const result = await logoutUser();
+    if (result.cookie) {
+      document.cookie = result.cookie;
+    }
+    navigate({ to: '/login' });
+  };
+
   return (
-    <div className="min-h-screen bg-[#FDFCFB]">
+    <div className="min-h-screen bg-[#F8F9F6]">
       {/* Admin Header */}
-      <header className="bg-white border-b border-[#F5EBE0]">
+      <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <Link to="/" className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#2D5A4A] rounded-full flex items-center justify-center">
-                  <span className="text-xl">🧼</span>
+                <div className="w-10 h-10 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
+                  <span className="text-xl">🌿</span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-[#1A1A1A] font-display">Admin Dashboard</h1>
-                  <p className="text-xs text-gray-500">Karen's Beautiful Soap</p>
+                  <h1 className="text-lg font-bold text-[#2D4F3E] font-display">School Dashboard</h1>
+                  <p className="text-xs text-gray-500">Westlake Academy</p>
                 </div>
               </Link>
             </div>
 
             {/* Admin Nav */}
             <nav className="flex items-center gap-6">
-              <Link to="/admin" className="text-[#2D5A4A] font-medium">Dashboard</Link>
-              <Link to="/admin/products" className="text-gray-600 hover:text-[#2D5A4A]">Products</Link>
-              <Link to="/admin/orders" className="text-gray-600 hover:text-[#2D5A4A]">Orders</Link>
-              <Link to="/admin/customers" className="text-gray-600 hover:text-[#2D5A4A]">Customers</Link>
-              <Link to="/admin/reviews" className="text-gray-600 hover:text-[#2D5A4A]">Reviews</Link>
-              <Link to="/" className="text-gray-500 hover:text-[#2D5A4A] text-sm">View Store →</Link>
+              <Link to="/admin" className="text-[#5B7F6D] font-medium">Dashboard</Link>
+              <Link to="/admin/applications" className="text-gray-600 hover:text-[#5B7F6D]">Applications</Link>
+              <Link to="/admin/leads" className="text-gray-600 hover:text-[#5B7F6D]">Leads</Link>
+              <Link to="/admin/families" className="text-gray-600 hover:text-[#5B7F6D]">Families</Link>
+              <Link to="/admin/students" className="text-gray-600 hover:text-[#5B7F6D]">Students</Link>
+              <Link to="/admin/settings" className="text-gray-600 hover:text-[#5B7F6D]">Settings</Link>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1 text-gray-500 hover:text-[#5B7F6D] text-sm"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
             </nav>
           </div>
         </div>
@@ -224,69 +267,82 @@ function AdminDashboard() {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Welcome Header */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-[#1A1A1A] font-display">Good morning, Karen!</h2>
-          <p className="text-gray-600">Here's what's happening with your store today.</p>
+          <h2 className="text-2xl font-bold text-[#2D4F3E] font-display">
+            Welcome back, {authResult.user?.firstName || 'Admin'}!
+          </h2>
+          <p className="text-gray-600">Here's what's happening with your school today.</p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <StatCard
-            label="Today's Sales"
-            value={`$${stats.todaySales.toFixed(2)}`}
-            icon={DollarSign}
-            color="green"
+            label="Families"
+            value={stats.totalHouseholds.toString()}
+            icon={Home}
+            color="evergreen"
           />
           <StatCard
-            label="Today's Orders"
-            value={stats.todayOrders.toString()}
-            icon={ShoppingCart}
+            label="Total Students"
+            value={stats.totalStudents.toString()}
+            icon={Users}
+            color="navy"
+          />
+          <StatCard
+            label="Enrolled"
+            value={stats.enrolledStudents.toString()}
+            icon={GraduationCap}
             color="blue"
           />
           <StatCard
-            label="Pending Orders"
-            value={stats.pendingOrders.toString()}
-            icon={Clock}
+            label="Applications"
+            value={stats.pendingApplications.toString()}
+            icon={FileText}
             color="amber"
+            badge={stats.pendingApplications > 0 ? 'Pending' : undefined}
           />
           <StatCard
-            label="Total Customers"
-            value={stats.totalCustomers.toString()}
-            icon={Users}
+            label="Active Leads"
+            value={stats.activeLeads.toString()}
+            icon={UserPlus}
             color="purple"
           />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Recent Orders */}
-          <div className="lg:col-span-2 bg-white rounded-xl border border-[#F5EBE0] p-6">
+          {/* Recent Applications */}
+          <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-[#1A1A1A] font-display">Recent Orders</h3>
-              <Link
-                to="/admin/orders"
-                className="text-sm text-[#2D5A4A] hover:underline flex items-center gap-1"
+              <h3 className="text-lg font-semibold text-[#2D4F3E] font-display flex items-center gap-2">
+                <FileText className="w-5 h-5 text-[#5B7F6D]" />
+                Recent Applications
+              </h3>
+              <a
+                href="/admin/applications"
+                className="text-sm text-[#5B7F6D] hover:underline flex items-center gap-1"
               >
                 View all <ArrowRight className="w-4 h-4" />
-              </Link>
+              </a>
             </div>
             <div className="space-y-4">
-              {recentOrders.length > 0 ? recentOrders.map((order) => (
+              {recentApplications.length > 0 ? recentApplications.map((app) => (
                 <div
-                  key={order.id}
-                  className="flex items-center justify-between py-3 border-b border-[#F5EBE0] last:border-0"
+                  key={app.id}
+                  className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0"
                 >
                   <div>
-                    <p className="font-medium text-[#1A1A1A]">{order.id}</p>
-                    <p className="text-sm text-gray-500">{order.customer} • {order.date}</p>
+                    <p className="font-medium text-[#2D4F3E]">{app.studentName}</p>
+                    <p className="text-sm text-gray-500">
+                      Grade {app.grade} • {app.schoolYear} • {app.date}
+                    </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium text-[#1A1A1A]">${order.total.toFixed(2)}</p>
-                    <StatusBadge status={order.status} />
+                    <StatusBadge status={app.status} />
                   </div>
                 </div>
               )) : (
                 <div className="text-center py-8 text-gray-500">
-                  <ShoppingCart className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p>No orders yet</p>
+                  <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p>No applications yet</p>
                 </div>
               )}
             </div>
@@ -294,64 +350,74 @@ function AdminDashboard() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Low Stock Alert */}
-            {lowStockProducts.length > 0 && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <AlertCircle className="w-5 h-5 text-amber-600" />
-                  <h3 className="font-semibold text-amber-900">Low Stock Alert</h3>
-                </div>
-                <div className="space-y-3">
-                  {lowStockProducts.map((product) => (
-                    <Link
-                      key={product.id}
-                      to="/admin/products/$productId"
-                      params={{ productId: product.id }}
-                      className="flex items-center justify-between hover:bg-amber-100/50 -mx-2 px-2 py-1 rounded transition-colors"
-                    >
-                      <span className="text-sm text-amber-900">{product.name}</span>
-                      <span className="text-sm font-medium text-amber-700">
-                        {product.stock} left
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-                <Link
-                  to="/admin/products"
-                  className="mt-4 block text-center text-sm text-amber-700 hover:text-amber-900 font-medium"
-                >
-                  Manage Inventory →
-                </Link>
-              </div>
-            )}
-
             {/* Quick Actions */}
-            <div className="bg-white rounded-xl border border-[#F5EBE0] p-6">
-              <h3 className="font-semibold text-[#1A1A1A] mb-4 font-display">Quick Actions</h3>
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 className="font-semibold text-[#2D4F3E] mb-4 font-display">Quick Actions</h3>
               <div className="space-y-2">
-                <Link
-                  to="/admin/products/new"
-                  className="block w-full py-2 px-4 bg-[#2D5A4A] text-white rounded-lg text-center hover:bg-[#1A1A1A] transition-colors"
+                <a
+                  href="/admin/leads/new"
+                  className="block w-full py-2 px-4 bg-[#5B7F6D] text-white rounded-lg text-center hover:bg-[#2D4F3E] transition-colors"
                 >
-                  + Add New Product
-                </Link>
-                <Link
-                  to="/admin/orders"
-                  className="block w-full py-2 px-4 bg-[#F5EBE0] text-[#1A1A1A] rounded-lg text-center hover:bg-[#D4A574] hover:text-white transition-colors"
+                  + Add New Lead
+                </a>
+                <a
+                  href="/admin/families/new"
+                  className="block w-full py-2 px-4 bg-gray-100 text-[#2D4F3E] rounded-lg text-center hover:bg-gray-200 transition-colors"
                 >
-                  Process Orders
-                </Link>
+                  + Register Family
+                </a>
+                <a
+                  href="/admin/applications"
+                  className="block w-full py-2 px-4 bg-gray-100 text-[#2D4F3E] rounded-lg text-center hover:bg-gray-200 transition-colors"
+                >
+                  Review Applications
+                </a>
               </div>
             </div>
 
-            {/* Monthly Revenue */}
-            <div className="bg-[#2D5A4A] rounded-xl p-6 text-white">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-5 h-5" />
-                <span className="text-sm text-white/70">This Month</span>
+            {/* Recent Leads */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-[#2D4F3E] font-display flex items-center gap-2">
+                  <UserPlus className="w-4 h-4 text-[#5B7F6D]" />
+                  Recent Leads
+                </h3>
+                <a
+                  href="/admin/leads"
+                  className="text-xs text-[#5B7F6D] hover:underline"
+                >
+                  View all
+                </a>
               </div>
-              <p className="text-3xl font-bold">${stats.monthlyRevenue.toLocaleString()}</p>
-              <p className="text-sm text-white/70 mt-1">Total revenue</p>
+              <div className="space-y-3">
+                {recentLeads.length > 0 ? recentLeads.map((lead) => (
+                  <div
+                    key={lead.id}
+                    className="p-3 bg-gray-50 rounded-lg"
+                  >
+                    <p className="font-medium text-[#2D4F3E] text-sm">{lead.name}</p>
+                    <p className="text-xs text-gray-500">
+                      {lead.students} student{lead.students !== 1 ? 's' : ''} • {lead.date}
+                    </p>
+                    <LeadStageBadge stage={lead.stage} />
+                  </div>
+                )) : (
+                  <p className="text-sm text-gray-500 text-center py-4">No leads yet</p>
+                )}
+              </div>
+            </div>
+
+            {/* Enrollment Period */}
+            <div className="bg-[#5B7F6D] rounded-xl p-6 text-white">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="w-5 h-5" />
+                <span className="text-sm text-white/70">Current School Year</span>
+              </div>
+              <p className="text-2xl font-bold">2025-2026</p>
+              <p className="text-sm text-white/70 mt-1">Enrollment Open</p>
+              <div className="mt-4 pt-4 border-t border-white/20">
+                <p className="text-xs text-white/60">Deadline: July 31, 2025</p>
+              </div>
             </div>
           </div>
         </div>
@@ -368,35 +434,36 @@ function StatCard({
   label,
   value,
   icon: Icon,
-  trend,
+  badge,
   color,
 }: {
   label: string;
   value: string;
-  icon: typeof DollarSign;
-  trend?: string;
-  color: 'green' | 'blue' | 'amber' | 'purple';
+  icon: typeof Users;
+  badge?: string;
+  color: 'evergreen' | 'navy' | 'blue' | 'amber' | 'purple';
 }) {
   const colors = {
-    green: 'bg-green-100 text-green-600',
+    evergreen: 'bg-[#5B7F6D]/10 text-[#5B7F6D]',
+    navy: 'bg-[#2D4F3E]/10 text-[#2D4F3E]',
     blue: 'bg-blue-100 text-blue-600',
     amber: 'bg-amber-100 text-amber-600',
     purple: 'bg-purple-100 text-purple-600',
   };
 
   return (
-    <div className="bg-white rounded-xl border border-[#F5EBE0] p-6">
+    <div className="bg-white rounded-xl border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-4">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${colors[color]}`}>
+        <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center', colors[color])}>
           <Icon className="w-5 h-5" />
         </div>
-        {trend && (
-          <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
-            {trend}
+        {badge && (
+          <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full">
+            {badge}
           </span>
         )}
       </div>
-      <p className="text-2xl font-bold text-[#1A1A1A]">{value}</p>
+      <p className="text-2xl font-bold text-[#2D4F3E]">{value}</p>
       <p className="text-sm text-gray-500">{label}</p>
     </div>
   );
@@ -404,16 +471,60 @@ function StatCard({
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    paid: 'bg-blue-100 text-blue-700',
-    processing: 'bg-amber-100 text-amber-700',
-    shipped: 'bg-purple-100 text-purple-700',
-    delivered: 'bg-green-100 text-green-700',
-    cancelled: 'bg-red-100 text-red-700',
+    draft: 'bg-gray-100 text-gray-700',
+    submitted: 'bg-blue-100 text-blue-700',
+    under_review: 'bg-amber-100 text-amber-700',
+    interview_scheduled: 'bg-purple-100 text-purple-700',
+    interview_completed: 'bg-purple-100 text-purple-700',
+    accepted: 'bg-green-100 text-green-700',
+    waitlisted: 'bg-orange-100 text-orange-700',
+    denied: 'bg-red-100 text-red-700',
+    withdrawn: 'bg-gray-100 text-gray-700',
+    enrolled: 'bg-[#5B7F6D]/20 text-[#5B7F6D]',
+  };
+
+  const labels: Record<string, string> = {
+    draft: 'Draft',
+    submitted: 'Submitted',
+    under_review: 'Under Review',
+    interview_scheduled: 'Interview Scheduled',
+    interview_completed: 'Interview Done',
+    accepted: 'Accepted',
+    waitlisted: 'Waitlisted',
+    denied: 'Denied',
+    withdrawn: 'Withdrawn',
+    enrolled: 'Enrolled',
   };
 
   return (
-    <span className={`text-xs px-2 py-1 rounded-full capitalize ${styles[status] || 'bg-gray-100 text-gray-700'}`}>
-      {status}
+    <span className={cn('text-xs px-2 py-1 rounded-full', styles[status] || 'bg-gray-100 text-gray-700')}>
+      {labels[status] || status}
+    </span>
+  );
+}
+
+function LeadStageBadge({ stage }: { stage: string }) {
+  const styles: Record<string, string> = {
+    inquiry: 'bg-blue-100 text-blue-700',
+    tour_scheduled: 'bg-purple-100 text-purple-700',
+    tour_completed: 'bg-amber-100 text-amber-700',
+    applied: 'bg-green-100 text-green-700',
+    converted: 'bg-[#5B7F6D]/20 text-[#5B7F6D]',
+    lost: 'bg-gray-100 text-gray-500',
+  };
+
+  const labels: Record<string, string> = {
+    inquiry: 'Inquiry',
+    tour_scheduled: 'Tour Scheduled',
+    tour_completed: 'Tour Completed',
+    applied: 'Applied',
+    converted: 'Converted',
+    lost: 'Lost',
+  };
+
+  return (
+    <span className={cn('text-xs px-2 py-1 rounded-full mt-1 inline-block', styles[stage] || 'bg-gray-100 text-gray-700')}>
+      {labels[stage] || stage}
     </span>
   );
 }

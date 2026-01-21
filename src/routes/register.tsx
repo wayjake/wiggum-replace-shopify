@@ -1,5 +1,5 @@
-// 📝 Register Page - Join the soap family!
-// "My cat's breath smells like cat food." - Ralph's password hint (don't use this!)
+// 📝 Register Page - Join the EnrollSage family portal
+// For parents who want to track their family's enrollment status
 //
 // ╭────────────────────────────────────────────────────────────╮
 // │  🛡️ RATE LIMITED!                                          │
@@ -13,7 +13,7 @@ import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
 import { cn } from '../utils';
 import { createUser, createSession, createSessionCookie, getUserByEmail } from '../lib/auth';
-import { getRequest } from '@tanstack/react-start/server';
+import { getRequest, setResponseHeader } from '@tanstack/react-start/server';
 import {
   checkRateLimit,
   resetRateLimit,
@@ -24,20 +24,19 @@ import { validateCsrfForRequest } from '../lib/csrf.server';
 import { useCsrf } from '../lib/csrf-react';
 
 // ═══════════════════════════════════════════════════════════
-// SERVER FUNCTIONS - Creating new soap enthusiasts
-// "I bent my wookiee!" - Ralph, creating an account
+// SERVER FUNCTIONS - Creating new family accounts
 // ═══════════════════════════════════════════════════════════
 
 const registerUser = createServerFn({ method: 'POST' })
-  .handler(async (data: {
+  .handler(async (input: { data: {
     firstName: string;
     lastName?: string;
     email: string;
     password: string;
     marketingConsent: boolean;
     csrfToken?: string;
-  }) => {
-    const { firstName, lastName, email, password, csrfToken } = data;
+  } }) => {
+    const { firstName, lastName, email, password, csrfToken } = input.data;
 
     // 🛡️ CSRF validation - protect against cross-site request forgery
     const request = getRequest();
@@ -86,10 +85,17 @@ const registerUser = createServerFn({ method: 'POST' })
       const sessionId = await createSession(userId);
       const cookie = createSessionCookie(sessionId);
 
+      // 🍪 Set the session cookie via response header (required for HttpOnly cookies)
+      try {
+        setResponseHeader('Set-Cookie', cookie);
+      } catch (e) {
+        console.warn('Could not set session cookie via header:', e);
+      }
+
       return {
         success: true,
         userId,
-        cookie,
+        cookie, // Also return for client-side fallback
       };
     } catch (error) {
       console.error('Registration error:', error);
@@ -104,10 +110,10 @@ const registerUser = createServerFn({ method: 'POST' })
 export const Route = createFileRoute('/register')({
   head: () => ({
     meta: [
-      { title: "Create Account | Karen's Beautiful Soap" },
+      { title: 'Create Account | EnrollSage' },
       {
         name: 'description',
-        content: 'Create an account to track orders, save your favorite soaps, and get exclusive offers.',
+        content: 'Create a family account to manage your children\'s school applications and enrollment.',
       },
     ],
   }),
@@ -117,60 +123,72 @@ export const Route = createFileRoute('/register')({
 function RegisterPage() {
   const navigate = useNavigate();
   const { token: csrfToken } = useCsrf();
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    marketingConsent: false,
-  });
+  // 🌿 Keep password state only for real-time validation UI
+  const [passwordValue, setPasswordValue] = useState('');
+  const [confirmPasswordValue, setConfirmPasswordValue] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const updateField = (field: keyof typeof formData, value: string | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
   const passwordRequirements = [
-    { label: 'At least 8 characters', met: formData.password.length >= 8 },
-    { label: 'Contains a number', met: /\d/.test(formData.password) },
-    { label: 'Contains uppercase letter', met: /[A-Z]/.test(formData.password) },
+    { label: 'At least 8 characters', met: passwordValue.length >= 8 },
+    { label: 'Contains a number', met: /\d/.test(passwordValue) },
+    { label: 'Contains uppercase letter', met: /[A-Z]/.test(passwordValue) },
   ];
 
   const isPasswordValid = passwordRequirements.every((req) => req.met);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
-    if (!formData.firstName || !formData.email || !formData.password) {
+    // Read values directly from form to capture browser autofill
+    const form = e.currentTarget;
+    const firstName = (form.elements.namedItem('firstName') as HTMLInputElement).value;
+    const lastName = (form.elements.namedItem('lastName') as HTMLInputElement).value;
+    const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+    const password = (form.elements.namedItem('password') as HTMLInputElement).value;
+    const confirmPassword = (form.elements.namedItem('confirmPassword') as HTMLInputElement).value;
+    const marketingConsent = (form.elements.namedItem('marketingConsent') as HTMLInputElement).checked;
+
+    if (!firstName || !email || !password) {
       setError('Please fill in all required fields');
       return;
     }
 
-    if (!isPasswordValid) {
+    // Re-validate password from form value in case autofill bypassed state
+    const passValid = password.length >= 8 && /\d/.test(password) && /[A-Z]/.test(password);
+    if (!passValid) {
       setError('Password does not meet requirements');
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
+    }
+
+    // Get token from context, with cookie fallback
+    let tokenToUse = csrfToken;
+    if (!tokenToUse && typeof document !== 'undefined') {
+      const cookies = document.cookie.split(';').map(c => c.trim());
+      const csrfCookie = cookies.find(c => c.startsWith('csrf-token='));
+      if (csrfCookie) {
+        tokenToUse = csrfCookie.substring('csrf-token='.length);
+      }
     }
 
     setIsLoading(true);
 
     try {
-      const result = await registerUser({
-        firstName: formData.firstName,
-        lastName: formData.lastName || undefined,
-        email: formData.email,
-        password: formData.password,
-        marketingConsent: formData.marketingConsent,
-        csrfToken: csrfToken || undefined,
-      });
+      const result = await registerUser({ data: {
+        firstName,
+        lastName: lastName || undefined,
+        email,
+        password,
+        marketingConsent,
+        csrfToken: tokenToUse || undefined,
+      } });
 
       if (!result.success) {
         setError(result.error || 'Registration failed');
@@ -183,8 +201,8 @@ function RegisterPage() {
         document.cookie = result.cookie;
       }
 
-      // 🎉 Welcome to the soap family! Redirect to account page
-      navigate({ to: '/account' });
+      // 🎉 Welcome! Redirect to family portal
+      navigate({ to: '/portal' });
     } catch (err) {
       console.error('Registration error:', err);
       setError('An unexpected error occurred');
@@ -193,31 +211,31 @@ function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] flex">
+    <div className="min-h-screen bg-[#F8F9F6] flex">
       {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#2D5A4A] text-white p-12 flex-col justify-between">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#5B7F6D] text-white p-12 flex-col justify-between">
         <div>
           <Link to="/" className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-              <span className="text-2xl">🧼</span>
+              <span className="text-2xl">🌿</span>
             </div>
-            <span className="text-2xl font-bold font-display">Karen's Beautiful Soap</span>
+            <span className="text-2xl font-bold font-display">EnrollSage</span>
           </Link>
         </div>
 
         <div className="max-w-md">
           <h2 className="text-4xl font-bold mb-6 font-display">
-            Join Our Family
+            Family Portal
           </h2>
           <p className="text-white/80 text-lg leading-relaxed mb-8">
-            Create an account to enjoy exclusive benefits:
+            Create an account to manage your family's enrollment:
           </p>
           <ul className="space-y-4">
             {[
-              'Track your orders in real-time',
-              'Save favorite products',
-              'Faster checkout with saved addresses',
-              'Exclusive member-only offers',
+              'Track application status in real-time',
+              'Submit and manage enrollment documents',
+              'View and pay tuition bills online',
+              'Communicate with school admissions',
             ].map((benefit, index) => (
               <li key={index} className="flex items-center gap-3">
                 <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
@@ -230,7 +248,7 @@ function RegisterPage() {
         </div>
 
         <div className="text-white/60 text-sm">
-          &copy; {new Date().getFullYear()} Karen's Beautiful Soap. Handcrafted with love.
+          &copy; {new Date().getFullYear()} EnrollSage. School enrollment made simple.
         </div>
       </div>
 
@@ -240,18 +258,18 @@ function RegisterPage() {
           {/* Mobile Logo */}
           <div className="lg:hidden mb-8 text-center">
             <Link to="/" className="inline-flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#2D5A4A] rounded-full flex items-center justify-center">
-                <span className="text-xl">🧼</span>
+              <div className="w-10 h-10 bg-[#5B7F6D] rounded-full flex items-center justify-center">
+                <span className="text-xl">🌿</span>
               </div>
-              <span className="text-xl font-bold text-[#1A1A1A] font-display">Karen's Beautiful Soap</span>
+              <span className="text-xl font-bold text-[#2D4F3E] font-display">EnrollSage</span>
             </Link>
           </div>
 
-          <h1 className="text-3xl font-bold text-[#1A1A1A] mb-2 font-display">
+          <h1 className="text-3xl font-bold text-[#2D4F3E] mb-2 font-display">
             Create Account
           </h1>
           <p className="text-gray-600 mb-8">
-            Join our community of soap lovers
+            Join to manage your family's enrollment
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -273,10 +291,10 @@ function RegisterPage() {
                   <input
                     type="text"
                     id="firstName"
-                    value={formData.firstName}
-                    onChange={(e) => updateField('firstName', e.target.value)}
-                    placeholder="Karen"
-                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-[#F5EBE0] focus:outline-none focus:border-[#2D5A4A] focus:ring-2 focus:ring-[#2D5A4A]/10"
+                    name="firstName"
+                    placeholder="Jane"
+                    autoComplete="given-name"
+                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
                   />
                 </div>
               </div>
@@ -287,10 +305,10 @@ function RegisterPage() {
                 <input
                   type="text"
                   id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) => updateField('lastName', e.target.value)}
+                  name="lastName"
                   placeholder="Smith"
-                  className="w-full px-4 py-3 rounded-lg border border-[#F5EBE0] focus:outline-none focus:border-[#2D5A4A] focus:ring-2 focus:ring-[#2D5A4A]/10"
+                  autoComplete="family-name"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
                 />
               </div>
             </div>
@@ -305,10 +323,10 @@ function RegisterPage() {
                 <input
                   type="email"
                   id="email"
-                  value={formData.email}
-                  onChange={(e) => updateField('email', e.target.value)}
+                  name="email"
                   placeholder="you@example.com"
-                  className="w-full pl-12 pr-4 py-3 rounded-lg border border-[#F5EBE0] focus:outline-none focus:border-[#2D5A4A] focus:ring-2 focus:ring-[#2D5A4A]/10"
+                  autoComplete="email"
+                  className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
                 />
               </div>
             </div>
@@ -323,10 +341,12 @@ function RegisterPage() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="password"
-                  value={formData.password}
-                  onChange={(e) => updateField('password', e.target.value)}
+                  name="password"
+                  value={passwordValue}
+                  onChange={(e) => setPasswordValue(e.target.value)}
                   placeholder="Create a strong password"
-                  className="w-full pl-12 pr-12 py-3 rounded-lg border border-[#F5EBE0] focus:outline-none focus:border-[#2D5A4A] focus:ring-2 focus:ring-[#2D5A4A]/10"
+                  autoComplete="new-password"
+                  className="w-full pl-12 pr-12 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
                 />
                 <button
                   type="button"
@@ -337,7 +357,7 @@ function RegisterPage() {
                 </button>
               </div>
               {/* Password Requirements */}
-              {formData.password && (
+              {passwordValue && (
                 <div className="mt-2 space-y-1">
                   {passwordRequirements.map((req, index) => (
                     <div
@@ -365,14 +385,16 @@ function RegisterPage() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={(e) => updateField('confirmPassword', e.target.value)}
+                  name="confirmPassword"
+                  value={confirmPasswordValue}
+                  onChange={(e) => setConfirmPasswordValue(e.target.value)}
                   placeholder="Confirm your password"
+                  autoComplete="new-password"
                   className={cn(
                     'w-full pl-12 pr-4 py-3 rounded-lg border focus:outline-none focus:ring-2',
-                    formData.confirmPassword && formData.password !== formData.confirmPassword
+                    confirmPasswordValue && passwordValue !== confirmPasswordValue
                       ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                      : 'border-[#F5EBE0] focus:border-[#2D5A4A] focus:ring-[#2D5A4A]/10'
+                      : 'border-gray-200 focus:border-[#5B7F6D] focus:ring-[#5B7F6D]/10'
                   )}
                 />
               </div>
@@ -383,12 +405,11 @@ function RegisterPage() {
               <input
                 type="checkbox"
                 id="marketingConsent"
-                checked={formData.marketingConsent}
-                onChange={(e) => updateField('marketingConsent', e.target.checked)}
-                className="mt-1 w-4 h-4 rounded border-gray-300 text-[#2D5A4A] focus:ring-[#2D5A4A]"
+                name="marketingConsent"
+                className="mt-1 w-4 h-4 rounded border-gray-300 text-[#5B7F6D] focus:ring-[#5B7F6D]"
               />
               <label htmlFor="marketingConsent" className="text-sm text-gray-600">
-                I'd like to receive soap care tips and exclusive offers via email. You can unsubscribe anytime.
+                I'd like to receive enrollment tips and school updates via email. You can unsubscribe anytime.
               </label>
             </div>
 
@@ -400,7 +421,7 @@ function RegisterPage() {
                 'w-full flex items-center justify-center gap-2 py-4 rounded-lg font-medium transition-all',
                 isLoading
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-[#2D5A4A] text-white hover:bg-[#1A1A1A]'
+                  : 'bg-[#5B7F6D] text-white hover:bg-[#2D4F3E]'
               )}
             >
               {isLoading ? (
@@ -419,19 +440,29 @@ function RegisterPage() {
             {/* Terms */}
             <p className="text-xs text-gray-500 text-center">
               By creating an account, you agree to our{' '}
-              <a href="#" className="text-[#2D5A4A] hover:underline">Terms of Service</a>
+              <Link to="/terms" className="text-[#5B7F6D] hover:underline">Terms of Service</Link>
               {' '}and{' '}
-              <a href="#" className="text-[#2D5A4A] hover:underline">Privacy Policy</a>.
+              <Link to="/privacy" className="text-[#5B7F6D] hover:underline">Privacy Policy</Link>.
             </p>
           </form>
 
           {/* Login Link */}
           <p className="mt-8 text-center text-gray-600">
             Already have an account?{' '}
-            <Link to="/login" className="text-[#2D5A4A] font-medium hover:underline">
+            <Link to="/login" className="text-[#5B7F6D] font-medium hover:underline">
               Sign in
             </Link>
           </p>
+
+          {/* Back to Home */}
+          <div className="mt-8 pt-8 border-t border-gray-200 text-center">
+            <Link
+              to="/"
+              className="text-gray-500 hover:text-[#5B7F6D] transition-colors"
+            >
+              Back to homepage
+            </Link>
+          </div>
         </div>
       </div>
     </div>

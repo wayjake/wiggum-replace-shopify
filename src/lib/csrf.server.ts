@@ -1,5 +1,5 @@
-// 🛡️ CSRF Protection (Server-Side) - Keeping your soap safe from cross-site attacks
-// "I'm learnding!" - Ralph, on security tokens
+// 🛡️ CSRF Protection (Server-Side) - Keeping EnrollSage safe from cross-site attacks
+// Generates and validates CSRF tokens with HMAC signatures
 //
 // ╭────────────────────────────────────────────────────────────╮
 // │  CSRF TOKEN IMPLEMENTATION (SERVER ONLY)                   │
