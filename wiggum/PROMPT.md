@@ -1,5 +1,4 @@
-> **EnrollSage** - Wise guidance for enrollment journeys
-> "From first inquiry to tuition paid—with wisdom, not chaos."
+> **EnrollSage** - The all-in-one platform for independent schools
 
 ## Where to Find Things
 

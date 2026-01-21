@@ -1,5 +1,5 @@
 // 🌿 About Page - The story behind EnrollSage
-// Wise guidance for enrollment journeys - why we exist and what we believe
+// The all-in-one platform for independent schools - why we exist and what we believe
 
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { ArrowRight, Users, Target, Heart, Zap, Menu, X } from 'lucide-react';
@@ -14,7 +14,7 @@ export const Route = createFileRoute('/about')({
         content: 'EnrollSage was built by people who believe private schools deserve better software. Learn about our mission to bring wisdom and calm to school enrollment.',
       },
       { property: 'og:title', content: 'About Us | EnrollSage' },
-      { property: 'og:description', content: 'Wise guidance for enrollment journeys, one school at a time.' },
+      { property: 'og:description', content: 'The all-in-one platform for independent schools.' },
     ],
   }),
   component: AboutPage,
@@ -312,7 +312,7 @@ function Footer() {
               <span className="text-lg font-display">EnrollSage</span>
             </div>
             <p className="text-white/60 text-sm">
-              Wise guidance for enrollment journeys.
+              The all-in-one platform for independent schools.
             </p>
           </div>
 

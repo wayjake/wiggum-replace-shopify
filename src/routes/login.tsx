@@ -270,7 +270,7 @@ function LoginPage() {
         </div>
 
         <div className="text-white/60 text-sm">
-          &copy; {new Date().getFullYear()} EnrollSage. Wise guidance for enrollment journeys.
+          &copy; {new Date().getFullYear()} EnrollSage. The all-in-one platform for independent schools.
         </div>
       </div>
 

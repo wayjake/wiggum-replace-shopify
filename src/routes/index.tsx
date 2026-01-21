@@ -1,5 +1,5 @@
-// 🌿 Landing Page - Wise guidance for enrollment journeys
-// EnrollSage: "From first inquiry to tuition paid—with wisdom, not chaos."
+// 🌿 Landing Page - The all-in-one platform for independent schools
+// EnrollSage: Admissions, enrollment, records, and billing in one calm system.
 
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
@@ -66,13 +66,13 @@ const subscribeToNewsletter = createServerFn({ method: 'POST' })
 export const Route = createFileRoute('/')({
   head: () => ({
     meta: [
-      { title: 'EnrollSage | Wise Guidance for School Enrollment' },
+      { title: 'EnrollSage | The All-in-One Platform for Independent Schools' },
       {
         name: 'description',
-        content: 'Wise guidance for enrollment journeys. From first inquiry to tuition paid—admissions, enrollment, and billing with clarity and calm.',
+        content: 'The all-in-one platform for independent schools. Admissions, enrollment, student records, and billing—all in one calm system.',
       },
-      { property: 'og:title', content: 'EnrollSage | Wise Guidance for School Enrollment' },
-      { property: 'og:description', content: 'From first inquiry to tuition paid—with wisdom, not chaos.' },
+      { property: 'og:title', content: 'EnrollSage | The All-in-One Platform for Independent Schools' },
+      { property: 'og:description', content: 'Admissions, enrollment, student records, and billing for independent schools.' },
       { property: 'og:type', content: 'website' },
     ],
   }),
@@ -194,7 +194,7 @@ function HeroSection() {
         {/* Subtle badge */}
         <div className="inline-flex items-center gap-2 bg-[#F8F9F6] text-[#5F6368] px-4 py-2 rounded-md text-sm mb-8">
           <span className="w-2 h-2 bg-[#5B7F6D] rounded-full"></span>
-          Wise guidance for schools with 300-800 students
+          Built for independent schools with 300-800 students
         </div>
 
         {/* Main headline - Serif for authority */}
@@ -653,7 +653,7 @@ function Footer() {
               <span className="text-lg font-display">EnrollSage</span>
             </div>
             <p className="text-white/60 text-sm">
-              Wise guidance for enrollment journeys.
+              The all-in-one platform for independent schools.
             </p>
           </div>
 

@@ -35,7 +35,7 @@ export const BREVO_TEMPLATES = {
  */
 export const DEFAULT_SENDER = {
   name: 'EnrollSage',
-  email: 'jake@dubsado.com', // Must be verified in Brevo!
+  email: 'jake@enrollsage.com', // Must be verified in Brevo!
 };
 
 // ═══════════════════════════════════════════════════════════

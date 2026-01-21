@@ -1,6 +1,6 @@
 Visual Trust System: Colors & Google Fonts
 
-**Brand: EnrollSage** — "Wise guidance for enrollment journeys"
+**Brand: EnrollSage** — "The all-in-one platform for independent schools"
 
 You are designing for:
 	•	Heads of school

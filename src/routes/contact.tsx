@@ -114,7 +114,7 @@ export const Route = createFileRoute('/contact')({
       { title: 'Contact Us | EnrollSage' },
       {
         name: 'description',
-        content: 'Get in touch with EnrollSage. Schedule a demo, ask questions, or learn how we can bring wise guidance to your school enrollment process.',
+        content: 'Get in touch with EnrollSage. Schedule a demo, ask questions, or learn how we can help your independent school.',
       },
       { property: 'og:title', content: 'Contact Us | EnrollSage' },
       { property: 'og:description', content: 'Schedule a demo or get answers to your questions.' },
@@ -500,7 +500,7 @@ function Footer() {
               <span className="text-lg font-display">EnrollSage</span>
             </div>
             <p className="text-white/60 text-sm">
-              Wise guidance for enrollment journeys.
+              The all-in-one platform for independent schools.
             </p>
           </div>
 
