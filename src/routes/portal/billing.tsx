@@ -10,6 +10,7 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
+import { useState, useEffect } from 'react';
 import {
   validateSession,
   parseSessionCookie,
@@ -28,8 +29,19 @@ import {
   Plus,
   LogOut,
   ChevronRight,
+  X,
+  Loader2,
+  Lock,
+  Shield,
 } from 'lucide-react';
 import { cn } from '../../utils';
+import {
+  StripeProvider,
+  CardElement,
+  useStripe,
+  useElements,
+  cardElementOptions,
+} from '../../lib/stripe-client';
 
 // ═══════════════════════════════════════════════════════════
 // SERVER FUNCTIONS
@@ -175,6 +187,102 @@ const logoutUser = createServerFn({ method: 'POST' }).handler(async () => {
   return { cookie: createLogoutCookie() };
 });
 
+// Create a payment intent for paying invoices
+const createPaymentIntent = createServerFn({ method: 'POST' })
+  .validator((data: { amount: number; invoiceId?: string }) => data)
+  .handler(async ({ data }) => {
+    const request = getRequest();
+    const cookieHeader = request?.headers.get('cookie') || '';
+    const sessionId = parseSessionCookie(cookieHeader);
+
+    if (!sessionId) {
+      return { success: false, error: 'Not authenticated' };
+    }
+
+    const session = await validateSession(sessionId);
+    if (!session) {
+      return { success: false, error: 'Invalid session' };
+    }
+
+    // Check if Stripe is configured
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeSecretKey) {
+      return { success: false, error: 'Payment processing is not configured. Please contact the school.' };
+    }
+
+    try {
+      // Import Stripe dynamically
+      const Stripe = (await import('stripe')).default;
+      const stripe = new Stripe(stripeSecretKey);
+
+      // Create a payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: data.amount,
+        currency: 'usd',
+        metadata: {
+          userId: session.user.id,
+          invoiceId: data.invoiceId || '',
+        },
+      });
+
+      return {
+        success: true,
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+      };
+    } catch (error: any) {
+      console.error('Error creating payment intent:', error);
+      return { success: false, error: error.message || 'Failed to create payment' };
+    }
+  });
+
+// Get Stripe publishable key
+const getStripePublishableKey = createServerFn({ method: 'GET' }).handler(async () => {
+  const key = process.env.VITE_STRIPE_PUBLISHABLE_KEY || process.env.STRIPE_PUBLIC_KEY;
+  return { publishableKey: key || null };
+});
+
+// Save a new payment method (stub - would integrate with Stripe Setup Intents)
+const createSetupIntent = createServerFn({ method: 'POST' }).handler(async () => {
+  const request = getRequest();
+  const cookieHeader = request?.headers.get('cookie') || '';
+  const sessionId = parseSessionCookie(cookieHeader);
+
+  if (!sessionId) {
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  const session = await validateSession(sessionId);
+  if (!session) {
+    return { success: false, error: 'Invalid session' };
+  }
+
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeSecretKey) {
+    return { success: false, error: 'Payment processing is not configured' };
+  }
+
+  try {
+    const Stripe = (await import('stripe')).default;
+    const stripe = new Stripe(stripeSecretKey);
+
+    // Create a setup intent for saving a card
+    const setupIntent = await stripe.setupIntents.create({
+      metadata: {
+        userId: session.user.id,
+      },
+    });
+
+    return {
+      success: true,
+      clientSecret: setupIntent.client_secret,
+    };
+  } catch (error: any) {
+    console.error('Error creating setup intent:', error);
+    return { success: false, error: error.message || 'Failed to setup payment method' };
+  }
+});
+
 // ═══════════════════════════════════════════════════════════
 // ROUTE DEFINITION
 // ═══════════════════════════════════════════════════════════
@@ -187,11 +295,12 @@ export const Route = createFileRoute('/portal/billing')({
     ],
   }),
   loader: async () => {
-    const [session, billingData] = await Promise.all([
+    const [session, billingData, stripeKey] = await Promise.all([
       getSessionUser(),
       getBillingData(),
+      getStripePublishableKey(),
     ]);
-    return { ...session, ...billingData };
+    return { ...session, ...billingData, stripePublishableKey: stripeKey.publishableKey };
   },
   component: BillingPage,
 });
@@ -206,7 +315,16 @@ function BillingPage() {
     payments: paymentHistory,
     paymentMethods: userPaymentMethods,
     summary,
+    stripePublishableKey,
   } = Route.useLoaderData();
+
+  // Modal and payment state
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [showAddCardModal, setShowAddCardModal] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [setupClientSecret, setSetupClientSecret] = useState<string | null>(null);
 
   if (!authenticated || !user) {
     navigate({ to: '/login' });
@@ -237,6 +355,49 @@ function BillingPage() {
     });
   };
 
+  // Open pay modal with optional invoice selection
+  const openPayModal = async (invoice?: any) => {
+    setSelectedInvoice(invoice || null);
+    const amount = invoice ? (invoice.amountDue || 0) : (summary?.totalDue || 0);
+    setPaymentAmount(String(amount / 100));
+    setClientSecret(null);
+    setShowPayModal(true);
+
+    // Create payment intent for the amount
+    if (amount > 0) {
+      try {
+        const result = await createPaymentIntent({
+          data: {
+            amount: amount,
+            invoiceId: invoice?.id,
+          },
+        });
+        if (result.success && result.clientSecret) {
+          setClientSecret(result.clientSecret);
+        }
+      } catch (error) {
+        console.error('Failed to create payment intent:', error);
+      }
+    }
+  };
+
+  // Open add card modal
+  const openAddCardModal = async () => {
+    setSetupClientSecret(null);
+    setShowAddCardModal(true);
+
+    // Create setup intent for saving a card
+    try {
+      const result = await createSetupIntent();
+      if (result.success && result.clientSecret) {
+        setSetupClientSecret(result.clientSecret);
+      }
+    } catch (error: any) {
+      setCardError(error.message || 'Failed to save card');
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F8F9F6]">
       {/* Header */}
@@ -246,7 +407,7 @@ function BillingPage() {
             <div className="flex items-center gap-6">
               <Link to="/portal" className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
-                  <span className="text-lg">🎓</span>
+                  <span className="text-lg">🌿</span>
                 </div>
                 <span className="font-bold text-lg text-[#2D4F3E] font-display">Family Portal</span>
               </Link>
@@ -308,7 +469,11 @@ function BillingPage() {
 
               <div className="bg-[#5B7F6D] rounded-xl p-6 text-white">
                 <p className="text-sm text-white/70 mb-2">Make a Payment</p>
-                <button className="w-full py-3 px-4 bg-white text-[#5B7F6D] rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2">
+                <button
+                  onClick={() => openPayModal()}
+                  disabled={(summary?.totalDue || 0) <= 0}
+                  className="w-full py-3 px-4 bg-white text-[#5B7F6D] rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <CreditCard className="w-4 h-4" />
                   Pay Now
                 </button>
@@ -364,7 +529,10 @@ function BillingPage() {
                   <CreditCard className="w-5 h-5 text-[#5B7F6D]" />
                   Payment Methods
                 </h2>
-                <button className="text-sm text-[#5B7F6D] hover:underline flex items-center gap-1">
+                <button
+                  onClick={() => openAddCardModal()}
+                  className="text-sm text-[#5B7F6D] hover:underline flex items-center gap-1"
+                >
                   <Plus className="w-4 h-4" /> Add Card
                 </button>
               </div>
@@ -401,7 +569,10 @@ function BillingPage() {
                 <div className="text-center py-8 text-gray-500">
                   <CreditCard className="w-8 h-8 mx-auto mb-2 opacity-50" />
                   <p>No payment methods saved</p>
-                  <button className="text-[#5B7F6D] hover:underline text-sm mt-2">
+                  <button
+                    onClick={() => openAddCardModal()}
+                    className="text-[#5B7F6D] hover:underline text-sm mt-2"
+                  >
                     Add a payment method
                   </button>
                 </div>
@@ -435,6 +606,135 @@ function BillingPage() {
                 <div className="text-center py-8 text-gray-500">
                   <Calendar className="w-8 h-8 mx-auto mb-2 opacity-50" />
                   <p>No payment history yet</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Pay Now Modal */}
+        {showPayModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-[#2D4F3E]">Make a Payment</h3>
+                <button
+                  onClick={() => setShowPayModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {selectedInvoice && (
+                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-gray-500">Paying for</p>
+                  <p className="font-medium text-[#2D4F3E]">
+                    {selectedInvoice.invoiceNumber || 'Invoice'} - {selectedInvoice.description || 'Tuition'}
+                  </p>
+                </div>
+              )}
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Payment Amount
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value)}
+                    className="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-[#5B7F6D] focus:ring-2 focus:ring-[#5B7F6D]/10"
+                  />
+                </div>
+              </div>
+
+              {stripePublishableKey && clientSecret ? (
+                <StripeProvider publishableKey={stripePublishableKey}>
+                  <PaymentForm
+                    clientSecret={clientSecret}
+                    amount={paymentAmount}
+                    onSuccess={() => {
+                      setShowPayModal(false);
+                      window.location.reload();
+                    }}
+                    onCancel={() => setShowPayModal(false)}
+                  />
+                </StripeProvider>
+              ) : (
+                <div className="text-center py-8">
+                  {!stripePublishableKey ? (
+                    <div className="text-amber-600">
+                      <AlertTriangle className="w-8 h-8 mx-auto mb-2" />
+                      <p className="text-sm">Payment processing is not configured.</p>
+                      <p className="text-xs text-gray-500 mt-1">Please contact the school.</p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-2 text-gray-500">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Preparing payment...</span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setShowPayModal(false)}
+                    className="mt-4 px-6 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Add Card Modal */}
+        {showAddCardModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-[#2D4F3E]">Add Payment Method</h3>
+                <button
+                  onClick={() => setShowAddCardModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {stripePublishableKey && setupClientSecret ? (
+                <StripeProvider publishableKey={stripePublishableKey}>
+                  <AddCardForm
+                    clientSecret={setupClientSecret}
+                    onSuccess={() => {
+                      setShowAddCardModal(false);
+                      window.location.reload();
+                    }}
+                    onCancel={() => setShowAddCardModal(false)}
+                  />
+                </StripeProvider>
+              ) : (
+                <div className="text-center py-8">
+                  {!stripePublishableKey ? (
+                    <div className="text-amber-600">
+                      <AlertTriangle className="w-8 h-8 mx-auto mb-2" />
+                      <p className="text-sm">Payment processing is not configured.</p>
+                      <p className="text-xs text-gray-500 mt-1">Please contact the school.</p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-2 text-gray-500">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Preparing form...</span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setShowAddCardModal(false)}
+                    className="mt-4 px-6 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
                 </div>
               )}
             </div>
@@ -478,5 +778,269 @@ function PaymentStatusBadge({ status }: { status: string }) {
     <span className={cn('text-xs px-2 py-1 rounded-full', styles[status] || 'bg-gray-100 text-gray-600')}>
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// STRIPE PAYMENT FORM COMPONENT
+// Uses Stripe Elements for secure card collection
+// ═══════════════════════════════════════════════════════════
+
+function PaymentForm({
+  clientSecret,
+  amount,
+  onSuccess,
+  onCancel,
+}: {
+  clientSecret: string;
+  amount: string;
+  onSuccess: () => void;
+  onCancel: () => void;
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [succeeded, setSucceeded] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      setError('Card element not found');
+      setIsProcessing(false);
+      return;
+    }
+
+    const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
+      clientSecret,
+      {
+        payment_method: {
+          card: cardElement,
+        },
+      }
+    );
+
+    if (stripeError) {
+      setError(stripeError.message || 'Payment failed');
+      setIsProcessing(false);
+    } else if (paymentIntent?.status === 'succeeded') {
+      setSucceeded(true);
+      setIsProcessing(false);
+    } else {
+      setError('Unexpected payment status');
+      setIsProcessing(false);
+    }
+  };
+
+  if (succeeded) {
+    return (
+      <div className="text-center py-6">
+        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <CheckCircle className="w-8 h-8 text-green-600" />
+        </div>
+        <h4 className="text-lg font-semibold text-[#2D4F3E] mb-2">Payment Successful!</h4>
+        <p className="text-gray-600 text-sm mb-4">
+          Thank you for your payment. Your account has been updated.
+        </p>
+        <button
+          onClick={onSuccess}
+          className="px-6 py-2 bg-[#5B7F6D] text-white rounded-lg hover:bg-[#4A6E5C]"
+        >
+          Done
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Card Details
+        </label>
+        <div className="p-4 border border-gray-200 rounded-lg bg-white">
+          <CardElement options={cardElementOptions} />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
+        <Shield className="w-4 h-4" />
+        <span>Your payment info is secure and encrypted by Stripe</span>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
+      )}
+
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={isProcessing}
+          className="flex-1 px-4 py-3 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isProcessing || !stripe}
+          className="flex-1 px-4 py-3 bg-[#5B7F6D] text-white rounded-lg hover:bg-[#4A6E5C] disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          {isProcessing ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            <>
+              <Lock className="w-4 h-4" />
+              Pay ${amount || '0.00'}
+            </>
+          )}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// STRIPE ADD CARD FORM COMPONENT
+// Uses Stripe Setup Intents to save card for future use
+// ═══════════════════════════════════════════════════════════
+
+function AddCardForm({
+  clientSecret,
+  onSuccess,
+  onCancel,
+}: {
+  clientSecret: string;
+  onSuccess: () => void;
+  onCancel: () => void;
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [succeeded, setSucceeded] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      setError('Card element not found');
+      setIsProcessing(false);
+      return;
+    }
+
+    const { error: stripeError, setupIntent } = await stripe.confirmCardSetup(
+      clientSecret,
+      {
+        payment_method: {
+          card: cardElement,
+        },
+      }
+    );
+
+    if (stripeError) {
+      setError(stripeError.message || 'Failed to save card');
+      setIsProcessing(false);
+    } else if (setupIntent?.status === 'succeeded') {
+      setSucceeded(true);
+      setIsProcessing(false);
+    } else {
+      setError('Unexpected status');
+      setIsProcessing(false);
+    }
+  };
+
+  if (succeeded) {
+    return (
+      <div className="text-center py-6">
+        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <CheckCircle className="w-8 h-8 text-green-600" />
+        </div>
+        <h4 className="text-lg font-semibold text-[#2D4F3E] mb-2">Card Saved!</h4>
+        <p className="text-gray-600 text-sm mb-4">
+          Your card has been securely saved for future payments.
+        </p>
+        <button
+          onClick={onSuccess}
+          className="px-6 py-2 bg-[#5B7F6D] text-white rounded-lg hover:bg-[#4A6E5C]"
+        >
+          Done
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Card Details
+        </label>
+        <div className="p-4 border border-gray-200 rounded-lg bg-white">
+          <CardElement options={cardElementOptions} />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
+        <Shield className="w-4 h-4" />
+        <span>Your card info is securely stored by Stripe</span>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
+      )}
+
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={isProcessing}
+          className="flex-1 px-4 py-3 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isProcessing || !stripe}
+          className="flex-1 px-4 py-3 bg-[#5B7F6D] text-white rounded-lg hover:bg-[#4A6E5C] disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          {isProcessing ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <CreditCard className="w-4 h-4" />
+              Save Card
+            </>
+          )}
+        </button>
+      </div>
+    </form>
   );
 }

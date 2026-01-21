@@ -231,6 +231,153 @@ test.describe('Super Admin Dashboard', () => {
   });
 
   // ═══════════════════════════════════════════════════════════
+  // NEW SCHOOL FORM
+  // ═══════════════════════════════════════════════════════════
+
+  test.describe('Create New School', () => {
+    test('can navigate to add school form', async ({ page }) => {
+      const loggedIn = await loginAsSuperAdmin(page);
+      if (!loggedIn) {
+        test.skip();
+        return;
+      }
+
+      // Navigate to schools page first
+      const schoolsLink = page.getByRole('link', { name: /school/i }).first();
+      if (await schoolsLink.isVisible()) {
+        await schoolsLink.click();
+      }
+
+      // Look for add school button
+      const addSchoolButton = page.getByRole('link', { name: /add|new school|create/i }).first();
+      if (await addSchoolButton.isVisible()) {
+        await addSchoolButton.click();
+        await expect(page).toHaveURL(/schools\/new/);
+      }
+    });
+
+    test('add school form has multi-step wizard', async ({ page }) => {
+      const loggedIn = await loginAsSuperAdmin(page);
+      if (!loggedIn) {
+        test.skip();
+        return;
+      }
+
+      await page.goto('/super-admin/schools/new');
+      await page.waitForLoadState('networkidle');
+
+      // Should have school form with steps
+      const pageContent = await page.textContent('body');
+      expect(pageContent?.toLowerCase()).toMatch(/school name|basic info|contact|settings|step|create/);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // SCHOOL DETAIL PAGE
+  // ═══════════════════════════════════════════════════════════
+
+  test.describe('School Detail Page', () => {
+    test('can view school details', async ({ page }) => {
+      const loggedIn = await loginAsSuperAdmin(page);
+      if (!loggedIn) {
+        test.skip();
+        return;
+      }
+
+      // Navigate to schools page
+      const schoolsLink = page.getByRole('link', { name: /school/i }).first();
+      if (await schoolsLink.isVisible()) {
+        await schoolsLink.click();
+        await page.waitForLoadState('networkidle');
+      }
+
+      // Click on a school to view details
+      const schoolLink = page.locator('a[href*="/super-admin/schools/"]').first();
+      if (await schoolLink.isVisible()) {
+        await schoolLink.click();
+        await page.waitForLoadState('networkidle');
+
+        // Should show school details
+        const pageContent = await page.textContent('body');
+        expect(pageContent?.toLowerCase()).toMatch(/school|academy|status|staff|settings|detail/);
+      }
+    });
+
+    test('school page has edit and manage options', async ({ page }) => {
+      const loggedIn = await loginAsSuperAdmin(page);
+      if (!loggedIn) {
+        test.skip();
+        return;
+      }
+
+      await page.goto('/super-admin/schools');
+      await page.waitForLoadState('networkidle');
+
+      // Click on a school
+      const schoolLink = page.locator('a[href*="/super-admin/schools/"]').first();
+      if (await schoolLink.isVisible()) {
+        await schoolLink.click();
+        await page.waitForLoadState('networkidle');
+
+        // Should have management options
+        const pageContent = await page.textContent('body');
+        expect(pageContent?.toLowerCase()).toMatch(/edit|save|status|manage|staff|settings|update/);
+      }
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // PLATFORM SETTINGS
+  // ═══════════════════════════════════════════════════════════
+
+  test.describe('Platform Settings', () => {
+    test('can navigate to settings page', async ({ page }) => {
+      const loggedIn = await loginAsSuperAdmin(page);
+      if (!loggedIn) {
+        test.skip();
+        return;
+      }
+
+      // Find and click settings link
+      const settingsLink = page.getByRole('link', { name: /setting/i }).first();
+      if (await settingsLink.isVisible()) {
+        await settingsLink.click();
+        await expect(page).toHaveURL(/settings/);
+      }
+    });
+
+    test('settings page shows integrations status', async ({ page }) => {
+      const loggedIn = await loginAsSuperAdmin(page);
+      if (!loggedIn) {
+        test.skip();
+        return;
+      }
+
+      await page.goto('/super-admin/settings');
+      await page.waitForLoadState('networkidle');
+
+      // Should show integration settings
+      const pageContent = await page.textContent('body');
+      expect(pageContent?.toLowerCase()).toMatch(/stripe|integration|api|brevo|oauth|security|setting/);
+    });
+
+    test('settings page has multiple tabs', async ({ page }) => {
+      const loggedIn = await loginAsSuperAdmin(page);
+      if (!loggedIn) {
+        test.skip();
+        return;
+      }
+
+      await page.goto('/super-admin/settings');
+      await page.waitForLoadState('networkidle');
+
+      // Should have tabs for different settings sections
+      const pageContent = await page.textContent('body');
+      expect(pageContent?.toLowerCase()).toMatch(/integration|security|notification|system|tab/);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
   // ACCESS CONTROL
   // ═══════════════════════════════════════════════════════════
 

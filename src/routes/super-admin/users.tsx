@@ -206,7 +206,7 @@ function UsersPage() {
             <div className="flex items-center gap-3">
               <Link to="/" className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-[#5B7F6D] rounded-lg flex items-center justify-center">
-                  <span className="text-lg">🎓</span>
+                  <span className="text-lg">🌿</span>
                 </div>
                 <span className="font-bold text-lg font-display">EnrollSage</span>
               </Link>

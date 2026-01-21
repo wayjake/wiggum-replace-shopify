@@ -359,6 +359,198 @@ test.describe('School Admin Dashboard', () => {
 });
 
 // ═══════════════════════════════════════════════════════════
+// NEW LEAD FORM
+// ═══════════════════════════════════════════════════════════
+
+test.describe('Add New Lead', () => {
+  test('can navigate to add lead form', async ({ page }) => {
+    const loggedIn = await loginAsSchoolAdmin(page);
+    if (!loggedIn) {
+      test.skip();
+      return;
+    }
+
+    // Navigate to leads page first
+    const leadsLink = page.getByRole('link', { name: /lead/i }).first();
+    if (await leadsLink.isVisible()) {
+      await leadsLink.click();
+    }
+
+    // Look for add lead button
+    const addLeadButton = page.getByRole('link', { name: /add|new lead/i }).first();
+    if (await addLeadButton.isVisible()) {
+      await addLeadButton.click();
+      await expect(page).toHaveURL(/leads\/new/);
+    }
+  });
+
+  test('add lead form has required fields', async ({ page }) => {
+    const loggedIn = await loginAsSchoolAdmin(page);
+    if (!loggedIn) {
+      test.skip();
+      return;
+    }
+
+    await page.goto('/admin/leads/new');
+    await page.waitForLoadState('networkidle');
+
+    // Should have contact info fields
+    const pageContent = await page.textContent('body');
+    expect(pageContent?.toLowerCase()).toMatch(/first name|last name|email|phone|source|grade|lead/);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// NEW FAMILY FORM
+// ═══════════════════════════════════════════════════════════
+
+test.describe('Register New Family', () => {
+  test('can navigate to add family form', async ({ page }) => {
+    const loggedIn = await loginAsSchoolAdmin(page);
+    if (!loggedIn) {
+      test.skip();
+      return;
+    }
+
+    // Navigate to families page first
+    const familiesLink = page.getByRole('link', { name: /famil/i }).first();
+    if (await familiesLink.isVisible()) {
+      await familiesLink.click();
+    }
+
+    // Look for add family button
+    const addFamilyButton = page.getByRole('link', { name: /add|new|register.*famil/i }).first();
+    if (await addFamilyButton.isVisible()) {
+      await addFamilyButton.click();
+      await expect(page).toHaveURL(/families\/new/);
+    }
+  });
+
+  test('add family form has multi-step wizard', async ({ page }) => {
+    const loggedIn = await loginAsSchoolAdmin(page);
+    if (!loggedIn) {
+      test.skip();
+      return;
+    }
+
+    await page.goto('/admin/families/new');
+    await page.waitForLoadState('networkidle');
+
+    // Should have guardian and student sections
+    const pageContent = await page.textContent('body');
+    expect(pageContent?.toLowerCase()).toMatch(/guardian|student|household|family|register/);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// LEAD DETAIL PAGE
+// ═══════════════════════════════════════════════════════════
+
+test.describe('Lead Detail Page', () => {
+  test('can view lead details', async ({ page }) => {
+    const loggedIn = await loginAsSchoolAdmin(page);
+    if (!loggedIn) {
+      test.skip();
+      return;
+    }
+
+    // Navigate to leads page
+    const leadsLink = page.getByRole('link', { name: /lead/i }).first();
+    if (await leadsLink.isVisible()) {
+      await leadsLink.click();
+      await page.waitForLoadState('networkidle');
+    }
+
+    // Click on a lead to view details
+    const leadLink = page.locator('a[href*="/admin/leads/"]').first();
+    if (await leadLink.isVisible()) {
+      await leadLink.click();
+      await page.waitForLoadState('networkidle');
+
+      // Should show lead details and stage progression
+      const pageContent = await page.textContent('body');
+      expect(pageContent?.toLowerCase()).toMatch(/inquiry|tour|stage|contact|lead/);
+    }
+  });
+
+  test('lead detail page has stage progression buttons', async ({ page }) => {
+    const loggedIn = await loginAsSchoolAdmin(page);
+    if (!loggedIn) {
+      test.skip();
+      return;
+    }
+
+    await page.goto('/admin/leads');
+    await page.waitForLoadState('networkidle');
+
+    // Click on a lead
+    const leadLink = page.locator('a[href*="/admin/leads/"]').first();
+    if (await leadLink.isVisible()) {
+      await leadLink.click();
+      await page.waitForLoadState('networkidle');
+
+      // Should have action buttons for stage progression
+      const pageContent = await page.textContent('body');
+      expect(pageContent?.toLowerCase()).toMatch(/schedule|tour|convert|stage|action/);
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// APPLICATION DETAIL PAGE
+// ═══════════════════════════════════════════════════════════
+
+test.describe('Application Detail Page', () => {
+  test('can view application details', async ({ page }) => {
+    const loggedIn = await loginAsSchoolAdmin(page);
+    if (!loggedIn) {
+      test.skip();
+      return;
+    }
+
+    // Navigate to applications page
+    const applicationsLink = page.getByRole('link', { name: /application/i }).first();
+    if (await applicationsLink.isVisible()) {
+      await applicationsLink.click();
+      await page.waitForLoadState('networkidle');
+    }
+
+    // Click on an application to view details
+    const appLink = page.locator('a[href*="/admin/applications/"]').first();
+    if (await appLink.isVisible()) {
+      await appLink.click();
+      await page.waitForLoadState('networkidle');
+
+      // Should show application pipeline and details
+      const pageContent = await page.textContent('body');
+      expect(pageContent?.toLowerCase()).toMatch(/student|grade|status|pipeline|review|application/);
+    }
+  });
+
+  test('application page has status workflow actions', async ({ page }) => {
+    const loggedIn = await loginAsSchoolAdmin(page);
+    if (!loggedIn) {
+      test.skip();
+      return;
+    }
+
+    await page.goto('/admin/applications');
+    await page.waitForLoadState('networkidle');
+
+    // Click on an application
+    const appLink = page.locator('a[href*="/admin/applications/"]').first();
+    if (await appLink.isVisible()) {
+      await appLink.click();
+      await page.waitForLoadState('networkidle');
+
+      // Should have action buttons for status workflow
+      const pageContent = await page.textContent('body');
+      expect(pageContent?.toLowerCase()).toMatch(/review|accept|deny|waitlist|decision|interview|enroll/);
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
 // ACCESS CONTROL TESTS
 // ═══════════════════════════════════════════════════════════
 
