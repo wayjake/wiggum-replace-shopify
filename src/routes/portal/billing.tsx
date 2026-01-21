@@ -188,9 +188,8 @@ const logoutUser = createServerFn({ method: 'POST' }).handler(async () => {
 });
 
 // Create a payment intent for paying invoices
-const createPaymentIntent = createServerFn({ method: 'POST' })
-  .validator((data: { amount: number; invoiceId?: string }) => data)
-  .handler(async ({ data }) => {
+const createPaymentIntent = createServerFn({ method: 'POST' }).handler(
+  async (input: { data: { amount: number; invoiceId?: string } }) => {
     const request = getRequest();
     const cookieHeader = request?.headers.get('cookie') || '';
     const sessionId = parseSessionCookie(cookieHeader);
@@ -217,11 +216,11 @@ const createPaymentIntent = createServerFn({ method: 'POST' })
 
       // Create a payment intent
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: data.amount,
+        amount: input.data.amount,
         currency: 'usd',
         metadata: {
           userId: session.user.id,
-          invoiceId: data.invoiceId || '',
+          invoiceId: input.data.invoiceId || '',
         },
       });
 
@@ -234,7 +233,8 @@ const createPaymentIntent = createServerFn({ method: 'POST' })
       console.error('Error creating payment intent:', error);
       return { success: false, error: error.message || 'Failed to create payment' };
     }
-  });
+  }
+);
 
 // Get Stripe publishable key
 const getStripePublishableKey = createServerFn({ method: 'GET' }).handler(async () => {

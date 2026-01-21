@@ -104,13 +104,8 @@ const getUserSettings = createServerFn({ method: 'GET' }).handler(async () => {
   };
 });
 
-const updateProfile = createServerFn({ method: 'POST' })
-  .validator((data: {
-    firstName: string;
-    lastName: string;
-    phone?: string;
-  }) => data)
-  .handler(async ({ data }) => {
+const updateProfile = createServerFn({ method: 'POST' }).handler(
+  async (input: { data: { firstName: string; lastName: string; phone?: string } }) => {
     const request = getRequest();
     const cookieHeader = request?.headers.get('cookie') || '';
     const sessionId = parseSessionCookie(cookieHeader);
@@ -125,6 +120,7 @@ const updateProfile = createServerFn({ method: 'POST' })
     }
 
     const db = getDb();
+    const data = input.data;
 
     try {
       // Update user
@@ -150,14 +146,11 @@ const updateProfile = createServerFn({ method: 'POST' })
       console.error('Error updating profile:', error);
       return { success: false, error: 'Failed to update profile' };
     }
-  });
+  }
+);
 
-const updatePassword = createServerFn({ method: 'POST' })
-  .validator((data: {
-    currentPassword: string;
-    newPassword: string;
-  }) => data)
-  .handler(async ({ data }) => {
+const updatePassword = createServerFn({ method: 'POST' }).handler(
+  async (input: { data: { currentPassword: string; newPassword: string } }) => {
     const request = getRequest();
     const cookieHeader = request?.headers.get('cookie') || '';
     const sessionId = parseSessionCookie(cookieHeader);
@@ -172,6 +165,7 @@ const updatePassword = createServerFn({ method: 'POST' })
     }
 
     const db = getDb();
+    const data = input.data;
 
     try {
       // Get current user
@@ -199,18 +193,13 @@ const updatePassword = createServerFn({ method: 'POST' })
       console.error('Error updating password:', error);
       return { success: false, error: 'Failed to update password' };
     }
-  });
+  }
+);
 
-const updateAddress = createServerFn({ method: 'POST' })
-  .validator((data: {
-    householdId: string;
-    address: string;
-    city: string;
-    state: string;
-    zip: string;
-  }) => data)
-  .handler(async ({ data }) => {
+const updateAddress = createServerFn({ method: 'POST' }).handler(
+  async (input: { data: { householdId: string; address: string; city: string; state: string; zip: string } }) => {
     const db = getDb();
+    const data = input.data;
 
     try {
       await db
@@ -229,7 +218,8 @@ const updateAddress = createServerFn({ method: 'POST' })
       console.error('Error updating address:', error);
       return { success: false, error: 'Failed to update address' };
     }
-  });
+  }
+);
 
 const logoutUser = createServerFn({ method: 'POST' }).handler(async () => {
   return { cookie: createLogoutCookie() };

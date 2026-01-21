@@ -112,16 +112,18 @@ const getSessionAndFamilyData = createServerFn({ method: 'GET' }).handler(async 
   };
 });
 
-const createStudent = createServerFn({ method: 'POST' })
-  .validator((data: {
-    householdId: string;
-    schoolId: string;
-    firstName: string;
-    lastName: string;
-    dateOfBirth: string;
-  }) => data)
-  .handler(async ({ data }) => {
+const createStudent = createServerFn({ method: 'POST' }).handler(
+  async (input: {
+    data: {
+      householdId: string;
+      schoolId: string;
+      firstName: string;
+      lastName: string;
+      dateOfBirth: string;
+    };
+  }) => {
     const db = getDb();
+    const data = input.data;
 
     try {
       const studentId = createId();
@@ -142,18 +144,21 @@ const createStudent = createServerFn({ method: 'POST' })
       console.error('Error creating student:', error);
       return { success: false, error: 'Failed to create student' };
     }
-  });
+  }
+);
 
-const createApplication = createServerFn({ method: 'POST' })
-  .validator((data: {
-    schoolId: string;
-    studentId: string;
-    householdId: string;
-    gradeApplyingFor: string;
-    schoolYear: string;
-  }) => data)
-  .handler(async ({ data }) => {
+const createApplication = createServerFn({ method: 'POST' }).handler(
+  async (input: {
+    data: {
+      schoolId: string;
+      studentId: string;
+      householdId: string;
+      gradeApplyingFor: string;
+      schoolYear: string;
+    };
+  }) => {
     const db = getDb();
+    const data = input.data;
 
     try {
       const applicationId = createId();
@@ -184,7 +189,8 @@ const createApplication = createServerFn({ method: 'POST' })
       console.error('Error creating application:', error);
       return { success: false, error: 'Failed to create application' };
     }
-  });
+  }
+);
 
 const logoutUser = createServerFn({ method: 'POST' }).handler(async () => {
   return { cookie: createLogoutCookie() };

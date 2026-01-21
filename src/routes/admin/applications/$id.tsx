@@ -51,16 +51,15 @@ import { createLogoutCookie } from '../../../lib/auth';
 // SERVER FUNCTIONS
 // ═══════════════════════════════════════════════════════════
 
-const getApplication = createServerFn({ method: 'GET' })
-  .validator((data: { id: string }) => data)
-  .handler(async ({ data }) => {
+const getApplication = createServerFn({ method: 'GET' }).handler(
+  async (input: { data: { id: string } }) => {
     const db = getDb();
 
     try {
       const [application] = await db
         .select()
         .from(applications)
-        .where(eq(applications.id, data.id));
+        .where(eq(applications.id, input.data.id));
 
       if (!application) {
         return { success: false, error: 'Application not found' };
@@ -95,18 +94,21 @@ const getApplication = createServerFn({ method: 'GET' })
       console.error('Error fetching application:', error);
       return { success: false, error: 'Failed to fetch application' };
     }
-  });
+  }
+);
 
-const updateApplicationStatus = createServerFn({ method: 'POST' })
-  .validator((data: {
-    id: string;
-    status: string;
-    decisionNotes?: string;
-    interviewDate?: string;
-    waitlistPosition?: number;
-  }) => data)
-  .handler(async ({ data }) => {
+const updateApplicationStatus = createServerFn({ method: 'POST' }).handler(
+  async (input: {
+    data: {
+      id: string;
+      status: string;
+      decisionNotes?: string;
+      interviewDate?: string;
+      waitlistPosition?: number;
+    };
+  }) => {
     const db = getDb();
+    const data = input.data;
 
     try {
       const updateData: Record<string, unknown> = {
@@ -144,12 +146,13 @@ const updateApplicationStatus = createServerFn({ method: 'POST' })
       console.error('Error updating application:', error);
       return { success: false, error: 'Failed to update application' };
     }
-  });
+  }
+);
 
-const enrollStudent = createServerFn({ method: 'POST' })
-  .validator((data: { applicationId: string; studentId: string }) => data)
-  .handler(async ({ data }) => {
+const enrollStudent = createServerFn({ method: 'POST' }).handler(
+  async (input: { data: { applicationId: string; studentId: string } }) => {
     const db = getDb();
+    const data = input.data;
 
     try {
       // Update student enrollment status
@@ -175,7 +178,8 @@ const enrollStudent = createServerFn({ method: 'POST' })
       console.error('Error enrolling student:', error);
       return { success: false, error: 'Failed to enroll student' };
     }
-  });
+  }
+);
 
 const logoutUser = createServerFn({ method: 'POST' }).handler(async () => {
   return { cookie: createLogoutCookie() };
