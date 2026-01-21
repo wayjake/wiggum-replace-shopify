@@ -42,9 +42,8 @@ import { cn } from '../../../utils';
 // SERVER FUNCTIONS
 // ═══════════════════════════════════════════════════════════
 
-const getApplicationDetail = createServerFn({ method: 'GET' })
-  .validator((data: { id: string }) => data)
-  .handler(async ({ data }) => {
+const getApplicationDetail = createServerFn({ method: 'GET' }).handler(
+  async (input: { data: { id: string } }) => {
     const request = getRequest();
     const cookieHeader = request?.headers.get('cookie') || '';
     const sessionId = parseSessionCookie(cookieHeader);
@@ -79,7 +78,7 @@ const getApplicationDetail = createServerFn({ method: 'GET' })
     const [application] = await db
       .select()
       .from(applications)
-      .where(eq(applications.id, data.id));
+      .where(eq(applications.id, input.data.id));
 
     if (!application) {
       return {
@@ -147,7 +146,8 @@ const getApplicationDetail = createServerFn({ method: 'GET' })
           }
         : null,
     };
-  });
+  }
+);
 
 const logoutUser = createServerFn({ method: 'POST' }).handler(async () => {
   return { cookie: createLogoutCookie() };
